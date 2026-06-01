@@ -1,0 +1,45 @@
+site_name: 1hair-labs | 一根头发丝的宽度
+site_description: Kubernetes | Linux | Monitoring | 运维成长记录
+
+theme:
+  name: dracula
+  language: zh
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+
+nav:
+
+  - 首页: index.md
+
+  - Kubernetes:
+      - 概览: kubernetes/index.md
+      - 高可用集群: kubernetes/ha-cluster.md
+      - Ingress: kubernetes/ingress.md
+      - 网络: kubernetes/network.md
+
+  - Linux:
+      - 概览: linux/index.md
+      - 常用命令: linux/command.md
+      - 存储管理: linux/storage.md
+
+  - Monitoring:
+      - Prometheus: monitoring/prometheus.md
+      - Grafana: monitoring/grafana.md
+      - Alertmanager: monitoring/alertmanager.md
+
+  - 故障实验室:
+      - 概览: lab/index.md
+      - HA故障演练: lab/failover-test.md
+      - ETCD恢复: lab/etcd-recovery.md
+
+  - 服务项目:
+      - service/index.md
+
+  - 关于我:
+      - about/index.md
