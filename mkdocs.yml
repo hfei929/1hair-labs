@@ -1,15 +1,16 @@
 site_name: 1hair-labs | 一根头发丝的宽度
-site_description: Kubernetes | Linux | Monitoring | 虚拟化与云原生运维成长记录
+site_description: Kubernetes、Linux、Prometheus、Grafana、ESXi、vCenter、vSAN、PVE 运维实践与成长记录
 site_author: hfei
-site_url: https://1hairlabs.com
+# site_url: https://1hairlabs.com
 
-repo_name: hfei929/1hair-labs
-repo_url: https://github.com/hfei929/1hair-labs
+# repo_name: hfei929/1hair-labs
+# repo_url: https://github.com/hfei929/1hair-labs
 
 copyright: Copyright © 2026 一根头发丝的宽度
 
 theme:
-  name: dracula
+  # name: dracula
+  name: material
   language: zh
 
   features:
@@ -43,6 +44,10 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: 切换浅色模式
+
+  font:
+    text: Roboto
+    code: Roboto Mono
   
   icon:
     repo: fontawesome/brands/github
@@ -91,9 +96,14 @@ nav:
       - 存储管理: linux/storage.md
 
   - Monitoring:
+      - 概览: monitoring/index.md
       - Prometheus: monitoring/prometheus.md
       - Grafana: monitoring/grafana.md
       - Alertmanager: monitoring/alertmanager.md
+
+  - 虚拟化与云原生:
+      - 概览: virtualization/index.md
+      - Docker: virtualization/docker.md
 
   - 故障实验室:
       - 概览: lab/index.md
