@@ -1,0 +1,41 @@
+# MkDocs build output
+
+site/
+
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+
+venv/
+.venv/
+env/
+
+# macOS
+
+.DS_Store
+
+# VSCode
+
+.vscode/
+
+# JetBrains IDE
+
+.idea/
+
+# Temporary files
+
+*.swp
+*.swo
+
+# Backup files
+
+*.bak
+
+# Logs
+
+*.log
+
