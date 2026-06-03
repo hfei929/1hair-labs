@@ -12,6 +12,8 @@ theme:
   # name: dracula
   name: material
   language: zh
+  
+  custom_dir: overrides
 
   logo: assets/1hairlabs-logo.png
   favicon: assets/1hairlabs-favicon.png
@@ -112,6 +114,9 @@ nav:
       - 概览: lab/index.md
       - HA故障演练: lab/failover-test.md
       - ETCD恢复: lab/etcd-recovery.md
+
+  - 故障排除:
+      - 概览: troubleshooting/index.md
 
   - 技术服务:
       - 服务介绍: service/index.md

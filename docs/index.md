@@ -123,5 +123,6 @@
 [了解更多](about/index.md){ .md-button }
 
 ---
+![一根头发丝的宽度](./assets/images/wechat-public/扫码_搜索联合传播样式-标准色版.png)
 
 ### 持续学习 · 持续输出 · 持续成长
