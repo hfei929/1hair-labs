@@ -1,7 +1,7 @@
 site_name: 1hair-labs | 一根头发丝的宽度
 site_description: Kubernetes、Linux、Prometheus、Grafana、ESXi、vCenter、vSAN、PVE 运维实践与成长记录
 site_author: hfei
-# site_url: https://1hairlabs.com
+site_url: https://1hairlabs.cn
 
 # repo_name: hfei929/1hair-labs
 # repo_url: https://github.com/hfei929/1hair-labs
@@ -12,6 +12,9 @@ theme:
   # name: dracula
   name: material
   language: zh
+
+  logo: assets/1hairlabs-logo.png
+  favicon: assets/1hairlabs-favicon.png
 
   features:
     - navigation.tabs
@@ -103,7 +106,7 @@ nav:
 
   - 虚拟化与云原生:
       - 概览: virtualization/index.md
-      - Docker: virtualization/docker.md
+      - Docker: virtualization/index.md
 
   - 故障实验室:
       - 概览: lab/index.md
