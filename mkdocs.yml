@@ -89,6 +89,13 @@ nav:
 
   - 首页: index.md
 
+  - Linux:
+      - 概览: linux/index.md
+      - Linux和系统安装简介: linux/linux-and-system-installation.md
+      - Linux目录结构说明: linux/linux-directory-structure.md
+      - 常用命令: linux/command.md
+      - 存储管理: linux/storage.md
+
   - Kubernetes:
       - 概览: kubernetes/index.md
       - 从入门到生产: kubernetes/K8s-beginner-to-production.md
@@ -96,13 +103,7 @@ nav:
       - 高可用集群: kubernetes/ha-cluster.md
       - Ingress: kubernetes/ingress.md
       - 网络: kubernetes/network.md
-
-  - Linux:
-      - 概览: linux/index.md
-      - Linux和系统安装简介: linux/linux-and-system-installation.md
-      - Linux目录结构说明: linux/linux-directory-structure.md
-      - 常用命令: linux/command.md
-      - 存储管理: linux/storage.md
+      - Docker详细使用教程: kubernetes/docker.md
 
   - Monitoring:
       - 概览: monitoring/index.md
