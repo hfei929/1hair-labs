@@ -122,9 +122,8 @@ nav:
       - Grafana: monitoring/grafana.md
       - Alertmanager: monitoring/alertmanager.md
 
-  - 虚拟化与云原生:
+  - 虚拟化:
       - 概览: virtualization/index.md
-      - Docker: virtualization/index.md
 
   - 故障实验室:
       - 概览: lab/index.md
