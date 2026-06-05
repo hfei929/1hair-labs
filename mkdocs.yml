@@ -91,23 +91,33 @@ nav:
 
   - Linux:
       - 概览: linux/index.md
-      - Linux和系统安装简介: linux/linux-and-system-installation.md
-      - Linux目录结构说明: linux/linux-directory-structure.md
-      - 常用命令: linux/command.md
-      - 存储管理: linux/storage.md
+      - Linux 和系统安装简介: linux/linux-and-system-installation.md
+      - Linux 目录结构说明: linux/linux-directory-structure.md
+      - Linux 常用命令: linux/common-commands.md
+      - Linux 完整命令: linux/all-commands.md
+      - Linux 存储管理: linux/storage.md
+      - Linux 网络管理: linux/network.md
+      - Linux 用户和权限管理: linux/user-and-permission.md
+      - Linux 软件包管理: linux/package-management.md
+      - Linux 系统监控: linux/system-monitoring.md
+      - Linux 系统日志管理: linux/log-management.md
+      - Linux 系统安全: linux/security.md
+      - Linux 系统性能优化: linux/performance-optimization.md
+      - Linux 系统故障排除: linux/troubleshooting.md
+      - Linux 应急响应: linux/incident-response.md
 
   - Kubernetes:
       - 概览: kubernetes/index.md
       - 从入门到生产: kubernetes/K8s-beginner-to-production.md
-      - 从单Master到生产级高可用架构思考: kubernetes/single-master-to-ha.md
+      - 从单 Master 到生产级高可用架构思考: kubernetes/single-master-to-ha.md
       - 高可用集群: kubernetes/ha-cluster.md
       - Ingress: kubernetes/ingress.md
       - 网络: kubernetes/network.md
-      - Docker详细使用教程: kubernetes/docker.md
+      - Docker 详细使用教程: kubernetes/docker.md
 
   - Monitoring:
       - 概览: monitoring/index.md
-      - K8s集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
+      - K8s 集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
       - Prometheus: monitoring/prometheus.md
       - Grafana: monitoring/grafana.md
       - Alertmanager: monitoring/alertmanager.md
@@ -119,7 +129,7 @@ nav:
   - 故障实验室:
       - 概览: lab/index.md
       - HA故障演练: lab/failover-test.md
-      - ETCD恢复: lab/etcd-recovery.md
+      - ETCD 恢复: lab/etcd-recovery.md
 
   - 故障排除:
       - 概览: troubleshooting/index.md
