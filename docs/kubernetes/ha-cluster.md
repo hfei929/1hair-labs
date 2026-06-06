@@ -111,7 +111,8 @@ VIP：
 https://192.168.114.134:6443
 ```
 
-本质上代表：** Kubernetes Control Plane Endpoint **
+本质上代表：
+**Kubernetes Control Plane Endpoint**
 
 理解这一点之后：
 
@@ -141,13 +142,14 @@ https://192.168.114.134:6443
 apt install haproxy
 ```
 
-但不会告诉你：**为什么一定要有它?**
+但不会告诉你：
+**为什么一定要有它?**
 
 ---
 
 ### 4.1 架构总览
 
-![image](assets/image-20260513234324-buowb0s.png)
+![k8s架构高可用架构总览](../assets/images/kubernetes/overview-k8s-ha-arch.png)
 
 ---
 
@@ -188,10 +190,6 @@ VRRP
 
 ---
 
-![高可用架构总览](../assets/images/kubernetes/overview-k8s-ha-arch.png)
-
----
-
 ### 4.3 HAProxy 做什么？
 
 HAProxy 工作在：`TCP 四层`
@@ -223,9 +221,7 @@ HAProxy 的核心：
 server master01 192.168.114.145:6443 check
 ```
 
----
-
-![image](assets/image-20260513194907-ik3ub29.png)
+![ha配置文件核心](../assets/images/kubernetes/ha-core.png)
 
 ---
 
@@ -269,7 +265,7 @@ Windows 8.1
 
 ---
 
-![image](assets/image-20260513195026-nqr8qpx.png)
+![windows8-k9s](../assets/images/kubernetes/win8-k9s.png)
 
 ---
 
@@ -295,7 +291,7 @@ kubectl get pods
 
 真正的数据流如下：
 
-![image](assets/image-20260513234911-m60bxtq.png)
+![image](../assets/images/kubernetes/k8s-数据流.png)
 
 ---
 
@@ -539,14 +535,6 @@ HAProxy + Keepalived
 | 可维护 | 配置统一标准化     |
 | 可迁移 | 更换环境成本极低   |
 | 工程化 | 更接近企业真实运维 |
-
----
-
-![image](assets/image-20260513232752-o3sgufd.png)
-
----
-
-![image](assets/image-20260513233046-pl4i6y6.png)
 
 ---
 

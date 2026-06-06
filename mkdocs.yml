@@ -110,7 +110,8 @@ nav:
       - 概览: kubernetes/index.md
       - 从入门到生产: kubernetes/K8s-beginner-to-production.md
       - 从单 Master 到生产级高可用架构思考: kubernetes/single-master-to-ha.md
-      - 高可用集群: kubernetes/ha-cluster.md
+      - K8s 高可用集群部署: kubernetes/ha-cluster.md
+      - 完整部署一套企业级私有云后的 10 个收获: kubernetes/10-takeaways.md
       - Ingress: kubernetes/ingress.md
       - 网络: kubernetes/network.md
       - Docker 详细使用教程: kubernetes/docker.md
