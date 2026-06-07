@@ -88,6 +88,9 @@ extra:
 nav:
 
   - 首页: index.md
+  
+  - 新手部署教程:
+      - 概览: deployment/tutorials.md
 
   - Linux:
       - 概览: linux/index.md
@@ -133,7 +136,7 @@ nav:
 
   - 故障排除:
       - 概览: troubleshooting/index.md
-
+  
   - 技术服务:
       - 服务介绍: service/index.md
 
