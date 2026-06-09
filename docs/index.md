@@ -4,6 +4,10 @@
 
 > 从传统运维到平台工程师的成长记录
 
+## 站点建设初期，正在完善当中，如果喜欢请收藏本网站，或者关注公众号 ⬇️ ⬇️ ⬇️
+
+![微信公众号](./assets/images/wechat-public/扫码_搜索联合传播样式-标准色版.png)
+
 ## 1Hair Labs
 
 专注 Linux、Kubernetes、Monitoring、Virtualization 与 Platform Engineering

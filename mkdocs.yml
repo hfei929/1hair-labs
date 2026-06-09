@@ -133,6 +133,7 @@ nav:
       - 概览: lab/index.md
       - HA故障演练: lab/failover-test.md
       - ETCD 恢复: lab/etcd-recovery.md
+      - 故障演练 01：人为打满 CPU，Grafana 会发生什么？: lab/cpu-stress-test.md
 
   - 故障排除:
       - 概览: troubleshooting/index.md
