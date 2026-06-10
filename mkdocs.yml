@@ -86,62 +86,108 @@ extra:
     link: https://github.com/hfei929
 
 nav:
-
-  - 首页: index.md
+    - 首页: index.md
+    
+    - 新手部署教程:
+        - 概览: deployment/tutorials.md
+    
+        - Windows:
+          - Windows 10 部署: deployment/windows/windows-10.md
+          - Windows Server 2019: deployment/windows/windows-server-2019.md
+            
+        - Linux:
+          - Ubuntu 22.04: deployment/linux/ubuntu-22.04.md
+          - CentOS 7: deployment/linux/centos-7.md
+          - CentOS 8: deployment/linux/centos-8.md
+          - Rocky Linux 8: deployment/linux/rocky-linux-8.md
+          - Rocky Linux 9: deployment/linux/rocky-linux-9.md
+          - Debian 11: deployment/linux/debian-11.md
+          - Debian 12: deployment/linux/debian-12.md
+    
+        - VMware:
+          - ESXi 7.0: deployment/vmware/esxi-7.0.md
+          - ESXi 8.0: deployment/vmware/esxi-8.0.md
+          - vCenter 7.0: deployment/vmware/vcenter-7.0.md
+          - vCenter 8.0: deployment/vmware/vcenter-8.0.md
+    
+    - Linux:
+        - 概览: linux/index.md
+        - Linux 和系统安装简介: linux/linux-and-system-installation.md
+        - Linux 目录结构说明: linux/linux-directory-structure.md
+        - Linux 常用命令: linux/common-commands.md
+        - Linux 完整命令: linux/all-commands.md
+        - Linux 存储管理: linux/storage.md
+        - Linux 网络管理: linux/network.md
+        - Linux 用户和权限管理: linux/user-and-permission.md
+        - Linux 软件包管理: linux/package-management.md
+        - Linux 系统监控: linux/system-monitoring.md
+        - Linux 系统日志管理: linux/log-management.md
+        - Linux 系统安全: linux/security.md
+        - Linux 系统性能优化: linux/performance-optimization.md
+        - Linux 系统故障排除: linux/troubleshooting.md
+        - Linux 应急响应: linux/incident-response.md
   
-  - 新手部署教程:
-      - 概览: deployment/tutorials.md
-
-  - Linux:
-      - 概览: linux/index.md
-      - Linux 和系统安装简介: linux/linux-and-system-installation.md
-      - Linux 目录结构说明: linux/linux-directory-structure.md
-      - Linux 常用命令: linux/common-commands.md
-      - Linux 完整命令: linux/all-commands.md
-      - Linux 存储管理: linux/storage.md
-      - Linux 网络管理: linux/network.md
-      - Linux 用户和权限管理: linux/user-and-permission.md
-      - Linux 软件包管理: linux/package-management.md
-      - Linux 系统监控: linux/system-monitoring.md
-      - Linux 系统日志管理: linux/log-management.md
-      - Linux 系统安全: linux/security.md
-      - Linux 系统性能优化: linux/performance-optimization.md
-      - Linux 系统故障排除: linux/troubleshooting.md
-      - Linux 应急响应: linux/incident-response.md
-
-  - Kubernetes:
-      - 概览: kubernetes/index.md
-      - 从入门到生产: kubernetes/K8s-beginner-to-production.md
-      - 从单 Master 到生产级高可用架构思考: kubernetes/single-master-to-ha.md
-      - K8s 高可用集群部署: kubernetes/ha-cluster.md
-      - 完整部署一套企业级私有云后的 10 个收获: kubernetes/10-takeaways.md
-      - Ingress: kubernetes/ingress.md
-      - 网络: kubernetes/network.md
-      - Docker 详细使用教程: kubernetes/docker.md
-
-  - Monitoring:
-      - 概览: monitoring/index.md
-      - K8s 集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
-      - Prometheus: monitoring/prometheus.md
-      - Grafana: monitoring/grafana.md
-      - Alertmanager: monitoring/alertmanager.md
-
-  - 虚拟化:
-      - 概览: virtualization/index.md
-
-  - 故障实验室:
-      - 概览: lab/index.md
-      - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
-      - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
-      - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
-      - ETCD 恢复: lab/etcd-recovery.md
-      - 故障演练 01：人为打满 CPU，Grafana 会发生什么？: lab/cpu-stress-test.md
-
-  - 故障排除:
-      - 概览: troubleshooting/index.md
+    - Kubernetes:
+        - 概览: kubernetes/index.md
+        - K8s从入门到上线完整路线: kubernetes/practice/K8s-beginner-to-production.md
+          
+        - 架构原理: 
+          - Kubernetes 架构总览: kubernetes/architecture/index.md
+          - Kubernetes API Server: kubernetes/architecture/api-server.md
+          - Kubernetes Scheduler: kubernetes/architecture/scheduler.md
+          - Kubernetes Controller Manager: kubernetes/architecture/controller-manager.md
+          - Kubernetes Kubelet: kubernetes/architecture/kubelet.md
+          - Kubernetes Kube Proxy: kubernetes/architecture/kube-proxy.md
+          - Kubernetes Etcd: kubernetes/architecture/etcd.md
+          - Kubernetes CNI: kubernetes/architecture/cni.md
+          - Kubernetes CSI: kubernetes/architecture/csi.md
+          - Kubernetes CRI: kubernetes/architecture/cri.md
+          - Kubernetes API 资源: kubernetes/architecture/api-resources.md
+          - Kubernetes 工作负载资源: kubernetes/architecture/workloads.md
+          - Kubernetes 服务资源: kubernetes/architecture/services.md
+          - Kubernetes 存储资源: kubernetes/architecture/storage.md
+          - Kubernetes 网络资源: kubernetes/architecture/network.md
+          - Kubernetes 安全资源: kubernetes/architecture/security.md
+          - Kubernetes 其他资源: kubernetes/architecture/other-resources.md
+    
+        - 实战经验: 
+          - Docker 详细使用教程: kubernetes/practice/docker.md
+          - 从单 Master 到生产级高可用架构思考: kubernetes/practice/single-master-to-ha.md
+          - Kubernetes 生产级高可用集群部署实战: kubernetes/practice/ha-cluster-deployment.md
+          - K8s 高可用集群部署: kubernetes/practice/ha-cluster.md
+          - 完整部署一套企业级私有云后的 10 个收获: kubernetes/practice/10-takeaways.md
+    
+        - 工具生态:
+          - k9s: kubernetes/tools/k9s.md
+    
+    - Monitoring:
+        - 概览: monitoring/index.md
+        - K8s 集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
+        - Prometheus: monitoring/prometheus.md
+        - Grafana: monitoring/grafana.md
+        - Alertmanager: monitoring/alertmanager.md
   
-  - 技术服务:
-      - 服务介绍: service/index.md
-
-  - 关于我:
-      - 个人介绍: about/index.md
+    - 虚拟化:
+        - 概览: virtualization/index.md
+  
+    - 技术资讯: 
+        - kubernetes:
+          - dashboards已归档: news/kubernetes/dashboard.md
+        - Linux: index.md
+        - VMware: index.md
+  
+    - 故障实验室:
+        - 概览: lab/index.md
+        - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
+        - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
+        - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
+        - 故障演练：人为打满 CPU,Grafana 会发生什么？: lab/cpu-stress-test.md
+  
+    - 故障排除:
+        - 概览: troubleshooting/index.md
+    
+    - 技术服务:
+        - 服务介绍: service/index.md
+  
+    - 关于我:
+        - 个人介绍: about/index.md
