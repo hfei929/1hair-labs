@@ -173,8 +173,8 @@ nav:
     - 技术资讯: 
         - kubernetes:
           - dashboards已归档: news/kubernetes/dashboard.md
-        - Linux: index.md
-        - VMware: index.md
+        - Linux: news/linux/index.md
+        - VMware: news/vmware/index.md
   
     - 故障实验室:
         - 概览: lab/index.md
