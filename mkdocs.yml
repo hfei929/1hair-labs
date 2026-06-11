@@ -159,7 +159,7 @@ nav:
     
         - 工具生态:
           - k9s: kubernetes/tools/k9s.md
-    
+          - headlamp: kubernetes/tools/headlamp.md
     - Monitoring:
         - 概览: monitoring/index.md
         - K8s 集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
