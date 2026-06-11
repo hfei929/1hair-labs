@@ -4,6 +4,10 @@
 
 Kubernetes 是一个开源的容器编排平台，采用分布式的微服务架构。整个系统分为 **Control Plane（控制平面）** 和 **Worker Nodes（工作节点）** 两大部分，通过分布式设计、声明式配置和自动化管理，实现容器应用的高可用和自动扩展。
 
+## 整体架构图
+
+![kubernetes 整体架构图](../../assets/images/kubernetes/kubernetes整体架构原理-带签名.png)
+
 ## 架构核心组件
 
 ### Control Plane（控制平面）
