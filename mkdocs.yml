@@ -59,7 +59,6 @@ theme:
 
 plugins:
   - search
-
 markdown_extensions:
   - admonition
   - attr_list
@@ -93,7 +92,8 @@ nav:
     
         - Windows:
           - Windows 10 部署: deployment/windows/windows-10.md
-          - Windows Server 2019: deployment/windows/windows-server-2019.md
+          - Windows 11 部署: deployment/windows/windows-11.md
+          - Windows Server 2016 部署: deployment/windows/windows-server-2016.md
             
         - Linux:
           - Ubuntu 22.04: deployment/linux/ubuntu-22.04.md
@@ -109,6 +109,10 @@ nav:
           - ESXi 8.0: deployment/vmware/esxi-8.0.md
           - vCenter 7.0: deployment/vmware/vcenter-7.0.md
           - vCenter 8.0: deployment/vmware/vcenter-8.0.md
+        
+        - Docker&Kubernetes:
+          - Docker: deployment/docker&k8s/docker.md
+          - Kubernetes: deployment/docker&k8s/k8s.md
     
     - Linux:
         - 概览: linux/index.md
@@ -129,7 +133,7 @@ nav:
   
     - Kubernetes:
         - 概览: kubernetes/index.md
-        - K8s从入门到上线完整路线: kubernetes/practice/K8s-beginner-to-production.md
+        - K8s从入门到上线完整路线: kubernetes/K8s-beginner-to-production.md
           
         - 架构原理: 
           - Kubernetes 架构总览: kubernetes/architecture/index.md
@@ -152,8 +156,8 @@ nav:
     
         - 实战经验: 
           - Docker 详细使用教程: kubernetes/practice/docker.md
+          - 单 Master 集群部署实战: kubernetes/practice/single-master-deployment.md
           - 从单 Master 到生产级高可用架构思考: kubernetes/practice/single-master-to-ha.md
-          - Kubernetes 生产级高可用集群部署实战: kubernetes/practice/ha-cluster-deployment.md
           - K8s 高可用集群部署: kubernetes/practice/ha-cluster.md
           - 完整部署一套企业级私有云后的 10 个收获: kubernetes/practice/10-takeaways.md
     

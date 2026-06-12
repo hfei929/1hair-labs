@@ -8,7 +8,7 @@
 
 无论你是：
 
-• 准备学习 Linux
+• 准备学习 Linux、Windows
 
 • 想搭建自己的 HomeLab
 

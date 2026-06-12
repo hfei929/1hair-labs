@@ -538,6 +538,8 @@ Headlamp 的插件支持与部署方式有关。
 
 如果使用官方桌面客户端（Headlamp Desktop），可以直接在客户端中管理插件。
 
+![plugin插件](../../assets/images/kubernetes/tools-headlamp-Plugin.png)
+
 常见插件包括：
 
  - Prometheus 指标展示
