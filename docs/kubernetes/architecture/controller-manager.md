@@ -13,7 +13,7 @@ tags:
   - Kubernetes
   - Controller Manager
   - Kubernetes架构
-author: HairLabs
+author: HairLabs | 一根头发丝的宽度
 
 ---
 

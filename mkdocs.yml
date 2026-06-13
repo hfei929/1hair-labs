@@ -142,13 +142,14 @@ nav:
           - Kubernetes Controller Manager: kubernetes/architecture/controller-manager.md
           - Kubernetes Kubelet: kubernetes/architecture/kubelet.md
           - Kubernetes Kube Proxy: kubernetes/architecture/kube-proxy.md
-          - Kubernetes Etcd: kubernetes/architecture/etcd.md
           - Kubernetes CNI: kubernetes/architecture/cni.md
-          - Kubernetes CSI: kubernetes/architecture/csi.md
+          - kubernetes Ingress: kubernetes/architecture/ingress.md
+          - Kubernetes Etcd: kubernetes/architecture/etcd.md
           - Kubernetes CRI: kubernetes/architecture/cri.md
+          - Kubernetes CSI: kubernetes/architecture/csi.md
           - Kubernetes API 资源: kubernetes/architecture/api-resources.md
           - Kubernetes 工作负载资源: kubernetes/architecture/workloads.md
-          - Kubernetes 服务资源: kubernetes/architecture/services.md
+          - kubernetes 服务资源详解: kubernetes/architecture/server-resources.md
           - Kubernetes 存储资源: kubernetes/architecture/storage.md
           - Kubernetes 网络资源: kubernetes/architecture/network.md
           - Kubernetes 安全资源: kubernetes/architecture/security.md
