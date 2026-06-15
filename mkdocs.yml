@@ -85,10 +85,18 @@ extra:
     link: https://github.com/hfei929
 
 nav:
-    - 首页: index.md
+    - 1hair-labs: 
+        - 网站介绍: index.md
+        - 技术方向: kubernetes/index.md
+        - 实验室: lab/index.md
+        - 技术服务: service/index.md
+        - 关于本站: about/index.md
     
     - 新手部署教程:
         - 概览: deployment/tutorials.md
+
+        - 部署环境基础:
+          - 裸金属、虚拟机与容器的区别: deployment/basics/baremetal-vm-container.md
     
         - Windows:
           - Windows 10 部署: deployment/windows/windows-10.md
@@ -99,10 +107,8 @@ nav:
           - Ubuntu 22.04: deployment/linux/ubuntu-22.04.md
           - CentOS 7: deployment/linux/centos-7.md
           - CentOS 8: deployment/linux/centos-8.md
-          - Rocky Linux 8: deployment/linux/rocky-linux-8.md
           - Rocky Linux 9: deployment/linux/rocky-linux-9.md
-          - Debian 11: deployment/linux/debian-11.md
-          - Debian 12: deployment/linux/debian-12.md
+          - Debian 13: deployment/linux/debian-13.md
     
         - VMware:
           - ESXi 7.0: deployment/vmware/esxi-7.0.md
