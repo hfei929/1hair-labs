@@ -59,6 +59,7 @@ theme:
 
 plugins:
   - search
+  - glightbox
 markdown_extensions:
   - admonition
   - attr_list
@@ -193,7 +194,7 @@ nav:
         - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
         - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
         - 故障演练：人为打满 CPU,Grafana 会发生什么？: lab/cpu-stress-test.md
-  
+        - 故障演练：Pod OOM（内存溢出）之后会发生什么？: lab/pod-oom-test.md
     - 故障排除:
         - 概览: troubleshooting/index.md
     
