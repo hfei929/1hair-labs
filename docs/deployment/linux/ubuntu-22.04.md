@@ -33,6 +33,7 @@ Ubuntu 每两年发布一个 LTS（Long Term Support）长期支持版本。
 | Ubuntu 20.04 | LTS | 2025 |
 | Ubuntu 22.04 | LTS | 2027 |
 | Ubuntu 24.04 | LTS | 2029 |
+| Ubuntu 26.04 | LTS | 2031 |
 
 本教程采用：
 
@@ -46,21 +47,12 @@ Ubuntu 每两年发布一个 LTS（Long Term Support）长期支持版本。
 
 最低配置：
 
-| 项目  | 配置     |
-| --- | ------ |
-| CPU | 1 Core |
-| 内存  | 2 GB   |
-| 磁盘  | 20 GB  |
-| 网络  | 可联网    |
-
-推荐配置：
-
-| 项目  | 配置     |
-| --- | ------ |
-| CPU | 2 Core |
-| 内存  | 4 GB   |
-| 磁盘  | 50 GB  |
-| 网络  | 千兆网络   |
+| 项目  | 配置     | 推荐配置|
+| --- | ------ |----|
+| CPU | 1 Core |2 Core|
+| 内存  | 2 GB   | 4 GB|
+| 磁盘  | 20 GB  | 50 GB
+| 网络  | 可联网    | 千兆网络|
 
 ---
 
@@ -68,7 +60,7 @@ Ubuntu 每两年发布一个 LTS（Long Term Support）长期支持版本。
 
 提前下载 Ubuntu ISO 镜像：
 
-[Ubuntu 官方下载页面](https://ubuntu.com/download/server?utm_source=chatgpt.com)
+[Ubuntu 官方下载页面](https://ubuntu.com/download/server)
 
 建议下载：
 
@@ -76,19 +68,23 @@ Ubuntu 每两年发布一个 LTS（Long Term Support）长期支持版本。
 ubuntu-22.04.x-live-server-amd64.iso
 ```
 
+如果想学习压力小一点可以先安装 ![Desktop](https://ubuntu.com/download/desktop) 版本体验。
+
 ---
 
 ## 创建虚拟机
 
-本教程使用 VMware Workstation 演示。
+本教程使用 ![VMware Workstation Pro 26H1](https://pan.quark.cn/s/14503c2e7051?pwd=MBKT) 演示。
 
 ### 新建虚拟机
 
-选择：
+点击客户端左上角的 “File” 选择：
 
 ```text
-Create a New Virtual Machine
+New Virtual Machine
 ```
+
+接着 `下一步`
 
 ---
 
@@ -100,11 +96,22 @@ Create a New Virtual Machine
 ubuntu-22.04.x-live-server-amd64.iso
 ```
 
-📷（此处插入截图）
+![选择镜像文件](../../assets/images/deployment/Ubuntu-2204/ubuntu-2204-选择镜像文件.png)
 
 ---
 
+### 名称和存放位置
+
+  - 名称随意
+  - 存放位置保持默认，也可选择个人偏向的位置。
+  - 大小按默认翻个倍，选择 “单个磁盘文件”
+
+  ![磁盘位置大小](../../assets/images/deployment/Ubuntu-2204/ubuntu-2204-磁盘位置和大小.png)
+---
+
 ### 配置虚拟机规格
+
+可在虚拟机设置界面修改：右键点击相应的虚拟机，选择末尾的“设置”.
 
 建议：
 
@@ -116,7 +123,7 @@ Memory：4096 MB
 Disk：50 GB
 ```
 
-📷（此处插入截图）
+![虚拟机配置](../../assets/images/deployment/Ubuntu-2204/ubuntu-2204-虚拟机配置.png)
 
 ---
 
@@ -130,8 +137,7 @@ Disk：50 GB
 Try or Install Ubuntu Server
 ```
 
-📷（此处插入截图）
-
+![安装界面](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204安装界面.png)
 ---
 
 ## 语言选择
@@ -148,7 +154,11 @@ English
 * 错误日志容易搜索
 * 避免编码问题
 
-📷（此处插入截图）
+![语言选择](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-语言选择.png)
+
+接下来直接跳过更新
+
+![跳过更新](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-跳过更新.png)
 
 ---
 
@@ -160,52 +170,31 @@ English
 English (US)
 ```
 
-📷（此处插入截图）
+![键盘布局](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-键盘.png)
+
+---
+
+## 安装类型
+
+保持默认即可：
+
+![安装类型](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-安装类型.png)
 
 ---
 
 ## 网络配置
 
-安装程序会自动识别网卡。
+安装程序会自动识别网卡，默认 DHCP 自动获取 IP 地址，如需修改 IP 地址可在系统安装完成后配置。
 
-如果使用 DHCP：
-
-```text
-Automatic
-```
-
-即可。
-
-如果需要固定 IP：
-
-选择：
-
-```text
-Edit IPv4
-```
-
-配置：
-
-```text
-IP Address
-Subnet Mask
-Gateway
-DNS
-```
-
-📷（此处插入截图）
+![ip地址](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-IP地址.png)
 
 ---
 
 ## 配置代理
 
-家庭实验环境可直接跳过：
+直接回车跳过：
 
-```text
-Leave blank
-```
-
-📷（此处插入截图）
+![proxy](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-proxy.png)
 
 ---
 
@@ -214,12 +203,12 @@ Leave blank
 建议使用默认源：
 
 ```text
-archive.ubuntu.com
+http://cn.archive.ubuntu.com/ubuntu
 ```
 
 国内用户可以后续切换镜像源。
 
-📷（此处插入截图）
+![镜像源](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-镜像源.png)
 
 ---
 
@@ -244,7 +233,13 @@ swap
 
 分区创建。
 
-📷（此处插入截图）
+![磁盘选择](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-磁盘选择.png)
+
+继续保持默认：
+
+![分区创建](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-分区创建.png)
+
+选择 `Done` 后会弹出 “确认” 框，选择 `Continue` 继续。
 
 ---
 
@@ -264,15 +259,11 @@ Password
 
 例如：
 
-```text
-Name: hairlabs
+![创建账户密码](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-创建账户密码.png)
 
-Hostname: ubuntu2204
+跳过 Ubuntu Pro
 
-Username: admin
-```
-
-📷（此处插入截图）
+![跳过ubuntu pro](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-跳过ubuntupro.png)
 
 ---
 
@@ -286,7 +277,7 @@ Install OpenSSH Server
 
 这样安装完成后即可远程连接。
 
-📷（此处插入截图）
+![安装ssh](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-安装SSH.png)
 
 ---
 
@@ -300,7 +291,7 @@ Install OpenSSH Server
 Done
 ```
 
-📷（此处插入截图）
+![额外软件包](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-不安装额外软件包.png)
 
 ---
 
@@ -316,7 +307,7 @@ Done
 
 取决于硬件性能。
 
-📷（此处插入截图）
+![开始安装](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-开始安装系统.png)
 
 ---
 
@@ -328,7 +319,9 @@ Done
 Reboot Now
 ```
 
-📷（此处插入截图）
+![安装完成](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-安装完成.png)
+
+> 重启之前会提示卸载挂载的光驱，虚拟机按 Enter 跳过，物理机拔掉启动盘。
 
 ---
 
@@ -345,12 +338,12 @@ login:
 成功后看到：
 
 ```bash
-admin@ubuntu2204:~$
+test@1hairlabs:~$
 ```
 
 表示安装成功。
 
-📷（此处插入截图）
+![登录成功](../../assets/images/deployment/Ubuntu-2204/Ubuntu2204-登录成功.png)
 
 ---
 
@@ -454,6 +447,9 @@ sudo systemctl enable ssh --now
 
 ## 总结
 
+!!! tip "其他版本安装"
+    其他的版本的安装和本教程的安装相差无几，可以参考。
+
 至此，我们已经完成：
 
 ✅ Ubuntu 22.04 安装
@@ -480,9 +476,3 @@ sudo systemctl enable ssh --now
 * VMware Workstation 安装教程
 * Docker 安装教程
 * Kubernetes 集群部署教程
-
----
-
-**文章概览（120字以内）**
-
-> Ubuntu 22.04 是目前最流行的 Linux 发行版之一。本教程从 ISO 下载、虚拟机创建、系统安装到 SSH 配置和基础检查，带你零基础完成 Ubuntu Server 22.04 的部署，为后续学习 Docker、Kubernetes 和云原生技术打下基础。
