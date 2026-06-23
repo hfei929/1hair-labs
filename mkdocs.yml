@@ -59,7 +59,6 @@ theme:
 
 plugins:
   - search
-  - glightbox
 markdown_extensions:
   - admonition
   - attr_list
@@ -168,6 +167,7 @@ nav:
           - 从单 Master 到生产级高可用架构思考: kubernetes/practice/single-master-to-ha.md
           - K8s 高可用集群部署: kubernetes/practice/ha-cluster.md
           - 完整部署一套企业级私有云后的 10 个收获: kubernetes/practice/10-takeaways.md
+          - k8s 集群v1.34升级到v1.36实战: kubernetes/practice/cluster-upgrade.md
     
         - 工具生态:
           - k9s: kubernetes/tools/k9s.md
@@ -182,24 +182,30 @@ nav:
     - 虚拟化:
         - 概览: virtualization/index.md
   
-    - 技术资讯: 
-        - kubernetes:
-          - dashboards已归档: news/kubernetes/dashboard.md
-        - Linux: news/linux/index.md
-        - VMware: news/vmware/index.md
+#    - 技术资讯: 
+#       - kubernetes:
+#          - dashboards已归档: news/kubernetes/dashboard.md
+#        - Linux: news/linux/index.md
+#        - VMware: news/vmware/index.md
   
     - 故障实验室:
         - 概览: lab/index.md
-        - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
-        - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
-        - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
-        - 故障演练：人为打满 CPU,Grafana 会发生什么？: lab/cpu-stress-test.md
-        - 故障演练：Pod OOM（内存溢出）之后会发生什么？: lab/pod-oom-test.md
-    - 故障排除:
-        - 概览: troubleshooting/index.md
+        
+        - 故障演练:
+  
+          - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
+          - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
+          - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
+          - 故障演练：人为打满 CPU,Grafana 会发生什么？: lab/cpu-stress-test.md
+          - 故障演练：Pod OOM（内存溢出）之后会发生什么？: lab/pod-oom-test.md
+
+        - 故障排除:
+            - 概览: troubleshooting/index.md
     
-    - 技术服务:
-        - 服务介绍: service/index.md
+    - 解决方案与实践:
+        - 概览: solutions/index.md
+#    - 个人服务:
+#        - 服务介绍: service/index.md
   
     - 关于我:
         - 个人介绍: about/index.md
