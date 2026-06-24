@@ -16,7 +16,20 @@ tags:
 
 # Kubernetes 1.34 升级到 1.36 实战指南：生产环境零停机升级全过程
 
-![集群升级概览](../../assets/images/kubernetes/cluster-upgrade-文章首图.png)
+![集群升级概览](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-生产级升级流程架构图.png)
+
+!!! warning "升级过程中发现的问题"
+
+    本次从 Kubernetes 1.34 升级到 1.35 的过程中，
+    kubeadm 提示了 `ContainerRuntimeVersion` 警告。
+
+    经过排查发现：
+
+      - containerd 1.7.24
+      - systemd cgroup
+      - 集群运行正常
+
+    该警告属于 Kubernetes 1.36 的兼容性预警，不会影响 Kubernetes 1.35 的升级。
 
 很多同学搭建 Kubernetes 集群后，往往很少进行版本升级。
 
@@ -100,31 +113,7 @@ worker03   Ready    <none>          41d   v1.34.3
 ## Kubernetes 升级整体流程
 
 整个升级流程如下：
-
-```bash
-升级前检查
-      │
-      ▼
-ETCD 备份
-      │
-      ▼
-升级 kubeadm
-      │
-      ▼
-升级 Control Plane
-      │
-      ▼
-升级 kubelet
-      │
-      ▼
-升级 Worker
-      │
-      ▼
-验证集群
-      │
-      ▼
-升级下一版本
-```
+![集群整体升级流程](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-集群整体升级流程.png)
 
 ### 第一步：升级前检查
 **检查节点状态**
@@ -163,8 +152,10 @@ kubelet --version
 
 安装 Pluto：
 ```bash
-curl -sL https://github.com/FairwindsOps/pluto/releases/latest/download/pluto_linux_amd64.tar.gz | tar -xz
-mv pluto /usr/local/bin/
+curl -L -O https://github.com/FairwindsOps/pluto/releases/download/v5.19.0/pluto_5.19.0_linux_amd64.tar.gz
+tar -xvf pluto_5.19.0_linux_amd64.tar.gz
+
+sudo mv pluto /usr/local/bin/
 ```
 
 扫描：
@@ -192,10 +183,15 @@ ETCD 快照 = 最后的救命稻草
 kubectl get pod -n kube-system | grep etcd
 ```
 示例：
+```bash
+etcd-master01                              1/1     Running   0              15d
+etcd-master02                              1/1     Running   0              15d
+etcd-master03                              1/1     Running   0              15d
+```
 
 etcd-master01 创建快照
 ```bash
-ETCDCTL_API=3 etcdctl snapshot save \
+sudo ETCDCTL_API=3 etcdctl snapshot save \
 /backup/etcd-$(date +%F).db \
 --cacert=/etc/kubernetes/pki/etcd/ca.crt \
 --cert=/etc/kubernetes/pki/etcd/server.crt \
@@ -203,120 +199,412 @@ ETCDCTL_API=3 etcdctl snapshot save \
 ```
 输出：
 ```bash
-Snapshot saved at /backup/etcd-2026-06-18.db
+Snapshot saved at /backup/etcd-2026-06-23.db
 ```
+
+![ETCD快照](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-ETCD快照.png)
 
 验证快照
 ```bash
-etcdctl snapshot status /backup/etcd-2026-06-18.db
+sudo etcdctl snapshot status /backup/etcd-2026-06-23.db
+-------
+Deprecated: Use `etcdutl snapshot status` instead.
+
+60a44d6b, 7808809, 1507, 43 MB
 ```
 
 ### 第三步：升级到 Kubernetes 1.35
-#### 升级 kubeadm
 
-查看可用版本：
+#### 准备工作：安装官方公钥（若未添加过）
+
+Kubernetes 官方自 v1.28 起使用新的 APT 仓库（pkgs.k8s.io），其签名公钥与旧版不同。如果系统尚未导入该公钥，请先执行以下命令：
+bash
+
+**下载并安装官方公钥**
 ```bash
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+```
+!!! info "说明"
+    公钥对所有版本通用（v1.35、v1.36 等），只需执行一次。如果 /etc/apt/keyrings/kubernetes-apt-keyring.gpg 已存在，可跳过此步骤。
+
+**添加 v1.35 的 APT 源**
+
+使用以下命令添加 Kubernetes v1.35 的稳定仓库：
+```bash
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes-1.35.list
+
+# 更新 APT 缓存
+sudo apt-get update
+```
+可通过 `apt-cache madison kubeadm | grep 1.35 ` 查看可用的 v1.35 版本包。
+
+![可用的1.35更新包](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-可用的1.35更新包.png)
+
+**添加 v1.36 的 APT 源（用于后续第二阶段的升级）**
+
+当所有节点都成功升级到 v1.35 并确认集群稳定后，再添加 v1.36 的源以进行下一轮升级。也可以提前添加，但必须等完成 v1.35 升级后再使用。
+
+```bash
+# 添加 v1.36 源（密钥已存在，无需重复下载）
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes-1.36.list
+
+# 更新 APT 缓存
+sudo apt-get update
+```
+!!! warning "注意事项与常见问题"
+    - 源文件命名：建议按版本号命名（如 kubernetes-1.35.list），便于管理。
+    - 多个源共存：可以同时保留多个版本源，APT 会按版本号选择安装包。升级时务必指定明确的版本号，避免误装。
+    - 清理旧源（可选）：为避免混淆，升级完成后可注释或移除不再使用的源文件（例如升级到 v1.36 后，可移除 v1.34 和 v1.35 源）。
+    - 密钥文件路径：确保 signed-by 指向正确的公钥文件路径，否则 apt-get update 会报错。
+
+**验证源配置**
+
+执行以下命令确认源已正确添加且可用：
+```bash
+# 列出所有源
+ls -l /etc/apt/sources.list.d/kubernetes-*.list
+
+# 查看各版本 kubeadm 可用版本
 apt-cache madison kubeadm
 ```
+若输出中包含 1.35.x 和 1.36.x 的条目，表示源配置成功。
+
+![1.35和1.36更新包](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-1.35和1.36更新包.png)
+
+#### 升级 kubeadm
+
 安装：
 ```bash
-apt-mark unhold kubeadm
-
-apt install -y kubeadm=1.35.0-1.1
-
-apt-mark hold kubeadm
+sudo apt-mark unhold kubeadm
+sudo apt install -y kubeadm=1.35.0-1.1
+sudo apt-mark hold kubeadm
 ```
 验证：
 ```bash
 kubeadm version
 ```
+
+![安装kubeadm1.35](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-安装kubeadm1.35.png)
+
 查看升级计划
 ```bash
 kubeadm upgrade plan
 ```
 输出类似：
-```
-Current version: v1.34.x
-Target version:  v1.35.x
+```bash
+#...
+[upgrade] Running cluster health checks
+[upgrade] Fetching available versions to upgrade to
+[upgrade/versions] Cluster version: 1.34.0
+[upgrade/versions] kubeadm version: v1.35.0
+I0624 10:06:55.928510 2277143 version.go:260] remote version is much newer: v1.36.2; falling back to: stable-1.35
+[upgrade/versions] Target version: v1.35.6
+[upgrade/versions] Latest version in the v1.34 series: v1.34.9
+#...
 ```
 
-##### 升级第一个 Control Plane
+**升级第一个 Control Plane**
 
 在 master01 上执行：
 ```bash
-kubeadm upgrade apply v1.35.x
+sudo kubeadm upgrade apply v1.35.0
 ```
 确认：`yes`
 
-##### 升级开始
-
-升级 kubelet 与 kubectl
+`kubeadm` 升级成功后将输出类似如下：
 ```bash
-apt-mark unhold kubelet kubectl
+[upgrade] SUCCESS! A control plane node of your cluster was upgraded to "v1.35.0".
+```
 
-apt install -y \
-kubelet=1.35.x-1.1 \
-kubectl=1.35.x-1.1
+**升级过程中出现 ContainerRuntimeVersion 警告怎么办？**
 
-apt-mark hold kubelet kubectl
+在升级 Kubernetes 1.35 时，可能会看到类似的警告：
+
+```text
+[WARNING ContainerRuntimeVersion]:
+You must update your container runtime to a version that supports the CRI method RuntimeConfig.
+
+Falling back to using cgroupDriver from kubelet config will be removed in 1.36.
+```
+
+第一次看到这个提示时，很多人会误认为：
+
+* containerd 版本过低
+* Kubernetes 无法继续升级
+* 必须先升级容器运行时
+
+实际上，大部分情况下并非如此。
+
+**为什么会出现这个警告？**
+
+从 Kubernetes 1.35 开始，Kubelet 正在逐步调整 cgroupDriver 的获取方式。
+
+过去：
+
+```text
+Kubelet
+    ↓
+读取自身配置文件
+    ↓
+获取 cgroupDriver
+```
+
+未来：
+
+```text
+Kubelet
+    ↓
+通过 CRI RuntimeConfig 接口
+    ↓
+从容器运行时获取 cgroupDriver
+```
+
+如果当前容器运行时没有实现 RuntimeConfig 接口，kubeadm 就会输出该警告。
+
+---
+
+**当前版本的处理机制**
+
+目前 Kubernetes 1.35 仍然保留兼容逻辑：
+
+```text
+读取 RuntimeConfig 失败
+        ↓
+回退到 kubelet 配置
+        ↓
+继续运行
+```
+
+因此：
+
+> 这只是 Warning，并不会阻止升级。
+
+---
+
+**如何确认环境是否正常？**
+
+查看 containerd 版本：
+
+```bash
+containerd --version
+```
+
+例如：
+
+```text
+containerd 1.7.24
+```
+
+查看 kubelet 配置：
+
+```bash
+sudo grep cgroupDriver /var/lib/kubelet/config.yaml
+```
+
+输出：
+
+```yaml
+cgroupDriver: systemd
+```
+
+查看 containerd 配置：
+
+```bash
+sudo crictl info
+```
+
+如果能够看到：
+
+```json
+"SystemdCgroup": true
+```
+
+则说明：
+
+* kubelet 使用 systemd cgroup
+* containerd 使用 systemd cgroup
+* 当前运行状态正常
+
+---
+
+**本次实验环境**
+
+| 组件           | 版本      |
+| ------------ | ------- |
+| Kubernetes   | 1.34.0  |
+| kubeadm      | 1.35.0  |
+| containerd   | 1.7.24  |
+| cgroupDriver | systemd |
+
+升级过程中虽然出现了 Warning：
+
+```text
+[WARNING ContainerRuntimeVersion]
+```
+
+但实际升级和集群运行均正常。
+
+---
+
+**Kubernetes 1.36 是否会受到影响？**
+
+根据目前社区测试情况：
+
+* containerd 1.6.x：建议升级
+* containerd 1.7.x：通常没有问题
+* containerd 2.x：官方推荐
+
+如果当前环境已经使用：
+
+```text
+containerd 1.7+
+systemd cgroup
+```
+
+则大多数情况下可以安全升级到 Kubernetes 1.36。
+
+---
+
+**建议**
+
+生产环境升级前建议提前检查：
+
+```bash
+containerd --version
+
+sudo crictl info
+
+sudo grep cgroupDriver /var/lib/kubelet/config.yaml
+```
+
+确认：
+
+* containerd ≥ 1.7
+* cgroupDriver = systemd
+* Runtime 正常运行
+
+这样可以有效降低 Kubernetes 1.36 升级过程中的兼容性风险。
+
+
+#### 升级 kubelet 与 kubectl
+```bash
+sudo apt-mark unhold kubelet kubectl
+sudo apt install -y kubelet=1.35.x-1.1 kubectl=1.35.x-1.1 
+sudo apt-mark hold kubelet kubectl
 ```
 重启：
 ```bash
-systemctl daemon-reload
-
-systemctl restart kubelet
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
 ```
 
-##### 升级其他 Master
+![升级kubelet和kubectl为1.35版本](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-升级kubelet和kubectl为1.35版本.png)
 
-在 master02、master03：
+#### 升级其他 Master
 ```bash
-kubeadm upgrade node
+sudo apt-mark unhold kubeadm
+sudo apt install -y kubeadm=1.35.0-1.1
+sudo apt-mark hold kubeadm
 ```
-然后：
+**在 master02、master03 配置仓库**
 ```bash
-apt install -y kubelet=1.35.x-1.1 kubectl=1.35.x-1.1
-
-systemctl restart kubelet
+# 添加官方密钥
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# 添加官方源
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes-1.35.list
+# 上面是1.35的源，下面是1.36的源
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes-1.36.list
+# 更新缓存
+sudo apt update
 ```
+
+**升级组件**
+```bash
+# 安装 kubeadm kubelet kubectl 组件
+sudo apt-mark unhold kubeadm kubelet kubectl
+sudo apt install -y kubeadm=1.35.0-1.1 kubelet=1.35.0-1.1 kubectl=1.35.0-1.1
+
+# 升级 kubeadm 
+sudo kubeadm upgrade node
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+sudo apt-mark hold kubeadm kubelet kubectl
+```
+
+✅ 判断是否真正升级成功
+
+以节点状态为准，而不是 kubeadm 输出：
+```bash
+kubectl get nodes
+```
+如果输出类似：
+```bash
+master01   Ready   v1.35.0
+master02   Ready   v1.35.0
+master03   Ready   v1.35.0
+```
+
+![master节点升级到1.35](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-master节点升级到1.35.png)
+
+则说明：
+
+🎉 集群已成功完成升级
+
 ### 第四步：升级 Worker 节点
 
-采用滚动升级方式。
-
-一次只升级一个节点。
+采用滚动升级方式，一次只升级一个节点。
 
 **驱逐节点**
 ```bash
+# master 执行
 kubectl drain worker01 --ignore-daemonsets --delete-emptydir-data
+```
+
+#### 添加 Kubernetes 源
+```bash
+sudo mkdir -p /etc/apt/keyrings
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes-1.36.list
+
+sudo apt update
 ```
 
 #### 升级 kubeadm
 ```bash
-apt install -y kubeadm=1.35.x-1.1
+sudo apt-mark unhold kubeadm kubelet kubectl 
+sudo apt install -y kubeadm=1.35.0-1.1
 ```
-##### 升级节点配置
+**升级节点配置**
 ```bash
-kubeadm upgrade node
+sudo kubeadm upgrade node
 ```
 
-##### 升级 kubelet
+**升级 kubelet**
 ```bash
-apt install -y kubelet=1.35.x-1.1 kubectl=1.35.x-1.1
+sudo apt install -y kubelet=1.35.0-1.1 kubectl=1.35.0-1.1
 ```
 
 **重启服务**
 ```bash
-systemctl daemon-reload
-systemctl restart kubelet
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+sudo apt-mark hold kubeadm kubelet kubectl 
 ```
 **恢复调度**
 ```bash
+# master 执行
 kubectl uncordon worker01
 ```
 **验证**
 ```bash
 kubectl get nodes
 ```
+![worker01升级完成](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-worker01升级完成.png)
+
 **确认：**
 ```bash
 worker01   Ready   v1.35.x
@@ -333,6 +621,9 @@ kubectl get nodes
 ```
 v1.35.x
 ```
+
+![集群升级为1.35](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-集群已升级为1.35版本.png)
+
 检查系统组件：
 ```bash
 kubectl get pod -n kube-system
@@ -367,36 +658,54 @@ Worker02
 Worker03
 ```
 
-#### 升级 kubeadm
+**升级 kubeadm**
 ```bash
-apt install -y kubeadm=1.36.x-1.1
+sudo apt-mark unhold kubeadm
+sudo apt install -y kubeadm=1.36.1-1.1
+sudo apt-mark hold kubeadm
 ```
 
 查看升级计划
 ```bash
-kubeadm upgrade plan
+sudo kubeadm upgrade plan
 ```
 
 升级 Control Plane
 ```bash
-kubeadm upgrade apply v1.36.x
+sudo kubeadm upgrade apply v1.36.1
 ```
 
 升级 kubelet
 ```bash
-apt install -y \
-kubelet=1.36.x-1.1 \
-kubectl=1.36.x-1.1
-systemctl restart kubelet
+sudo apt-mark unhold kubelet kubectl
+sudo apt install -y kubelet=1.36.1-1.1 kubectl=1.36.1-1.1
+sudo apt-mark hold kubelet kubectl
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
 ```
 
-升级 Worker
+**升级 Worker**
 ```bash
-kubectl drain worker01 \
---ignore-daemonsets \
---delete-emptydir-data
+# master 执行 worker 节点驱逐
+kubectl drain worker01 --ignore-daemonsets --delete-emptydir-data
+
+# 升级 kubeadm
+sudo apt-mark unhold kubeadm kubelet kubectl 
+sudo apt install -y kubeadm=1.36.1-1.1
+
+# 升级节点配置
 kubeadm upgrade node
-systemctl restart kubelet
+
+# 升级 kubelet kubectl 组件
+sudo apt install -y kubelet=1.36.1-1.1 kubectl=1.36.1-1.1
+
+# 重启
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+sudo apt-mark hold kubeadm kubelet kubectl
+
+# master 解除封锁
 kubectl uncordon worker01
 ```
 
@@ -409,6 +718,8 @@ kubectl get nodes
 ```
 v1.36.x
 ```
+
+![集群升级到1.36](../../assets/images/kubernetes/cluster-upgrade/cluster-upgrade-集群升级到1.36.png)
 
 检查组件状态
 ```bash
@@ -461,11 +772,11 @@ etcdctl snapshot restore etcd.db
 
 可以直接降级 kubelet：
 ```bash
-apt install kubelet=<旧版本>
+sudo apt install kubelet=<旧版本>
 ```
 然后重启：
 ```bash
-systemctl restart kubelet
+sudo systemctl restart kubelet
 ```
 
 ## 生产环境升级建议
@@ -514,7 +825,7 @@ Master03
 ## 总结
 
 本次升级路径如下：
-
+```text
 Kubernetes 1.34
       │
       ▼
@@ -522,6 +833,7 @@ Kubernetes 1.35
       │
       ▼
 Kubernetes 1.36
+```
 
 整个过程中最重要的三个原则：
 
