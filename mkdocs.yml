@@ -168,6 +168,7 @@ nav:
           - K8s 高可用集群部署: kubernetes/practice/ha-cluster.md
           - 完整部署一套企业级私有云后的 10 个收获: kubernetes/practice/10-takeaways.md
           - k8s 集群v1.34升级到v1.36实战: kubernetes/practice/cluster-upgrade.md
+          - kubectl drain 到底做了什么？: kubernetes/practice/kubectl-drain.md
     
         - 工具生态:
           - k9s: kubernetes/tools/k9s.md

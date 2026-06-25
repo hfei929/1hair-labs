@@ -844,9 +844,8 @@ Kubernetes 1.36
 掌握 Kubernetes 升级流程后，后续从 1.36 升级到 1.37、1.38，甚至未来版本，都可以按照相同思路进行操作。
 
 ## 相关阅读
-  - Kubernetes 架构详解：从 API Server 到 ETCD 一次讲透
-  - Kubernetes Control Plane 组件详解
-  - Kubernetes ETCD 备份与恢复实战
-  - Kubernetes Pod OOM 故障排查指南
-  - Kubernetes 节点 NotReady 故障分析
-  - Kubernetes Service 详解：ClusterIP、NodePort、LoadBalancer 一次讲透
+  - [kubectl drain 到底做了什么？](../practice/kubectl-drain.md)
+  - [Kubernetes 架构详解：从 API Server 到 ETCD](../architecture/etcd.md)
+  - [Kubernetes Control Plane 组件详解](../architecture/controller-manager.md)
+  - [Kubernetes ETCD 备份与恢复实战](../../lab/failover-test-1.md)
+  - [Kubernetes Pod OOM 故障排查指南](../../lab/pod-oom-test.md)
