@@ -19,7 +19,7 @@ author: HairLabs | 一根头发丝的宽度
 
 ## 文章摘要
 
-ETCD 是 Kubernetes 控制平面的核心组件之一。
+[ETCD](https://etcd.io/) 是 Kubernetes 控制平面的核心组件之一。
 
 集群中的 Pod、Node、Deployment、Service、ConfigMap、Secret 等几乎所有资源信息，最终都会存储在 ETCD 中。
 
@@ -959,6 +959,18 @@ Kubernetes 仅支持 ETCD。
 不存储。
 
 仅存储元数据。
+
+---
+
+## 生产实践
+
+在一次 [Kubernetes 1.34→1.35 升级过程中](../practice/cluster-upgrade.md)，由于 kubelet 参数异常，导致 ETCD Static Pod
+无法正常重建，最终出现：
+```bash
+static Pod hash for component etcd
+did not change after 5m0s
+```
+这说明 ETCD 是控制平面升级过程中最敏感的组件。
 
 ---
 
