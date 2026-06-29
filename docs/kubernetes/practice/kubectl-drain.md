@@ -1,5 +1,5 @@
 ---
-title: kubectl drain 到底做了什么？为什么它总是在升级时为难你？
+title: kubectl drain 到底做了什么？解析理解 drain 原理
 description: 深入解析 kubectl drain 的工作原理，涵盖 Eviction API、PDB、DaemonSet、裸 Pod 等核心机制，帮助你在 Kubernetes 节点维护和升级时安全下线节点，避免业务中断。
 keywords:
 tags:
@@ -24,7 +24,7 @@ tags:
 author: HairLabs | 一根头发丝的宽度
 ---
 
-# kubectl drain 到底做了什么？为什么它总是在升级时为难你？
+# kubectl drain 到底做了什么？解析理解 drain 原理
 
 > 你以为 drain 只是删除 Pod？它其实是在“安全地清空一台节点”。
 
