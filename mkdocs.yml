@@ -84,6 +84,7 @@ extra:
   - icon: fontawesome/brands/github
     link: https://github.com/hfei929
 
+# 以下为站点导航内容
 nav:
     - 1hair-labs: 
         - 网站介绍: index.md
@@ -182,6 +183,7 @@ nav:
           - k8s 集群v1.34升级到v1.36实战: kubernetes/practice/cluster-upgrade.md
           - kubectl drain 到底做了什么？: kubernetes/practice/kubectl-drain.md
           - Kubernetes 资源 Requests vs Limits: kubernetes/practice/requests-vs-limits.md
+          - Kubernetes 资源优化实战：用监控数据精准配置 Requests 和 Limits: kubernetes/practice/resource-optimization.md
     
         - 工具生态:
           - k9s: kubernetes/tools/k9s.md
@@ -223,3 +225,4 @@ nav:
   
     - 关于我:
         - 个人介绍: about/index.md
+# 以上为站点主体导航内容。
