@@ -59,6 +59,7 @@ theme:
 
 plugins:
   - search
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -69,8 +70,11 @@ markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.details
-  - pymdownx.superfences
-
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
@@ -108,7 +112,7 @@ nav:
           - Ubuntu 22.04: deployment/linux/ubuntu-22.04.md
           - CentOS 7: deployment/linux/centos-7.md
           - CentOS 8: deployment/linux/centos-8.md
-          - Rocky Linux 9: deployment/linux/rocky-linux-9.md
+          - Rocky Linux 9.x: deployment/linux/rocky-linux-9.md
           - Debian 13: deployment/linux/debian-13.md
     
         - VMware:
@@ -223,6 +227,6 @@ nav:
 #    - 个人服务:
 #        - 服务介绍: service/index.md
   
-    - 关于我:
-        - 个人介绍: about/index.md
+    - 关于 1hair-labs:
+        - about/index.md
 # 以上为站点主体导航内容。
