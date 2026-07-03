@@ -18,6 +18,8 @@ author: 一根头发丝的宽度
 
 # Kubernetes API Server 详解：集群的神经中枢与统一入口
 
+![为什么所有的请求都要经过API-Server](../../assets/images/kubernetes/architecture/api-server/为什么所有请求都要经过APIServer.png)
+
 ## 📌 文章摘要
 API Server 是 Kubernetes 控制平面的**核心枢纽**和**唯一入口**，承担着认证、授权、准入控制、数据持久化等关键职责。本文将深入解析其架构设计、工作原理、Watch 机制、高可用方案及生产实践，帮助你全面掌握这个 Kubernetes 的“神经中枢”。
 
