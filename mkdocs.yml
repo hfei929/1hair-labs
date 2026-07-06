@@ -4,7 +4,7 @@ site_author: 1HairLabs
 site_description: >
   专注于 Kubernetes、Linux、Docker、云原生、可观测性与企业级基础设施，提供系统化教程、实践实验、故障排查及技术知识库。
 
-copyright: Copyright © 2026 1HairLabs
+copyright: Copyright © 2026 1HairLabs · 一根头发丝的宽度 All Rights Reserved.
 
 theme:
   name: material
