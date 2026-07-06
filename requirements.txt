@@ -3,3 +3,4 @@ mkdocs-material
 pymdown-extensions
 mkdocs-dracula-theme
 mkdocs-glightbox
+mkdocs-minify-plugin

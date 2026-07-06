@@ -1,9 +1,5 @@
 # 从单 Master 到生产级高可用：一次 Kubernetes 架构演进的完整思考
 
-> 本文约 1000 字，阅读约需 5 分钟。
->
-> 从“能用”到“可靠”，往往只差一次架构升级。这篇文章记录了我将实验环境从单控制平面，演进为生产级高可用架构的全过程思考与取舍。
-
 ---
 
 ![kubernetes集群高可用架构图解](../assets/images/kubernetes/k8s-ha-architecture.png)

@@ -17,8 +17,6 @@ tags:
 
 # Kubernetes 资源优化实战：用监控数据精准配置 Requests 和 Limits
 
-> 别再让开发和运维为了资源配置吵架了，让数据说话。
-
 ## 概述
 
 在 Kubernetes 中，`requests` 和 `limits` 的配置直接影响着集群的稳定性和成本效率。配置过高导致资源浪费，配置过低则可能引发 CPU 限流或 OOM Kill。

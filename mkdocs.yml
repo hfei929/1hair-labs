@@ -1,15 +1,12 @@
-site_name: 1hair-labs | 一根头发丝的宽度
-site_description: Kubernetes、Linux、Prometheus、Grafana、ESXi、vCenter、vSAN、PVE 运维实践与成长记录
-site_author: hfei
+site_name: 1HairLabs
 site_url: https://1hairlabs.cn
+site_author: 1HairLabs
+site_description: >
+  专注于 Kubernetes、Linux、Docker、云原生、可观测性与企业级基础设施，提供系统化教程、实践实验、故障排查及技术知识库。
 
-# repo_name: hfei929/1hair-labs
-# repo_url: https://github.com/hfei929/1hair-labs
-
-copyright: Copyright © 2026 一根头发丝的宽度
+copyright: Copyright © 2026 1HairLabs
 
 theme:
-  # name: dracula
   name: material
   language: zh
   
@@ -19,36 +16,59 @@ theme:
   favicon: assets/1hairlabs-favicon.png
 
   features:
+    # 左侧导航
     - navigation.tabs
     - navigation.sections
     - navigation.expand
     - navigation.top
     - navigation.footer
     - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.path
+    - navigation.prune
     
+    # 搜索
     - search.highlight
     - search.share
     - search.suggest
     
+    # 内容
     - content.code.copy
     - content.code.annotate
-    
+    - content.tabs.link
+    - content.tooltips
+    - content.action.edit
+    - content.action.view
+
+    # 目录
     - toc.follow
 
   palette:
-    - scheme: default
-      primary: blue
-      accent: indigo
-      toggle:
-        icon: material/weather-night
-        name: 切换深色模式
     
-    - scheme: slate
-      primary: blue
-      accent: indigo
-      toggle:
-        icon: material/weather-sunny
-        name: 切换浅色模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: blue
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: blue
+#    - scheme: default
+#      primary: blue
+#      accent: indigo
+#      toggle:
+#        icon: material/weather-night
+#        name: 切换深色模式
+#    
+#    - scheme: slate
+#      primary: blue
+#      accent: indigo
+#      toggle:
+#        icon: material/weather-sunny
+#        name: 切换浅色模式
 
   font:
     text: Roboto
@@ -57,18 +77,24 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
+# 插件
 plugins:
   - search
+  - tags
 
+  - blog
+
+  - minify:
+      minify_html: true
+
+# markdown 增强
 markdown_extensions:
   - admonition
   - attr_list
   - md_in_html
   - tables
   - footnotes
-
-  - toc:
-      permalink: true
+  - def_list
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
@@ -77,32 +103,62 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
+
   - pymdownx.inlinehilite
-  - pymdownx.highlight
-  - pymdownx.superfences
   - pymdownx.snippets
 
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.keys
+
+  - pymdownx.magiclink
+
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+  - pymdownx.emoji
+
+  - toc:
+      permalink: true
 
 extra:
+  generator: false
+
   social:
-  - icon: fontawesome/brands/github
-    link: https://github.com/hfei929
+    - icon: fontawesome/brands/github
+      link: https://github.com/hfei929
+
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/
+
+    - icon: fontawesome/brands/weixin
+      link: https://1hairlabs.cn
+
+    - icon: material/rss
+      link: /feed_rss_created.xml
+
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - javascripts/extra.js
 
 # 以下为站点导航内容
+# ------------------------------------------------------------------------
 nav:
-    - 1hair-labs: 
-        - 网站介绍: index.md
-        - 技术方向: kubernetes/index.md
+    - 1Hair-Labs: 
+        - 网站首页: index.md
+        - 学习路线: roadmap/index.md
         - 实验室: lab/index.md
-        - 技术服务: service/index.md
-        - 关于本站: about/index.md
-    
-    - 新手部署教程:
+#        - 技术服务: service/index.md
+        - 关于 1Hairlabs: about/index.md
+
+# ------------------------------------------------------------------------
+
+    - 环境准备:
+
         - 概览: deployment/tutorials.md
 
-        - 部署环境基础:
+        - 基础知识:
           - 裸金属、虚拟机与容器的区别: deployment/basics/baremetal-vm-container.md
     
         - Windows:
@@ -112,105 +168,132 @@ nav:
             
         - Linux:
           - Ubuntu 22.04: deployment/linux/ubuntu-22.04.md
-          - CentOS 7: deployment/linux/centos-7.md
-          - CentOS 8: deployment/linux/centos-8.md
-          - Rocky Linux 9.x: deployment/linux/rocky-linux-9.md
           - Debian 13: deployment/linux/debian-13.md
-    
+          - Rocky Linux 9.x: deployment/linux/rocky-linux-9.md
+          - CentOS 8: deployment/linux/centos-8.md
+          - CentOS 7（EOL）: deployment/linux/centos-7.md
+
         - VMware:
           - ESXi 7.0: deployment/vmware/esxi-7.0.md
           - ESXi 8.0: deployment/vmware/esxi-8.0.md
           - vCenter 7.0: deployment/vmware/vcenter-7.0.md
           - vCenter 8.0: deployment/vmware/vcenter-8.0.md
         
-        - Docker&Kubernetes:
-          - Docker: deployment/docker&k8s/docker.md
-          - Kubernetes: deployment/docker&k8s/k8s.md
-    
+        - Docker:
+          - Docker 部署: deployment/docker&k8s/docker.md
+
+        - Kubernetes:
+          - Kubernetes 部署: deployment/docker&k8s/k8s.md
+
+# ------------------------------------------------------------------------
+
     - Linux:
         - 概览: linux/index.md
-        - 基础知识: 
-            - 主页: linux/base-system/index.md
-            - Linux 目录结构说明: linux/base-system/linux-directory-structure.md
+
+        - 📚 学习路线: linux/roadmap.md
+
+        - ⭐ 推荐阅读: linux/recommended-reading.md
+
+        - 📖 基础知识: 
+            - Linux 基础主页: linux/base-system/index.md
+            - Linux 目录结构: linux/base-system/linux-directory-structure.md
             - Linux 常用命令: linux/base-system/common-commands.md
             - Linux 完整命令: linux/base-system/all-commands.md
-            - Linux 软件包管理: linux/base-system/package-management.md
-            - Linux 系统监控: linux/base-system/system-monitoring.md
-            - Linux 系统日志管理: linux/base-system/log-management.md
-            - Linux 系统故障排除: linux/base-system/troubleshooting.md
+            - 软件包管理: linux/base-system/package-management.md
+            - 系统监控: linux/base-system/system-monitoring.md
+            - 系统日志管理: linux/base-system/log-management.md
+            - 系统故障排除: linux/base-system/troubleshooting.md
 
-        - 网络:
-            - 主页: linux/network/network.md
+        - 🌐 网络:
+            - 网络基础: linux/network/network.md
 
-        - 存储:
-            - 主页: linux/storage/storage.md
+        - 💾 存储:
+            - 存储基础: linux/storage/storage.md
 
-        - 安全:
-            - 主页: linux/security/index.md
-            - Linux 用户和权限管理: linux/security/user-and-permission.md
-            - Linux与Windows数据删除与安全擦除: linux/security/data-deletion-and-secure-erasure.md
+        - 🔐 安全:
+            - 安全基础: linux/security/index.md
+            - 用户和权限: linux/security/user-and-permission.md
+            - 数据安全擦除: linux/security/data-deletion-and-secure-erasure.md
 
-        - 性能:
-            - 主页: linux/performance/performance-optimization.md
+        - 🚀 性能优化:
+            - Linux 性能: linux/performance/performance-optimization.md
 
         - shell:
-            - 主页: linux/shell/shell.md
+            - Shell 基础: linux/shell/shell.md
   
+# ------------------------------------------------------------------------
+
     - Kubernetes:
-        - 概览: kubernetes/index.md
-        - K8s从入门到上线完整路线: kubernetes/K8s-beginner-to-production.md
+
+        - Kubernetes 概览: kubernetes/index.md
+
+        -  📚 学习路线:
+            - 从入门到生产: kubernetes/K8s-beginner-to-production.md
           
-        - 架构原理: 
-          - Kubernetes 架构总览: kubernetes/architecture/index.md
-          - Kubernetes API Server: kubernetes/architecture/api-server.md
-          - Kubernetes Scheduler: kubernetes/architecture/scheduler.md
-          - Kubernetes Controller Manager: kubernetes/architecture/controller-manager.md
-          - Kubernetes Kubelet: kubernetes/architecture/kubelet.md
-          - Kubernetes Kube Proxy: kubernetes/architecture/kube-proxy.md
-          - Kubernetes CNI: kubernetes/architecture/cni.md
-          - kubernetes Ingress: kubernetes/architecture/ingress.md
-          - Kubernetes Etcd: kubernetes/architecture/etcd.md
-          - Kubernetes CRI: kubernetes/architecture/cri.md
-          - Kubernetes CSI: kubernetes/architecture/csi.md
-          - Kubernetes API 资源: kubernetes/architecture/api-resources.md
-          - Kubernetes 工作负载资源: kubernetes/architecture/workloads.md
-          - kubernetes 服务资源详解: kubernetes/architecture/server-resources.md
-          - Kubernetes 存储资源: kubernetes/architecture/storage.md
-          - Kubernetes 网络资源: kubernetes/architecture/network.md
-          - Kubernetes 安全资源: kubernetes/architecture/security.md
-          - Kubernetes 其他资源: kubernetes/architecture/other-resources.md
+        - 🏗 架构原理: 
+          - 架构总览: kubernetes/architecture/index.md
+          - API Server: kubernetes/architecture/api-server.md
+          - Scheduler: kubernetes/architecture/scheduler.md
+          - Controller Manager: kubernetes/architecture/controller-manager.md
+          - Kubelet: kubernetes/architecture/kubelet.md
+          - Kube Proxy: kubernetes/architecture/kube-proxy.md
+          - CNI: kubernetes/architecture/cni.md
+          - Ingress: kubernetes/architecture/ingress.md
+          - Etcd: kubernetes/architecture/etcd.md
+          - CRI: kubernetes/architecture/cri.md
+          - CSI: kubernetes/architecture/csi.md
+          - API 资源: kubernetes/architecture/api-resources.md
+          - 工作负载资源: kubernetes/architecture/workloads.md
+          - 服务资源详解: kubernetes/architecture/server-resources.md
+          - 存储资源: kubernetes/architecture/storage.md
+          - 网络资源: kubernetes/architecture/network.md
+          - 安全资源: kubernetes/architecture/security.md
+          - 其他资源: kubernetes/architecture/other-resources.md
     
-        - 实战经验: 
-          - Docker 详细使用教程: kubernetes/practice/docker.md
-          - 单 Master 集群部署实战: kubernetes/practice/single-master-deployment.md
-          - 从单 Master 到生产级高可用架构思考: kubernetes/practice/single-master-to-ha.md
-          - K8s 高可用集群部署: kubernetes/practice/ha-cluster.md
-          - 完整部署一套企业级私有云后的 10 个收获: kubernetes/practice/10-takeaways.md
-          - k8s 集群v1.34升级到v1.36实战: kubernetes/practice/cluster-upgrade.md
+        - 🚀 部署实战: 
+          - Docker: kubernetes/practice/docker.md
+          - 单 Master 集群战: kubernetes/practice/single-master-deployment.md
+          - 高可用架构思考: kubernetes/practice/single-master-to-ha.md
+          - 高可用集群部署: kubernetes/practice/ha-cluster.md
+          - 集群升级实战: kubernetes/practice/cluster-upgrade.md
+
+
+
+        - ✅ 最佳实践:
+          - Requests vs Limits: kubernetes/practice/requests-vs-limits.md
+          - 计算资源优化: kubernetes/practice/resource-optimization.md
           - kubectl drain 到底做了什么？: kubernetes/practice/kubectl-drain.md
-          - Kubernetes 资源 Requests vs Limits: kubernetes/practice/requests-vs-limits.md
-          - Kubernetes 资源优化实战：用监控数据精准配置 Requests 和 Limits: kubernetes/practice/resource-optimization.md
+          - 完整部署私有云经验总结: kubernetes/practice/10-takeaways.md
     
-        - 工具生态:
+        - 🧰 工具生态:
           - k9s: kubernetes/tools/k9s.md
           - headlamp: kubernetes/tools/headlamp.md
-    - Monitoring:
+        
+        - 🔍 故障排查: lab/index.md
+
+# ------------------------------------------------------------------------
+
+    - 可观测性:
+
         - 概览: monitoring/index.md
-        - K8s 集群监控健康检查指标: monitoring/k8s-cluster-health-check.md
+        - K8s 健康检查指标: monitoring/k8s-cluster-health-check.md
         - Prometheus: monitoring/prometheus.md
         - Grafana: monitoring/grafana.md
         - Alertmanager: monitoring/alertmanager.md
   
-    - 虚拟化:
-        - 概览: virtualization/index.md
+#    - 虚拟化:
+#        - 概览: virtualization/index.md
   
 #    - 技术资讯: 
 #       - kubernetes:
 #          - dashboards已归档: news/kubernetes/dashboard.md
 #        - Linux: news/linux/index.md
 #        - VMware: news/vmware/index.md
-  
+
+# ------------------------------------------------------------------------
+
     - 故障实验室:
+
         - 概览: lab/index.md
         
         - 故障演练:
@@ -218,17 +301,23 @@ nav:
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
           - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
           - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
-          - 故障演练：人为打满 CPU,Grafana 会发生什么？: lab/cpu-stress-test.md
-          - 故障演练：Pod OOM（内存溢出）之后会发生什么？: lab/pod-oom-test.md
+          - CPU 压力测试: lab/cpu-stress-test.md
+          - Pod OOM 测试: lab/pod-oom-test.md
 
-        - 故障排除:
+        - 故障排查:
             - 概览: troubleshooting/index.md
-    
-    - 解决方案与实践:
+
+# -------------------------------------------------------------------------
+
+    - 解决方案:
+
         - 概览: solutions/index.md
 #    - 个人服务:
 #        - 服务介绍: service/index.md
-  
+
+# ------------------------------------------------------------------------
+
     - 关于 1hair-labs:
-        - about/index.md
+        - 关于本站:about/index.md
+       
 # 以上为站点主体导航内容。
