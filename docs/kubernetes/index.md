@@ -1,27 +1,132 @@
+---
+title: Kubernetes - 1HairLabs
+description: Kubernetes 知识库，涵盖集群架构、核心组件、网络与存储、高可用部署、资源管理与生产环境最佳实践，从实验环境到生产集群的完整实践记录。
+hide:
+  - comments
+---
+
 # Kubernetes
 
-> 从实验环境到生产集群，记录 Kubernetes 的学习、实践与故障处理过程。
+从实验环境到生产集群，记录 Kubernetes 的学习、实践与故障处理过程。
 
-Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是现代平台工程的重要组成部分。
+Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是现代平台工程的核心。本专题涵盖集群部署、架构原理、高可用设计、资源管理、故障排查与生产环境实践。
 
-本专题主要围绕以下方向展开：
+---
 
-* Kubernetes 集群部署
-* 高可用架构设计
-* Ingress 与流量管理
-* 存储系统与 CSI
-* Pod 网络模型
-* 集群升级与运维
-* 故障排查与恢复
-* 生产环境最佳实践
+## 快速入门
 
-## 推荐阅读
+刚接触 Kubernetes？不确定从哪里开始？
 
-* Kubernetes 高可用集群实践
-* Ingress 工作原理解析
-* Kubernetes 网络流量全链路
-* ETCD 恢复演练
+👉 [K8s 从入门到上线完整路线](K8s-beginner-to-production/) — 一篇讲清从"听说过 K8s"到"能独立上线项目"的完整路径，包含学习顺序、实战路线和避坑指南。
 
-## 持续更新
+按阶段选择阅读：
 
-本专题将持续记录个人在实验环境与实际项目中的学习与实践过程。
+| 你的阶段 | 推荐阅读 |
+|---|---|
+| 新手（第 1~3 阶段） | Linux 基础 → Docker → K8s 核心对象（Pod / Deployment / Service） |
+| 进阶（第 4~5 阶段） | ConfigMap / Ingress / HPA / Prometheus 监控 |
+| 提升（第 6~7 阶段） | 实战项目 → 高可用架构 → 生产上线 |
+
+---
+
+## 内容索引
+
+### 集群架构
+
+理解 Kubernetes 各组件的职责与交互方式，是从"会用"走向"能排障"的关键。
+
+| 文章 | 说明 |
+|---|---|
+| [API Server](architecture/api-server/) | 集群统一入口，所有操作经过这里 |
+| [ETCD](architecture/etcd/) | 集群状态存储，唯一有状态组件 |
+| [Scheduler](architecture/scheduler/) | Pod 调度决策 |
+| [Controller Manager](architecture/controller-manager/) | 控制循环与状态协调 |
+| [Kubelet](architecture/kubelet/) | 节点代理，管理 Pod 生命周期 |
+| [Kube Proxy](architecture/kube-proxy/) | 服务发现与流量转发 |
+| [Workloads](architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
+| [API Resources](architecture/api-resources/) | 集群 API 资源全景 |
+| [Server Resources](architecture/server-resources/) | 节点资源与容量管理 |
+| [Other Resources](architecture/other-resources/) | 其他集群资源 |
+
+### 网络
+
+Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI 的基础。
+
+| 文章 | 说明 |
+|---|---|
+| [Kubernetes 网络模型](architecture/network/) | Pod 网络、Service 网络与节点网络 |
+| [CNI](architecture/cni/) | 容器网络接口与主流插件 |
+| [Ingress](architecture/ingress/) | 七层流量入口与 Ingress Controller |
+
+### 存储
+
+| 文章 | 说明 |
+|---|---|
+| [存储系统](architecture/storage/) | PV / PVC / StorageClass |
+| [CSI](architecture/csi/) | 容器存储接口与驱动 |
+
+### 运行时与安全
+
+| 文章 | 说明 |
+|---|---|
+| [CRI](architecture/cri/) | 容器运行时接口 |
+| [安全机制](architecture/security/) | RBAC / SecurityContext / Pod Security |
+
+### 最佳实践
+
+| 文章 | 说明 |
+|---|---|
+| [单 Master 集群部署](practice/single-master-deployment/) | 从零搭建第一套 K8s 集群 |
+| [Docker 与 K8s](practice/docker/) | 容器运行时与 K8s 的关系 |
+| [从单 Master 到 HA](practice/single-master-to-ha/) | 单 Master 升级高可用 |
+| [HA 集群实践](practice/ha-cluster/) | HAProxy + Keepalived + 3 Master 部署 |
+| [Requests vs Limits](practice/requests-vs-limits/) | 调度信号与运行时限制的区别 |
+| [资源优化](practice/resource-optimization/) | 集群资源调优方法 |
+| [集群升级](practice/cluster-upgrade/) | K8s 版本升级流程与风险 |
+| [kubectl drain](practice/kubectl-drain/) | 节点维护操作 |
+| [10 条实战经验](practice/10-takeaways/) | 生产环境踩坑总结 |
+
+### 工具
+
+| 文章 | 说明 |
+|---|---|
+| [K9s](tools/k9s/) | 终端 K8s 管理工具 |
+| [Headlamp](tools/headlamp/) | Web UI 集群管理工具 |
+
+---
+
+## 学习顺序
+
+```mermaid
+flowchart TD
+    A[集群架构<br>API Server · ETCD · Scheduler] --> B[核心对象<br>Pod · Deployment · Service]
+    B --> C[网络<br>CNI · Ingress · Kube Proxy]
+    C --> D[存储<br>PV · PVC · CSI]
+    D --> E[安全<br>RBAC · SecurityContext]
+    E --> F[部署实践<br>单 Master → HA]
+    F --> G[资源管理<br>Requests · Limits · 调优]
+    G --> H[运维<br>升级 · 节点维护 · 故障排查]
+
+    style A fill:#e0e7ff,stroke:#4f46e5
+    style B fill:#dbeafe,stroke:#2563eb
+    style C fill:#fef3c7,stroke:#d97706
+    style D fill:#fce7f3,stroke:#db2777
+    style E fill:#fee2e2,stroke:#dc2626
+    style F fill:#d1fae5,stroke:#059669
+    style G fill:#fef3c7,stroke:#d97706
+    style H fill:#f3f4f6,stroke:#64748b
+```
+
+详细的分阶段学习路线 → [Kubernetes 学习路线](roadmap/)
+
+---
+
+## 后续计划
+
+| 方向 | 规划内容 |
+|---|---|
+| 网络 | 网络流量全链路解析、NetworkPolicy 实践、Service Mesh |
+| 存储 | 本地存储 vs 网络存储、存储性能测试 |
+| 运维 | ETCD 备份与恢复演练、集群灾备方案 |
+| 安全 | Pod Security Standards、镜像扫描、OPA Gatekeeper |
+| 可观测性 | 与 Prometheus / Grafana / Loki 集成实践 |

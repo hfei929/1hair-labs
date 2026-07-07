@@ -150,7 +150,6 @@ nav:
         - 学习路线: roadmap/index.md
         - 实验室: lab/index.md
 #        - 技术服务: service/index.md
-        - 关于 1Hairlabs: about/index.md
 
 # ------------------------------------------------------------------------
 
@@ -227,8 +226,7 @@ nav:
 
         - Kubernetes 概览: kubernetes/index.md
 
-        -  📚 学习路线:
-            - 从入门到生产: kubernetes/K8s-beginner-to-production.md
+        -  📚 学习路线: kubernetes/roadmap.md
           
         - 🏗 架构原理: 
           - 架构总览: kubernetes/architecture/index.md
@@ -260,6 +258,7 @@ nav:
 
 
         - ✅ 最佳实践:
+          - 从入门到生产: kubernetes/K8s-beginner-to-production.md
           - Requests vs Limits: kubernetes/practice/requests-vs-limits.md
           - 计算资源优化: kubernetes/practice/resource-optimization.md
           - kubectl drain 到底做了什么？: kubernetes/practice/kubectl-drain.md
@@ -317,7 +316,6 @@ nav:
 
 # ------------------------------------------------------------------------
 
-    - 关于 1hair-labs:
-        - 关于本站:about/index.md
+    - 关于 1Hair-Labs: about/index.md
        
 # 以上为站点主体导航内容。

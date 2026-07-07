@@ -1,19 +1,15 @@
 ---
-title: Linux
-description: Linux 运维基础、系统管理、网络、存储、安全、性能优化与故障排查实践。
+title: Linux - 1HairLabs
+description: Linux 系统知识库，涵盖文件系统、用户权限、网络、存储、安全、性能优化与故障排查，结合实际运维经验帮助你从「会使用」走向「理解」。
 ---
 
-# Linux
+# Linux · 现代基础设施的底座
 
-> Linux 不只是一个操作系统，它是现代基础设施的底座。
+Linux 不只是一个操作系统，它是现代基础设施的底座。
 
-无论是 Kubernetes、Docker、数据库、中间件、虚拟化平台还是云计算环境，其底层几乎都运行在 Linux 之上。
+无论是 Kubernetes、Docker、数据库、中间件、虚拟化平台还是云计算环境，底层几乎都运行在 Linux 之上。理解 Linux，才能真正理解现代基础设施。
 
-对于运维工程师、SRE 和平台工程师而言：
-
-> 理解 Linux，才能真正理解现代基础设施。
-
-本专题记录工作与实验过程中涉及的 Linux 知识、运维经验以及故障实践，希望帮助读者从「会使用 Linux」逐步走向「理解 Linux」。
+本专题记录工作与实验中涉及的 Linux 知识、运维经验以及故障实践，帮助你从「会使用 Linux」逐步走向「理解 Linux」。
 
 ---
 
@@ -36,187 +32,96 @@ Kubernetes 是云原生的大脑，
 ```
 
 ---
-
-## 本专题包含哪些内容？
+## 内容索引
 
 ### 系统基础
 
-- Linux 基础命令
-- 文件系统原理
-- 用户与权限管理
-- 进程与服务管理
-- 软件包管理
+Linux 日常运维的核心技能。
 
----
+| 文章 | 说明 |
+|---|---|
+| [Linux 目录结构说明](base-system/linux-directory-structure/) | FHS 标准、各目录用途与设计逻辑 |
+| [Linux 常用命令](base-system/common-commands/) | 日常运维高频命令速查 |
+| [Linux 完整命令参考](base-system/all-commands/) | 按功能分类的完整命令列表 |
+| [软件包管理](base-system/package-management/) | apt / yum / dnf / dpkg / rpm |
+| [系统监控](base-system/system-monitoring/) | top / htop / iostat / vmstat |
+| [日志管理](base-system/log-management/) | journald / rsyslog / 日志轮转 |
+| [故障排除](base-system/troubleshooting/) | 常见系统故障的定位方法 |
 
-### 网络与通信
+### 用户与安全
 
-- TCP/IP 基础
-- DNS 原理
-- SSH 使用与安全
-- 网络故障排查
+安全不是独立于运维之外的工作，很多安全问题本质上是系统管理问题。
 
----
+| 文章 | 说明 |
+|---|---|
+| [用户和权限管理](security/user-and-permission/) | 用户/组/ACL/SELinux 基础 |
+| [数据删除与安全擦除](security/data-deletion-and-secure-erasure/) | 文件真的删掉了吗？数据恢复与安全销毁 |
 
-### 存储与文件系统
+### 网络
 
-- inode 原理
-- ext4 文件系统
-- LVM 逻辑卷
-- 磁盘管理
-- 数据恢复与数据销毁
+很多 Kubernetes 问题本质是网络问题，而网络问题的根因往往在 Linux 层。
 
----
-
-### Linux 安全
-
-安全并不是独立于运维之外的工作。
-
-很多安全问题，本质上都是系统管理问题。
-
-本部分主要关注：
-
-- 文件权限管理
-- SSH 安全配置
-- sudo 权限控制
-- 密钥管理
-- 数据加密
-- 安全删除
-- 系统加固
-- 审计与日志
-
----
+| 文章 | 说明 |
+|---|---|
+| [Linux 网络基础](network/network/) | 网络配置、接口管理、路由基础 |
 
 ### 性能优化
 
-- CPU 分析
-- 内存分析
-- I/O 性能
-- 系统负载
-- 性能调优实践
-
----
+| 文章 | 说明 |
+|---|---|
+| [性能优化](performance/performance-optimization/) | CPU / 内存 / IO / 网络调优 |
 
 ### Shell 与自动化
 
-- Shell 脚本
-- awk/sed
-- crontab
-- 自动化运维
-- 日常脚本实践
+| 文章 | 说明 |
+|---|---|
+| [Shell 脚本基础](shell/shell/) | Shell 语法与常用脚本实践 |
+
+> 后续持续补充：awk/sed、crontab、自动化运维脚本。
 
 ---
 
-### 故障排查
+## 学习顺序
 
-- 服务无法启动
-- 网络异常
-- 磁盘空间不足
-- OOM 分析
-- 系统性能瓶颈
+```mermaid
+flowchart TD
+    A[系统基础<br>命令 · 目录 · 包管理] --> B[用户与权限<br>用户/组 · ACL · sudo]
+    B --> C[网络<br>TCP/IP · DNS · 路由]
+    C --> D[存储<br>inode · ext4 · LVM]
+    D --> E[安全<br>SSH加固 · 密钥 · 审计]
+    E --> F[性能分析<br>CPU · 内存 · IO]
+    F --> G[故障排查<br>OOM · 磁盘 · 网络]
+    G --> H[自动化<br>Shell · crontab]
+    H --> I[Kubernetes]
 
----
-
-## 学习路线推荐
-
-```text
-Linux 基础
-    ↓
-文件系统
-    ↓
-用户与权限
-    ↓
-网络
-    ↓
-存储
-    ↓
-安全
-    ↓
-性能分析
-    ↓
-故障排查
-    ↓
-自动化运维
-    ↓
-Kubernetes
+    style A fill:#dbeafe,stroke:#2563eb
+    style B fill:#d1fae5,stroke:#059669
+    style C fill:#fef3c7,stroke:#d97706
+    style D fill:#fce7f3,stroke:#db2777
+    style E fill:#fee2e2,stroke:#dc2626
+    style F fill:#e0e7ff,stroke:#4f46e5
+    style G fill:#fef3c7,stroke:#d97706
+    style H fill:#d1fae5,stroke:#059669
+    style I fill:#f3f4f6,stroke:#64748b
 ```
 
----
-
-## 推荐阅读
-
-### 存储与文件系统
-
-- 文件真的删掉了吗？从 Linux 到 Windows，一次讲透数据删除与安全擦除
-- inode 到底是什么？
-- ext4 文件系统工作原理
-
----
-
-### Linux 安全
-
-- 文件真的删掉了吗？从 Linux 到 Windows，一次讲透数据删除与安全擦除
-- SSH 密钥登录详解（规划中）
-- sudo 与最小权限原则（规划中）
-- LUKS 全盘加密实践（规划中）
-- Linux 文件权限详解（规划中）
-
----
-
-### 性能分析
-
-- CPU 使用率到底代表什么？
-- Linux 内存管理原理
-
----
-
-### 故障排查
-
-- Pod OOM 后到底发生了什么？
-- Linux 常见故障排查思路
+详细的分阶段学习路线 → [Linux 学习路线](roadmap/)
 
 ---
 
 ## 后续计划
 
-未来计划持续补充以下方向：
+以下方向持续更新中：
 
-### 安全方向
-
-- SSH 安全加固
-- Fail2Ban 实践
-- SELinux 入门
-- sudo 权限控制
-- LUKS 加密
-- 审计日志分析
-
-### 存储方向
-
-- inode 深入解析
-- ext4 工作原理
-- LVM 实践
-- SSD 与 TRIM
-
-### 系统方向
-
-- systemd
-- cgroup
-- namespace
-- Linux 启动流程
-
----
-
-## 持续更新
-
-本站所有内容均来自：
-
-- 实际工作场景
-- 实验环境验证
-- 故障复盘记录
-- 技术研究与学习笔记
-
-希望通过持续积累，将 Linux 从「命令集合」转变为「系统认知」。
+| 方向 | 规划内容 |
+|---|---|
+| 存储 | inode 深入解析、ext4 工作原理、LVM 实践、SSD 与 TRIM |
+| 安全 | SSH 安全加固、Fail2Ban、SELinux、LUKS 全盘加密、审计日志 |
+| 系统 | systemd、cgroup、namespace、Linux 启动流程 |
+| 网络 | TCP/IP 协议栈、DNS 原理、iptables、网络故障排查 |
 
 ---
 
 > 学习 Linux，不是为了记住多少命令，而是为了理解现代基础设施是如何运转的。
+>
+> —— 1HairLabs
