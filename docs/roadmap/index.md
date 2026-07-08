@@ -335,6 +335,7 @@ click F "/solutions/"
 ```
 
 **🎯 学习目标**
+
 - 应用容器化（Dockerfile / 镜像构建）
 - Kubernetes 部署与发布
 - 理解 Deployment / Service / Ingress
@@ -355,6 +356,7 @@ click F "/lab/"
 click G "/kubernetes/practice/"
 ```
 **🎯 学习目标**
+
 - Linux 服务器管理与排障
 - Kubernetes 集群部署与维护
 - 网络 / 存储基础
@@ -375,6 +377,7 @@ click E "/kubernetes/practice/"
 click F "/kubernetes/practice/"
 ```
 **🎯 学习目标**
+
 - 构建完整可观测性体系
 - SLA / SLO / SLI 设计
 - 日志 / 指标 / 链路追踪
@@ -394,6 +397,7 @@ click E "/solutions/"
 ```
 
 **🎯 学习目标**
+
 - 构建企业级 Kubernetes 平台
 - 标准化应用交付体系
 - 多集群与多租户管理
@@ -416,6 +420,7 @@ click H "/solutions/"
 ```
 
 **🎯 学习目标**
+
 - 企业级云原生架构设计
 - 高可用 / 高可靠系统设计
 - 网络 / 存储 / 安全体系规划
