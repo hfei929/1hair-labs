@@ -1,0 +1,55 @@
+/* 点击后的遮罩 */
+
+.mermaid-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.85);
+
+    z-index: 9999;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+}
+
+/* SVG容器 */
+
+.mermaid-container {
+
+    width: 95vw;
+
+    height: 95vh;
+
+    overflow: hidden;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    cursor: grab;
+
+}
+
+/* SVG */
+
+.mermaid-container svg {
+
+    transition: transform .08s linear;
+
+    user-select: none;
+
+}
+
+.mermaid svg {
+
+    cursor: zoom-in;
+
+}
