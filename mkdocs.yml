@@ -314,6 +314,7 @@ nav:
           - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
           - CPU 压力测试: lab/cpu-stress-test.md
           - Pod OOM 测试: lab/pod-oom-test.md
+          - Kubernetes Cluster HA 故障演练 EP.4: lab/api-server-all-down.md
 
         - 故障排查:
             - 概览: troubleshooting/index.md

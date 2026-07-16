@@ -80,40 +80,7 @@ flowchart LR
 
 真实的请求链路是这样的：
 
-```mermaid
-flowchart TD
-    kubectl --> API[API Server]
-    API --> AuthN[Authentication 认证]
-    AuthN --> AuthZ[Authorization 授权]
-    AuthZ --> Admission[Admission 准入控制]
-    Admission --> Validation[Validation 合法性校验]
-    Validation --> RV[ResourceVersion 乐观锁]
-    RV --> WatchCache[Watch Cache]
-    WatchCache --> Storage[Storage Layer 存储层]
-    Storage --> etcd[(etcd)]
-
-    %% 1. 客户端层（中性灰）
-    style kubectl fill:#f8fafc,stroke:#94a3b8,stroke-width:2px,color:#334155
-
-    %% 2. 核心入口层（沉稳蓝）
-    style API fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
-
-    %% 3. 安全管控层（暖色渐变：橙 -> 红，代表层层拦截）
-    style AuthN fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
-    style AuthZ fill:#fed7aa,stroke:#ea580c,stroke-width:2px,color:#7c2d12
-    style Admission fill:#fecaca,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
-
-    %% 4. 校验与并发控制层（亮暖色：黄 -> 绿，代表逻辑判断）
-    style Validation fill:#fef08a,stroke:#ca8a04,stroke-width:2px,color:#713f12
-    style RV fill:#bbf7d0,stroke:#16a34a,stroke-width:2px,color:#14532d
-
-    %% 5. 内部缓存与抽象层（冷色渐变：紫 -> 靛蓝）
-    style WatchCache fill:#e9d5ff,stroke:#9333ea,stroke-width:2px,color:#4c1d95
-    style Storage fill:#c7d2fe,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b
-
-    %% 6. 底层存储层（生态绿，代表数据库基石）
-    style etcd fill:#a7f3d0,stroke:#059669,stroke-width:2px,color:#064e3b
-```
+![数据到ETCD的真实架构路径](../../assets/images/kubernetes/why-not-directly-modify-etcd/数据到etcd的真实架构路径.png)
 
 可以看到，API Server 远不止是一个 HTTP 网关。它承担着 Kubernetes 控制面最核心的职责：认证、鉴权、准入、校验、乐观锁、缓存，以及最终的存储代理。etcd 只是被抽象在存储层之下的一个可靠状态数据库。真正的大脑是 API Server。
 
@@ -273,7 +240,9 @@ ETCDCTL_API=3 etcdctl \
 
 ![直接读取etcd信息](../../assets/images/kubernetes/why-not-directly-modify-etcd/直接读取etcd信息.png)
 
-可以看到，返回的内容不是熟悉的 YAML，而是一段经过序列化的二进制数据。这说明 etcd 对外暴露的并不是 Kubernetes 原生资源接口，只是被 API Server 内部使用的一个状态存储而已。直接从 etcd 写入数据，就等于绕过了所有业务逻辑，直接修改底层二进制存储——这当然是极度危险的。
+可以看到，返回的内容不是熟悉的 YAML，而是一段经过序列化的二进制数据（如果你用 -w json 会看到 base64 编码的字节，同样不可读。下图所示）。这说明 etcd 对外暴露的并不是 Kubernetes 原生资源接口，只是被 API Server 内部使用的一个状态存储而已。直接从 etcd 写入数据，就等于绕过了所有业务逻辑，直接修改底层二进制存储——这当然是极度危险的。
+
+![json格式查看](../../assets/images/kubernetes/why-not-directly-modify-etcd/json输出查看.png)
 
 !!! tip "💡 实验总结"
     这个实验直观地展示了：etcd 中存储的数据格式（protobuf）与用户交互的 API 格式（YAML/JSON）是完全不同的两层抽象。API Server 正是这两层之间的"翻译官"和"守门人"。
