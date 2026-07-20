@@ -43,7 +43,7 @@ Linux 是云原生技术体系的基础。
 
 围绕 Prometheus、Grafana、Alertmanager、OpenTelemetry 构建完整的监控与告警体系。
 
-👉 [进入可观测性专题](monitoring/)
+👉 [进入可观测性专题](observability/)
 
 ---
 

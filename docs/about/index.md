@@ -72,7 +72,7 @@ hide:
 | [环境准备](../deployment/tutorials/) | 系统安装与部署入门 | 从这里开始 |
 | [Linux](../linux/) | 系统基础与运维实践 | 地基 |
 | [Kubernetes](../kubernetes/) | 集群架构与生产实践 | 核心 |
-| [Monitoring](../monitoring/) | 监控体系建设 | 保障 |
+| [可观测性](../observability/) | 监控体系建设 | 保障 |
 | [Lab 实验室](../lab/) | 故障演练与技术验证 | 验证 |
 | [解决方案](../solutions/) | 端到端方案落地 | 整合 |
 

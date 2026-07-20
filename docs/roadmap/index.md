@@ -256,10 +256,10 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Prometheus](../monitoring/prometheus/) | 架构、配置、PromQL、服务发现 |
-| [Grafana](../monitoring/grafana/) | 仪表盘设计、数据源配置 |
-| [Alertmanager](../monitoring/alertmanager/) | 告警规则与通知路由 |
-| [K8s 集群健康检查](../monitoring/k8s-cluster-health-check/) | 集群健康度巡检方法 |
+| [Prometheus](../observability/prometheus/) | 架构、配置、PromQL、服务发现 |
+| [Grafana](../observability/grafana/) | 仪表盘设计、数据源配置 |
+| [Alertmanager](../observability/alertmanager/) | 告警规则与通知路由 |
+| [K8s 集群健康检查](../observability/k8s-cluster-health-check/) | 集群健康度巡检方法 |
 
 **学完后你应该能够：**
 
@@ -351,7 +351,7 @@ click A "/linux/"
 click B "/linux/network/"
 click C "/deployment/docker&k8s/docker.md"
 click D "/kubernetes/"
-click E "/monitoring/"
+click E "/observability/"
 click F "/lab/"
 click G "/kubernetes/practice/"
 ```
@@ -367,12 +367,12 @@ click G "/kubernetes/practice/"
 ### 📊 SRE
 ```mermaid
 flowchart LR
-A[Kubernetes] --> B[Monitoring] --> C[Logging] --> D[Tracing] --> E[性能优化] --> F[容量规划]
+A[Kubernetes] --> B[Observability] --> C[Logging] --> D[Tracing] --> E[性能优化] --> F[容量规划]
 
 click A "/kubernetes/"
-click B "/monitoring/"
-click C "/monitoring/"
-click D "/monitoring/"
+click B "/observability/"
+click C "/observability/"
+click D "/observability/"
 click E "/kubernetes/practice/"
 click F "/kubernetes/practice/"
 ```
@@ -414,7 +414,7 @@ click B "/deployment/docker&k8s/docker.md"
 click C "/kubernetes/"
 click D "/linux/network/"
 click E "/linux/storage/"
-click F "/monitoring/"
+click F "/observability/"
 click G "/solutions/"
 click H "/solutions/"
 ```

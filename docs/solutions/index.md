@@ -30,7 +30,7 @@ hide:
 | 安全加固 | RBAC → Pod Security Standards → 网络策略 → 镜像扫描 |
 | 生产验收 | HA 故障演练 → 资源压力测试 → 集群健康检查 |
 
-> 关联专栏：[环境准备](../deployment/tutorials/) · [Kubernetes](../kubernetes/) · [Monitoring](../monitoring/) · [Lab 实验室](../lab/)
+> 关联专栏：[环境准备](../deployment/tutorials/) · [Kubernetes](../kubernetes/) · [可观测性](../observability/) · [Lab 实验室](../lab/)
 
 ### 可观测性平台建设
 
@@ -44,7 +44,7 @@ hide:
 | 链路追踪 | Tempo / Jaeger → OpenTelemetry 接入 → 请求全链路 |
 | 统一界面 | Grafana 数据源整合 → 指标 / 日志 / 链路联动查询 |
 
-> 关联专栏：[Monitoring](../monitoring/) · [Kubernetes](../kubernetes/)
+> 关联专栏：[可观测性](../observability/) · [Kubernetes](../kubernetes/)
 
 ### HomeLab 基础设施搭建
 

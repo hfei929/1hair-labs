@@ -199,29 +199,51 @@ nav:
             - Linux 目录结构: linux/base-system/linux-directory-structure.md
             - Linux 常用命令: linux/base-system/common-commands.md
             - Linux 完整命令: linux/base-system/all-commands.md
+            - 进程管理: linux/base-system/process-management.md
+            - systemd 服务管理: linux/base-system/systemd-explained.md
+            - 定时任务: linux/base-system/scheduled-tasks.md
             - 软件包管理: linux/base-system/package-management.md
             - 系统监控: linux/base-system/system-monitoring.md
             - 系统日志管理: linux/base-system/log-management.md
             - NTP 时间同步原理: linux/base-system/ntp-explained.md
+            - 启动流程: linux/base-system/boot-process.md
+            - 内核模块管理: linux/base-system/kernel-modules.md
+            - 备份与恢复: linux/base-system/backup-strategies.md
+            - 容器底层原理: linux/base-system/container-internals.md
             - 系统故障排除: linux/base-system/troubleshooting.md
 
         - 🌐 网络:
+            - 网络概览: linux/network/index.md
             - 网络基础: linux/network/network.md
+            - 隧道与覆盖网络: linux/network/vxlan-and-tunnel.md
+            - iptables/nftables: linux/network/iptables-nftables-deep.md
 
         - 💾 存储:
+            - 存储概览: linux/storage/index.md
             - 存储基础: linux/storage/storage.md
+            - 文件系统原理: linux/storage/filesystem-internals.md
+            - LVM 实战: linux/storage/lvm-practice.md
 
         - 🔐 安全:
             - 安全基础: linux/security/index.md
             - 用户和权限: linux/security/user-and-permission.md
+            - sudo 权限管理: linux/security/sudo-best-practices.md
+            - SSH 安全加固: linux/security/ssh-hardening.md
+            - Fail2Ban 防暴力破解: linux/security/fail2ban.md
+            - LUKS 磁盘加密: linux/security/luks-encryption.md
+            - SELinux 实践: linux/security/selinux-practice.md
+            - auditd 审计系统: linux/security/auditd.md
             - 数据安全擦除: linux/security/data-deletion-and-secure-erasure.md
 
         - 🚀 性能优化:
             - 性能优化概览: linux/performance/index.md
             - 优化基础: linux/performance/performance-optimization.md
+            - CPU 深度解析: linux/performance/cpu-deep-dive.md
+            - 内存深度解析: linux/performance/memory-deep-dive.md
 
         - Shell:
             - Shell 基础: linux/shell/index.md
+            - 文本处理三剑客: linux/shell/text-processing.md
   
 # ------------------------------------------------------------------------
 
@@ -288,14 +310,46 @@ nav:
 
     - 可观测性:
 
-        - 概览: monitoring/index.md
-        - K8s 健康检查指标: monitoring/k8s-cluster-health-check.md
-        - Prometheus: monitoring/prometheus.md
-        - Grafana: monitoring/grafana.md
-        - Alertmanager: monitoring/alertmanager.md
+        - 概览: observability/index.md
+
+        - 📊 Metrics:
+            - Prometheus: observability/prometheus.md
+            - Grafana: observability/grafana.md
+            - Alertmanager: observability/alertmanager.md
+            - K8s 健康检查指标: observability/k8s-cluster-health-check.md
+
+        - 📝 Logs:
+            - Loki 日志聚合: observability/loki.md
+
+        - 🔍 Traces:
+            - 分布式追踪: observability/tracing.md
+
+        - 🔗 统一可观测性:
+            - OpenTelemetry: observability/opentelemetry.md
+            - SLO / SLI / Error Budget: observability/slo-sli.md
   
-#    - 虚拟化:
-#        - 概览: virtualization/index.md
+    - 虚拟化:
+        - 概览: virtualization/index.md
+        - 通用概念:
+            - Hypervisor 类型对比: virtualization/concepts/hypervisor-types.md
+            - CPU 与内存虚拟化原理: virtualization/concepts/cpu-memory-virtualization.md
+            - 虚拟网络基础: virtualization/concepts/networking-basics.md
+            - 虚拟存储基础: virtualization/concepts/storage-basics.md
+        - VMware vSphere:
+            - vSphere 架构总览: virtualization/vmware/vsphere-architecture.md
+            - vCenter 架构详解: virtualization/vmware/vcenter-architecture.md
+            - vSAN 存储架构: virtualization/vmware/vsan-architecture.md
+            - HA / DRS / FT 原理: virtualization/vmware/ha-drs-ft.md
+            - vDS 与 NSX 网络: virtualization/vmware/networking-deep.md
+            - 生命周期管理: virtualization/vmware/lifecycle-management.md
+        - Proxmox VE:
+            - PVE 架构概览: virtualization/pve/pve-overview.md
+            - PVE vs VMware 对比: virtualization/pve/pve-vs-vmware.md
+        - KVM 生态:
+            - KVM + libvirt + QEMU: virtualization/kvm/kvm-libvirt.md
+            - virt-manager / Cockpit / oVirt: virtualization/kvm/virt-manager-ovirt.md
+        - 跨平台对比:
+            - Hypervisor 选型指南: virtualization/comparison/hypervisor-comparison.md
   
 #    - 技术资讯: 
 #       - kubernetes:

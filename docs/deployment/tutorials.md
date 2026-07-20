@@ -114,7 +114,7 @@ flowchart LR
 
 **推荐方向：**
 
-- **Grafana + Prometheus** — 监控平台 → [查看监控专题](/monitoring/)
+- **Grafana + Prometheus** — 监控平台 → [查看监控专题](/observability/)
 - **Kubernetes 实验集群** — 容器编排实践 → [查看 K8s 实践](/kubernetes/practice/)
 - **Jellyfin** — 家庭影音平台（教程规划中）
 - **Nextcloud** — 私有云盘（教程规划中）
