@@ -202,6 +202,7 @@ nav:
             - 软件包管理: linux/base-system/package-management.md
             - 系统监控: linux/base-system/system-monitoring.md
             - 系统日志管理: linux/base-system/log-management.md
+            - NTP 时间同步原理: linux/base-system/ntp-explained.md
             - 系统故障排除: linux/base-system/troubleshooting.md
 
         - 🌐 网络:
@@ -216,10 +217,11 @@ nav:
             - 数据安全擦除: linux/security/data-deletion-and-secure-erasure.md
 
         - 🚀 性能优化:
-            - Linux 性能: linux/performance/performance-optimization.md
+            - 性能优化概览: linux/performance/index.md
+            - 优化基础: linux/performance/performance-optimization.md
 
         - Shell:
-            - Shell 基础: linux/shell/shell.md
+            - Shell 基础: linux/shell/index.md
   
 # ------------------------------------------------------------------------
 
