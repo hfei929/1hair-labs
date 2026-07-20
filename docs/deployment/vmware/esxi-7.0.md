@@ -187,12 +187,10 @@ US Default
 安装过程约：
 
 ```text
-3 ~ 5 分钟
+3 ~ 10 分钟
 ```
 
 取决于硬件性能。
-
-![安装进度](../../assets/images/deployment/vmware/esxi7-安装进度.png)
 
 ---
 
@@ -253,6 +251,9 @@ ESXi 默认使用 DHCP 获取 IP。建议配置**静态 IP**，避免 IP 变动�
 
 全部通过（OK）即说明网络配置成功。
 
+!!! info "说明"
+    这里并不一定需要测试所有的网络，只需要测自己需求的网络可通可达即可。
+
 ---
 
 ### 确认版本信息
@@ -304,12 +305,9 @@ https://<ESXi-IP>/ui
 
 ![WebClient首页](../../assets/images/deployment/vmware/esxi7-WebClient首页.png)
 
-!!! tip "申请免费 License"
-    ESXi 60 天试用期到期后部分高级功能将受限。
+!!! tip "License"
     
-    1. 访问 [VMware vSphere Hypervisor Free](https://customerconnect.vmware.com/web/vmware/evalcenter?p=free-esxi7)
-    2. 注册或登录 VMware 账号 → 获取免费 License Key
-    3. Web Client：导航器 → **管理** → **许可** → 分配许可证
+    浏览器直接搜索相应的许可证填入即可。
 
 ---
 
@@ -363,8 +361,6 @@ ubuntu-test
 
 在虚拟机列表中找到 `ubuntu-test` → **打开电源** → **控制台** → 在浏览器中打开远程控制台 → 按常规步骤完成操作系统安装。
 
-![VM控制台](../../assets/images/deployment/vmware/esxi7-VM控制台.png)
-
 !!! success "恭喜！"
     你已经成功在 ESXi 7.0 上创建并运行了第一台嵌套虚拟机。ESXi 的强大之处在于可以同时运行数十台此类 VM，充分利用服务器硬件资源。
 
@@ -377,6 +373,7 @@ ubuntu-test
 **原因**：宿主机未开启 CPU 虚拟化，或 Workstation 虚拟机未勾选虚拟化引擎。
 
 **解决**：
+
 1. 检查宿主机 BIOS → 开启 VT-x / AMD-V
 2. 编辑 ESXi 虚拟机设置 → 处理器 → 勾选 **「虚拟化 Intel VT-x/EPT 或 AMD-V/RVI」**
 3. 如果选项为灰色，关闭虚拟机后编辑 `.vmx` 文件，添加：
@@ -392,6 +389,7 @@ vhv.enable = "TRUE"
 **原因**：通常与显卡或内存设置有关。
 
 **解决**：
+
 1. ESXi 虚拟机内存至少设置 6 GB（推荐 8 GB）
 2. 启动时按 `Shift + O`，输入 `ignoreHeadless=TRUE` 然后回车
 3. 尝试减少显存或关闭 3D 加速（虚拟机设置 → 显示器）
@@ -403,6 +401,7 @@ vhv.enable = "TRUE"
 **原因**：网络配置错误或防火墙阻挡。
 
 **排查步骤**：
+
 1. 检查 ESXi DCUI 主界面的 IP 地址是否正确
 2. 宿主机执行：
 
@@ -421,6 +420,7 @@ ping <ESXi-IP>
 **原因**：嵌套环境中虚拟交换机与物理网卡的映射问题。
 
 **解决**：
+
 1. 确认 ESXi 虚拟机的网络适配器为 **桥接模式**（而非 NAT）
 2. ESXi 中所有 VM 使用默认的 `VM Network` 端口组即可
 3. 如果桥接仍不通，可为 ESXi 虚拟机添加第二张网卡（仅主机模式）作为管理口
