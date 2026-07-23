@@ -263,6 +263,7 @@ nav:
               - Etcd: kubernetes/architecture/etcd.md
 
           - ⚙️ Node:
+              - Worker Node 架构: kubernetes/architecture/worker-node.md
               - Kubelet: kubernetes/architecture/kubelet.md
               - CRI: kubernetes/architecture/cri.md
               - Kube Proxy: kubernetes/architecture/kube-proxy.md
