@@ -264,6 +264,7 @@ nav:
 
           - ⚙️ Node:
               - Worker Node 架构: kubernetes/architecture/worker-node.md
+              - Kubelet SyncLoop 原理: kubernetes/architecture/kubelet-syncloop.md
               - Kubelet: kubernetes/architecture/kubelet.md
               - CRI: kubernetes/architecture/cri.md
               - Kube Proxy: kubernetes/architecture/kube-proxy.md
