@@ -49,49 +49,20 @@ flowchart LR
 
 ---
 
-## 二、什么是 CRI？
+## 二、前置概念速览
 
-**CRI（Container Runtime Interface）** 是 Kubernetes 定义的一套容器运行时标准 gRPC 接口。
+!!! info "CRI 与 containerd 的基础概念请参考已发布的 [CRI 容器运行时接口](cri.md)"
+    本文不再重复 CRI 的定义、OCI/Docker/containerd 生态对比等内容。这里仅做最简回顾：
 
-```mermaid
-flowchart TB
-    KL[kubelet] -->|CRI gRPC| CRI[CRI 接口]
-    CRI --> CON[containerd<br>内置 CRI 插件]
-    CRI --> CRIO[CRI-O<br>原生 CRI 实现]
+-   **CRI**：Kubernetes 定义的容器运行时标准 gRPC 接口
+-   **containerd**：实现了 CRI 的主流容器运行时（内置 CRI Plugin）
+-   **kubelet ↔ containerd**：通过 Unix Socket（`/run/containerd/containerd.sock`）上的 gRPC 连接通信
 
-    style CRI fill:#fee2e2,stroke:#dc2626
-    style KL fill:#dbeafe,stroke:#2563eb
-```
-
-| 角色 | 说明 |
-| --- | --- |
-| **kubelet** | 发起方——通过 gRPC 客户端调用 CRI 接口 |
-| **CRI 接口** | 标准协议——定义 protobuf 消息格式和 gRPC Service |
-| **containerd** | 实现方——内置 CRI 插件，接收请求并执行 |
-
-有了 CRI，kubelet 不关心底层是 containerd 还是 CRI-O——都走同一套 gRPC 调用。
+下面直接进入 CRI 的协议层架构。
 
 ---
 
-## 三、为什么 Kubernetes 需要 CRI？
-
-早期 Kubernetes 直接硬编码支持 Docker：
-
-```text
-kubelet → Docker Engine → Container
-```
-
-问题是：如果未来出现 containerd、CRI-O、或者其他 Runtime，每接一种就要改 kubelet 代码。有了 CRI 之后：
-
-```text
-kubelet → CRI（标准接口）→ 任意兼容 Runtime
-```
-
-kubelet 和 Runtime 解耦——这是 CRI 的核心价值。
-
----
-
-## 四、CRI 整体架构
+## 三、CRI 整体架构
 
 ```mermaid
 flowchart TB
@@ -136,7 +107,7 @@ flowchart TB
 
 ---
 
-## 五、CRI 为什么用 gRPC？
+## 四、CRI 为什么用 gRPC？
 
 gRPC（Google Remote Procedure Call）让你**像调用本地函数一样调用远程服务**。在 CRI 场景中：
 
@@ -158,7 +129,7 @@ gRPC（Google Remote Procedure Call）让你**像调用本地函数一样调用�
 
 ---
 
-## 六、kubelet 如何连接 containerd？
+## 五、kubelet 如何连接 containerd？
 
 查看 kubelet 的 Runtime 配置：
 
@@ -185,7 +156,7 @@ kubelet 启动时通过这个 Socket 建立 gRPC 长连接，后续所有 CRI �
 
 ---
 
-## 七、CRI 核心接口：RuntimeService 与 ImageService
+## 六、CRI 核心接口：RuntimeService 与 ImageService
 
 CRI 协议定义在 Kubernetes 源码的 `k8s.io/cri-api` 包中，核心是两个 gRPC Service：
 
@@ -222,7 +193,7 @@ service ImageService {
 
 ---
 
-## 八、SyncPod 内部到底调用哪些 CRI 方法？
+## 七、SyncPod 内部到底调用哪些 CRI 方法？
 
 回顾 [SyncLoop 文章](kubelet-syncloop.md)，SyncPod 执行时按顺序调三个核心 CRI 方法：
 
@@ -258,7 +229,7 @@ sequenceDiagram
 
 ---
 
-## 九、RunPodSandbox：创建 Pod 基础环境
+## 八、RunPodSandbox：创建 Pod 基础环境
 
 ### 9.1 为什么需要 Sandbox？
 
@@ -327,7 +298,7 @@ message RunPodSandboxResponse {
 
 ---
 
-## 十、CreateContainer：创建业务容器
+## 九、CreateContainer：创建业务容器
 
 ### 10.1 请求结构
 
@@ -379,7 +350,7 @@ message CreateContainerResponse {
 
 ---
 
-## 十一、StartContainer：启动容器
+## 十、StartContainer：启动容器
 
 ```protobuf
 message StartContainerRequest {
@@ -393,7 +364,7 @@ message StartContainerResponse {}
 
 ---
 
-## 十二、完整调用链
+## 十一、完整调用链
 
 从 kubectl 到容器进程的完整路径：
 
@@ -424,7 +395,7 @@ flowchart TD
 
 ---
 
-## 十三、实验验证
+## 十二、实验验证
 
 ### 查看 Runtime 信息
 
@@ -479,7 +450,7 @@ ls -la /run/containerd/containerd.sock
 
 ---
 
-## 十四、常见故障排查
+## 十三、常见故障排查
 
 ### Pod 一直卡在 ContainerCreating
 
@@ -510,7 +481,7 @@ gRPC 调用层面报错。可能原因：
 
 ---
 
-## 十五、总结：CRI 是 Kubernetes 与容器世界之间的桥梁
+## 十四、总结：CRI 是 Kubernetes 与容器世界之间的桥梁
 
 三层分工：
 
@@ -540,7 +511,7 @@ flowchart LR
 
 ---
 
-## 十六、相关阅读
+## 十五、相关阅读
 
 | 文章 | 说明 |
 | --- | --- |
