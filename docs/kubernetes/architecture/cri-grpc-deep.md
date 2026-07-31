@@ -542,7 +542,7 @@ flowchart LR
 
 本文是 Worker Node 系列的第三篇。下一篇自然衔接：
 
-> **containerd 创建容器全过程：从 CRI 请求到 runc 启动容器**
+> [Kubernetes containerd 原理：从 CRI 请求到 runc 启动容器全过程](containerd-from-cri-to-runc.md)
 
 回答读者追问：containerd 收到 `CreateContainer` 后，到底发生了什么？形成完整链路：
 
