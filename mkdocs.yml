@@ -243,6 +243,8 @@ nav:
 
         - Shell:
             - Shell 基础: linux/shell/index.md
+            - jq 命令详解: linux/shell/jq-command-guide.md
+            - yq 命令详解: linux/shell/yq-command-guide.md
             - 文本处理三剑客: linux/shell/text-processing.md
   
 # ------------------------------------------------------------------------
