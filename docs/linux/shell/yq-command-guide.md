@@ -20,515 +20,631 @@ tags:
 
 # yq 命令详解：从 YAML/JSON 处理到 Kubernetes 配置自动化
 
-## 文章摘要
+YAML 是 Kubernetes、Helm、Ansible 等工具的核心配置格式。`grep` 和 `awk` 处理 YAML 的嵌套结构往往很痛苦——缩进层级、数组索引、多文档分隔，这些都不是文本工具擅长的。
 
-如果你已经熟悉了 jq，那么你很快就会发现：在 Linux 运维、Kubernetes 配置管理和自动化脚本中，另一个同样重要的工具就是 yq。
+`yq` 把 YAML 当作数据结构来处理，支持按层级提取字段、条件筛选、格式转换和原地修改。如果你已经熟悉 [jq](../jq-command-guide/)，yq 的学习曲线会非常顺滑。
 
-yq 的作用非常直观：
+本文以 mikefarah/yq（Go 版）v4 为例，所有命令均在测试集群（3 Master + 3 Worker，K8s 1.36.1）上实际运行验证。
 
-- 读取 YAML、JSON、TOML 等结构化数据
-- 按层级提取字段
-- 过滤、转换和重写配置内容
-- 在 Shell 脚本和 Kubernetes 场景中批量处理配置
-
-尤其是在 Kubernetes、Helm、Ansible、CI/CD 和配置自动化场景里，yq 可以说是“处理 YAML 的 jq”。
-
-本文会从最基础的概念讲起，带你逐步掌握 yq 的常见语法、过滤器、修改配置的方式，以及与 kubectl、Helm、Shell 脚本结合的实战案例。
-
----
-
-## 一、为什么要学 yq？
-
-在现代运维和云原生场景中，YAML 几乎无处不在：
-
-- Kubernetes 的 Deployment、Service、ConfigMap
-- Helm 的 Chart 配置
-- Ansible 的 playbook
-- CI/CD 的流水线配置
-- 大量基础设施和应用配置文件
-
-很多人刚接触 YAML 时，会遇到一个典型问题：
-
-> 我看着配置文件很清楚，但我怎么快速提取其中的某个字段？
-
-例如，你可能想要这样做：
-
-- 取出一个 Deployment 的副本数
-- 提取所有容器镜像名
-- 过滤出某个标签下的资源
-- 修改一个值后再写回文件
-
-如果你仅使用 `grep`、`sed`、`awk`，处理嵌套 YAML 往往会非常痛苦。yq 的价值就在于：
-
-- 把 YAML 当成“数据结构”来处理
-- 支持按层级访问字段
-- 支持条件筛选和批量处理
-- 能和 Shell 管道、kubectl、Helm 很好结合
-
----
-
-## 二、yq 是什么？
-
-yq 是一个命令行工具，用来处理 YAML、JSON、TOML 等格式的数据。它的核心思路和 jq 非常类似：
-
-- 读取输入
-- 使用过滤器选择内容
-- 输出结果
-
-最常见的用法就是：
+## 准备数据
 
 ```bash
-yq '.spec.replicas' deployment.yaml
+# 导出 kube-system 下所有 Deployment 的 YAML
+kubectl get deployment -n kube-system -o yaml > /tmp/deploy.yaml
+
+# 生成一个真正的多文档 YAML（Deployment + Service）
+{ kubectl get deployment coredns -n kube-system -o yaml; \
+  echo "---"; \
+  kubectl get service kube-dns -n kube-system -o yaml; } > /tmp/multi.yaml
 ```
 
-这条命令表示：
+## 安装与版本陷阱
 
-- 读取 deployment.yaml
-- 取出其中 `spec.replicas` 的值
-- 输出结果
+### 两个 yq，完全不同的工具
 
-如果你已经使用过 jq，就会非常容易理解 yq 的使用方式。
+yq 有两个主流版本，语法不兼容：
 
-!!! warning "注意：yq 版本有两大流派"
-    目前主流有两种 yq：
+| 版本 | 仓库 | 语言 | 语法风格 |
+|------|------|------|----------|
+| Go 版 | mikefarah/yq | Go | 自有语法，与 jq 类似但不完全一致 |
+| Python 版 | kislyuk/yq | Python | jq 的 YAML 包装器，底层调用 jq |
 
-    - `mikefarah/yq`（Go 版，常见现代版本，本文以它为例）
-    - `kislyuk/yq`（Python 版，语法和现代版略有差异）
+**本文以 Go 版（mikefarah/yq v4）为例。** Python 版的语法不在本文讨论范围内。
 
-    如果你从网上看到教程和你手上的命令不一致，先确认一下版本再继续。
+### apt install yq 的坑
 
----
-
-## 三、yq 的安装
-
-### Ubuntu / Debian
+Ubuntu/Debian 仓库里的 `yq` 是 Python 版，不是 Go 版。直接 `apt install yq` 会装到错误的版本：
 
 ```bash
 sudo apt update
 sudo apt install yq
-```
-
-### CentOS / Rocky / RHEL
-
-```bash
-sudo yum install yq
-```
-
-### macOS
-
-```bash
-brew install yq
-```
-
-### 验证安装
-
-```bash
 yq --version
 ```
 
-如果看到版本号，说明安装成功。
+输出看起来像版本号，但仔细看没有 `mikefarah` 字样。运行一下就能发现问题：
 
----
+```bash
+yq '.' /tmp/deploy.yaml | head -5
+```
 
-## 四、yq 的基本工作方式
+Python 版的输出是 **JSON 格式**（因为它底层就是 jq 的包装器），而 Go 版应该输出 **YAML 格式**。更明显的问题出现在使用 yq 专属语法时：
 
-yq 的基本结构可以概括为：
+```bash
+yq '.spec.replicas' /tmp/deploy.yaml
+# null
+```
+
+返回 null，因为 `deploy.yaml` 是 `kubectl get deployment -n kube-system -o yaml` 的输出，根结构是列表（`items: []`），不是单个 Deployment。需要 `.items[0].spec.replicas` 才能取到值。这个问题两个版本都存在，但 Python 版还会报 jq 的错误：
+
+```bash
+yq '.spec.template.spec.containers[].image' /tmp/deploy.yaml
+# jq: error (at <stdin>:1): Cannot iterate over null (null)
+```
+
+报错信息是 `jq: error`，因为 Python 版底层就是 jq。
+
+### 正确安装 Go 版
+
+从 GitHub Releases 下载二进制文件：
+
+```bash
+# 下载最新版（Linux amd64）
+sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+sudo chmod +x /usr/local/bin/yq
+
+# 验证版本
+yq --version
+```
+
+输出应包含 `mikefarah` 和版本号：
+
+```
+yq (https://github.com/mikefarah/yq/) version v4.53.3
+```
+
+!!! warning "PATH 冲突"
+
+    如果之前通过 `apt install yq` 安装过 Python 版，`/usr/bin/yq` 可能还在。`/usr/local/bin` 通常在 PATH 中优先级更高，但建议确认：
+
+    ```bash
+    which yq
+    # /usr/local/bin/yq
+    ```
+
+    如果显示 `/usr/bin/yq`，说明 Python 版优先，需要 `sudo apt remove yq` 卸载。
+
+### 其他平台
+
+=== "macOS"
+
+    ```bash
+    brew install yq
+    ```
+
+=== "CentOS / Rocky / RHEL"
+
+    ```bash
+    # EPEL 仓库中的 yq 可能是 Python 版，建议用二进制方式安装
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod +x /usr/local/bin/yq
+    ```
+
+## 基本工作方式
+
+yq 的基本结构和 jq 一致：
 
 ```bash
 yq '<过滤器>' <文件>
 ```
 
-例如：
+过滤器是用单引号包裹的表达式，描述"要从 YAML 中取什么数据"。例如：
 
 ```bash
-yq '.' deployment.yaml
+yq '.' /tmp/deploy.yaml              # 输出整个文档
+yq '.items[0].metadata.name' /tmp/deploy.yaml  # 取第一个 Deployment 的名称
 ```
 
-这里的 `.` 表示“输出整个文档”。
-
-如果你想取出某个字段：
+yq 也可以从标准输入读取，方便和 kubectl 管道配合：
 
 ```bash
-yq '.metadata.name' deployment.yaml
+kubectl get deployment coredns -n kube-system -o yaml | yq '.spec.replicas'
 ```
 
-这条命令会输出 YAML 中 `metadata.name` 的值。
+## 核心过滤器
 
----
-
-## 五、yq 的最常见语法：从入门开始
-
-### 5.1 输出整个 YAML
+### 输出整个文档（`.`）
 
 ```bash
-yq '.' deployment.yaml
-```
-
-这会把整个文件按标准格式输出。
-
-### 5.2 取出单个字段
-
-假设有如下 YAML：
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: web
-```
-
-你可以这样取出副本数：
-
-```bash
-yq '.spec.replicas' deployment.yaml
-```
-
-输出结果：
-
-```yaml
-3
-```
-
-### 5.3 取出嵌套字段
-
-```bash
-yq '.spec.selector.matchLabels.app' deployment.yaml
+yq '.' /tmp/deploy.yaml | head -20
 ```
 
 输出：
 
 ```yaml
-web
+apiVersion: v1
+items:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      annotations:
+        deployment.kubernetes.io/revision: "1"
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"apps/v1","kind":"Deployment",...}
+      creationTimestamp: "2026-05-12T15:08:34Z"
 ```
 
-### 5.4 取数组中的元素
+Go 版输出 YAML 格式，Python 版输出 JSON 格式——这是区分两个版本最直观的方法。
 
-如果 YAML 中有数组：
+### 取字段（`.field`）
+
+`deploy.yaml` 是列表结构，需要通过 `.items[0]` 访问第一个元素：
+
+```bash
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 1
+```
+
+!!! tip "先看结构再取字段"
+
+    `kubectl get deployment -o yaml` 输出的是 `kind: List`，根字段是 `apiVersion`/`items`/`kind`/`metadata`。如果直接写 `.spec.replicas` 会返回 null，因为根对象没有 `spec` 字段——`spec` 在每个 `items[]` 元素里面。
+
+### 取嵌套字段（`.field1.field2...`）
+
+```bash
+yq '.items[0].spec.selector.matchLabels."k8s-app"' /tmp/deploy.yaml
+# calico-kube-controllers
+```
+
+!!! warning "字段名含特殊字符"
+
+    字段名包含 `-` 时，必须用引号包裹：`."k8s-app"` 或 `.["k8s-app"]`。直接写 `.k8s-app` 会被解析为减法运算。
+
+### 遍历数组（`.[]`）
+
+```bash
+yq '.items[] | .metadata.name' /tmp/deploy.yaml
+```
+
+输出：
+
+```
+calico-kube-controllers
+coredns
+headlamp
+```
+
+### 管道（`|`）
+
+管道将前一个表达式的输出作为后一个表达式的输入，和 Shell 管道概念一致：
+
+```bash
+yq '.items[] | "\(.metadata.name): replicas=\(.spec.replicas)"' /tmp/deploy.yaml
+```
+
+输出：
+
+```
+calico-kube-controllers: replicas=1
+coredns: replicas=2
+headlamp: replicas=1
+```
+
+### 条件筛选（`select()`）
+
+```bash
+yq '.items[].spec.template.spec.containers[] | select(.image | test("calico")) | .name' /tmp/deploy.yaml
+# calico-kube-controllers
+```
+
+这条命令遍历所有 Deployment 的所有容器，筛选出镜像名包含 "calico" 的容器，输出容器名。
+
+### 提取所有容器镜像
+
+```bash
+yq '.items[].spec.template.spec.containers[].image' /tmp/deploy.yaml
+```
+
+输出：
+
+```
+m.daocloud.io/docker.io/calico/kube-controllers:v3.28.2
+swr.cn-east-3.myhuaweicloud.com/coredns/coredns:v1.11.4
+swr.cn-east-3.myhuaweicloud.com/helm/headlamp:v0.25.1
+```
+
+从镜像地址可以看出集群使用了多个镜像仓库——DaoCloud、华为云 SWR。升级前拿这个清单逐一确认兼容性。
+
+### 构造新对象
+
+和 jq 一样，yq 可以用 `{}` 构造新的输出对象：
+
+```bash
+yq '.items[] | {"name": .metadata.name, "replicas": .spec.replicas, "namespace": .metadata.namespace}' /tmp/deploy.yaml
+```
+
+输出：
 
 ```yaml
-containers:
-  - name: app
-    image: nginx:1.25
-  - name: sidecar
-    image: busybox:1.36
+name: calico-kube-controllers
+replicas: 1
+namespace: kube-system
+name: coredns
+replicas: 2
+namespace: kube-system
+name: headlamp
+replicas: 1
+namespace: kube-system
 ```
 
-你可以取出第一个容器：
+### 其他常用操作
+
+| 操作 | 语法 | 示例 |
+|------|------|------|
+| 数组长度 | `length` | `yq '.items \| length' /tmp/deploy.yaml` → `3` |
+| 获取所有键 | `keys` | `yq '.items[0].metadata.labels \| keys' /tmp/deploy.yaml` |
+| 排序 | `sort_by()` | `yq '.items \| sort_by(.metadata.name)' /tmp/deploy.yaml` |
+| 去重 | `unique` | `yq '.items[].metadata.namespace \| unique' /tmp/deploy.yaml` |
+
+### 输出纯文本（`-r`）
+
+yq 默认输出带格式的 YAML。在 Shell 脚本中取值时，加 `-r` 输出纯文本：
 
 ```bash
-yq '.spec.template.spec.containers[0]' deployment.yaml
+# 不加 -r
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 1
+
+# 加 -r（对简单值效果一样，但对字符串会去掉引号）
+yq -r '.items[0].metadata.name' /tmp/deploy.yaml
+# calico-kube-controllers
 ```
 
-### 5.5 遍历数组
+## 输出格式控制
+
+### YAML 与 JSON 互转
 
 ```bash
-yq '.spec.template.spec.containers[] | .name' deployment.yaml
+# YAML 转 JSON
+yq -o=json '.' /tmp/deploy.yaml | head -20
+
+# JSON 转 YAML
+kubectl get pods -A -o json | yq -o=yaml '.items[0]'
 ```
 
-这会把数组里的每个元素依次输出。
-
-### 5.6 取对象中的所有键
+### 美化输出
 
 ```bash
-yq '.metadata.labels | keys' deployment.yaml
+yq -P '.' /tmp/deploy.yaml | head -30
 ```
 
-这对于快速查看对象有哪些字段很有用。
+`-P`（pretty print）会强制缩进 2 空格，适合调试格式不规范的 YAML。
 
+## 修改 YAML
+
+### 修改字段（预览）
+
+不加 `-i`，修改结果只输出到终端，不写回文件：
+
+```bash
+# 修改前
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 1
+
+# 修改后预览
+yq '.items[0].spec.replicas = 5' /tmp/deploy.yaml | yq '.items[0].spec.replicas'
+# 5
+
+# 确认文件没变
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 1
+```
+
+### 写回文件（`-i`）
+
+加 `-i`（in-place），修改直接写回文件：
+
+```bash
+yq -i '.items[0].spec.replicas = 99' /tmp/deploy.yaml
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 99
+```
+
+!!! warning "`-i` 是原地覆盖"
+
+    `-i` 直接修改原文件，没有备份。对生产配置操作前先 `cp file file.bak`。
+
+恢复原始文件：
+
+```bash
+kubectl get deployment -n kube-system -o yaml > /tmp/deploy.yaml
+```
+
+### 修改嵌套字段
+
+```bash
+yq '.items[0].spec.template.spec.containers[0].image = "calico/kube-controllers:v3.29.0"' /tmp/deploy.yaml | \
+    yq '.items[0].spec.template.spec.containers[0].image'
+# calico/kube-controllers:v3.29.0
+```
+
+### 删除字段（`del`）
+
+```bash
+yq 'del(.items[0].metadata.annotations)' /tmp/deploy.yaml | head -20
+```
+
+输出中第一个 Deployment 的 `annotations` 字段被移除，其他内容不变。
+
+### 新增字段
+
+```bash
+yq '.items[0].metadata.labels."test-label" = "true"' /tmp/deploy.yaml | \
+    yq '.items[0].metadata.labels'
+```
+
+输出：
+
+```yaml
+k8s-app: calico-kube-controllers
+pod-template-hash: 7b44d8d7c8
+test-label: "true"
+```
+
+## 多文档 YAML 处理
+
+多文档 YAML 用 `---` 分隔，常见于 Helm 模板和 `kubectl` 输出。这是 yq 相对于纯文本工具的核心优势之一。
+
+### 什么是多文档 YAML
+
+```bash
+cat /tmp/multi.yaml | head -5
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
 ---
-
-## 六、yq 的核心过滤器：最常用的 10 个
-
-下面这些是 yq 中最常用、最实用的语法。
-
-### 6.1 `.`：当前输入
-
-```bash
-yq '.' deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
 ```
 
-### 6.2 `.field`：取对象字段
+两个文档之间用 `---` 分隔。
+
+### 按文档索引访问
 
 ```bash
-yq '.metadata.name' deployment.yaml
+# 取第一个文档的类型
+yq 'select(documentIndex == 0) | .kind' /tmp/multi.yaml
+# Deployment
+
+# 取第二个文档的类型
+yq 'select(documentIndex == 1) | .kind' /tmp/multi.yaml
+# Service
 ```
 
-### 6.3 `.field1.field2`：取嵌套字段
+### 遍历所有文档
+
+yq v4 默认对每个文档执行表达式。不需要 `.[]` 遍历文档：
 
 ```bash
-yq '.spec.template.spec.containers[0].image' deployment.yaml
+yq '"\(.kind)/\(.metadata.name)"' /tmp/multi.yaml
 ```
 
-### 6.4 `.[]`：遍历数组或对象
+输出：
 
-```bash
-yq '.items[]' file.yaml
+```
+Deployment/coredns
+Service/kube-dns
 ```
 
-### 6.5 `|`：管道
+!!! warning "yq 和 jq 的 `.[]` 语义不同"
+
+    jq 中 `.[]` 遍历数组元素。yq 中 `.[]` 遍历对象的值（不是文档）。跨文档遍历时不需要 `.[]`，直接写表达式即可。
+
+### 文档计数
 
 ```bash
-yq '.items[] | .metadata.name' file.yaml
+# 统计非空文档数量
+yq '.kind' /tmp/multi.yaml | grep -c .
+# 2
 ```
 
-这是 yq 最常见的组合之一，类似于 Shell 中的管道。
+!!! note "kubectl 输出的尾部空文档"
 
-### 6.6 `select()`：条件筛选
+    `kubectl get deployment,service -o yaml` 会在末尾产生一个空文档（`---` 后面没有内容），`yq 'length'` 会把空文档也算进去。用 `grep -c .` 只统计有内容的行更准确。
+
+## Kubernetes 实战示例
+
+### 提取所有 Deployment 的副本数
 
 ```bash
-yq '.items[] | select(.metadata.name == "web")' file.yaml
+yq '.items[] | "\(.metadata.name): replicas=\(.spec.replicas)"' /tmp/deploy.yaml
 ```
 
-这会筛选出名字为 `web` 的对象。
+输出：
 
-### 6.7 `map()`：批量转换
-
-```bash
-yq '.items | map(.metadata.name)' file.yaml
+```
+calico-kube-controllers: replicas=1
+coredns: replicas=2
+headlamp: replicas=1
 ```
 
-可以用于把一组对象提取成一个名字列表。
-
-### 6.8 `length`：求长度
+### 提取所有容器镜像
 
 ```bash
-yq '.items | length' file.yaml
+yq '.items[].spec.template.spec.containers[].image' /tmp/deploy.yaml
 ```
 
-### 6.9 `keys`：获取字段名
+输出：
 
-```bash
-yq '.metadata.labels | keys' file.yaml
+```
+m.daocloud.io/docker.io/calico/kube-controllers:v3.28.2
+swr.cn-east-3.myhuaweicloud.com/coredns/coredns:v1.11.4
+swr.cn-east-3.myhuaweicloud.com/helm/headlamp:v0.25.1
 ```
 
-### 6.10 `-r`：输出纯文本
+### 按条件筛选容器
 
 ```bash
-yq -r '.metadata.name' deployment.yaml
+# 找出镜像名包含 calico 的容器
+yq '.items[].spec.template.spec.containers[] | select(.image | test("calico")) | .name' /tmp/deploy.yaml
+# calico-kube-controllers
 ```
 
-如果你想把结果直接用于 Shell 脚本，`-r` 非常实用。
-
----
-
-## 七、yq 与 JSON 的关系
-
-yq 不仅可以处理 YAML，还可以处理 JSON。事实上，很多时候你会发现：
-
-- Kubernetes 的 `kubectl get ... -o json` 输出是 JSON
-- 某些 API 返回值是 JSON
-- 你在脚本里想统一处理配置和接口数据
-
-这时 yq 也能派上用场。
-
-例如：
+### YAML 与 JSON 互转
 
 ```bash
-kubectl get pods -o json | yq '.items[0].metadata.name'
+# 把 YAML 输出转成 JSON（方便和其他工具配合）
+kubectl get deployment coredns -n kube-system -o yaml | yq -o=json '.spec.replicas'
+# 2
+
+# 把 JSON 输出转成 YAML（方便阅读）
+kubectl get pods -A -o json | yq -o=yaml '.items[0].metadata.labels'
 ```
 
-或：
+## Shell 脚本实战
+
+### 读取副本数用于判断
 
 ```bash
-curl -s https://example.com/api | yq '.data[0].id'
+#!/bin/bash
+# check_replicas.sh - 检查 Deployment 副本数
+
+REPLICAS=$(yq -r '.items[0].spec.replicas' /tmp/deploy.yaml)
+
+if [ "$REPLICAS" -lt 2 ]; then
+    echo "警告: 副本数 $REPLICAS，建议至少 2 个"
+else
+    echo "副本数正常: $REPLICAS"
+fi
 ```
 
-从这个角度看，yq 就像是 YAML 世界里的 jq。
-
----
-
-## 八、yq 的常见输出格式
-
-### 8.1 默认输出
+### 批量提取镜像清单
 
 ```bash
-yq '.' file.yaml
+#!/bin/bash
+# list_images.sh - 提取所有容器镜像并去重排序
+
+yq -r '.items[].spec.template.spec.containers[].image' /tmp/deploy.yaml | sort -u
 ```
 
-### 8.2 输出为 JSON
+输出：
 
-```bash
-yq -o=json '.' file.yaml
+```
+m.daocloud.io/docker.io/calico/kube-controllers:v3.28.2
+swr.cn-east-3.myhuaweicloud.com/coredns/coredns:v1.11.4
+swr.cn-east-3.myhuaweicloud.com/helm/headlamp:v0.25.1
 ```
 
-有些时候你需要把 YAML 转成 JSON，方便进一步交给脚本或其他工具处理。
-
-### 8.3 输出为 YAML
+### 批量修改配置
 
 ```bash
-yq -o=yaml '.' file.json
+#!/bin/bash
+# batch_update.sh - 批量修改多个 YAML 文件的副本数
+
+for file in deploy-*.yaml; do
+    echo "处理 $file..."
+    yq -i '.spec.replicas = 3' "$file"
+done
 ```
 
-### 8.4 美化输出
+## 常见踩坑
+
+### 坑一：Python 版和 Go 版语法不兼容
+
+| 现象 | 原因 | 解决 |
+|------|------|------|
+| `yq '.'` 输出 JSON | 装到了 Python 版（kislyuk/yq） | 安装 Go 版（mikefarah/yq） |
+| 报错信息是 `jq: error` | Python 版底层就是 jq | 同上 |
+| `yq --version` 没有 mikefarah | 不是 Go 版 | 同上 |
+
+### 坑二：字段名含特殊字符
 
 ```bash
-yq -P '.' file.yaml
+# 错误：yq 把 - 解析为减法
+yq '.items[0].metadata.labels.k8s-app' /tmp/deploy.yaml
+# Error: bad expression
+
+# 正确写法一：引号包裹
+yq '.items[0].metadata.labels."k8s-app"' /tmp/deploy.yaml
+
+# 正确写法二：方括号语法
+yq '.items[0].metadata.labels["k8s-app"]' /tmp/deploy.yaml
 ```
 
-`-P` 会让输出更适合阅读，特别适合调试配置。
+### 坑三：List 结构的路径访问
 
----
-
-## 九、修改 YAML：yq 的写回能力
-
-yq 的一个非常实用的能力是“修改并写回文件”。
-
-### 9.1 修改单个字段
+`kubectl get deployment -o yaml` 输出的是 `kind: List`，不是单个 Deployment：
 
 ```bash
-yq -i '.spec.replicas = 5' deployment.yaml
+# 错误：根对象没有 spec 字段
+yq '.spec.replicas' /tmp/deploy.yaml
+# null
+
+# 正确：通过 items[0] 访问第一个元素
+yq '.items[0].spec.replicas' /tmp/deploy.yaml
+# 1
 ```
 
-这会把 `replicas` 的值改成 `5`，并直接写回文件。
-
-### 9.2 修改嵌套字段
+### 坑四：多文档 YAML 的 `.[]` 语义
 
 ```bash
-yq -i '.spec.template.spec.containers[0].image = "nginx:1.27"' deployment.yaml
+# 错误：.[] 遍历的是对象 value，不是文档
+yq '.[] | "\(.kind)/\(.metadata.name)"' /tmp/multi.yaml
+# 输出乱码或 null
+
+# 正确：直接写表达式，yq 自动对每个文档执行
+yq '"\(.kind)/\(.metadata.name)"' /tmp/multi.yaml
+# Deployment/coredns
+# Service/kube-dns
 ```
 
-### 9.3 增加字段
+### 坑五：`-i` 直接覆盖无备份
 
 ```bash
-yq -i '.metadata.labels.test = "true"' deployment.yaml
-```
+# 危险：直接覆盖原文件
+yq -i '.spec.replicas = 99' deployment.yaml
 
-这类操作在批量调整配置时很实用。
-
-!!! tip "谨慎修改配置文件"
-    `-i` 是直接写回文件，适合你明确知道自己在做什么的场景。对于生产环境配置，建议先备份文件或者先用输出预览结果，确认无误后再写回。
-
----
-
-## 十、结合 Kubernetes 的实战示例
-
-### 10.1 提取 Deployment 的副本数
-
-```bash
-kubectl get deployment web -o yaml | yq '.spec.replicas'
-```
-
-### 10.2 提取所有容器镜像
-
-```bash
-kubectl get deployment web -o yaml | yq '.spec.template.spec.containers[].image'
-```
-
-### 10.3 提取所有 Pod 名称
-
-```bash
-kubectl get pods -o json | yq '.items[].metadata.name'
-```
-
-### 10.4 过滤出特定命名空间下的资源
-
-```bash
-kubectl get pods -A -o yaml | yq '.items[] | select(.metadata.namespace == "kube-system") | .metadata.name'
-```
-
-这类用法在日常运维中非常常见，尤其是你想快速从大量资源中定位某一类对象时。
-
----
-
-## 十一、结合 Shell 脚本的实战示例
-
-### 11.1 批量提取 Deployment 名称
-
-```bash
-kubectl get deploy -A -o yaml | yq '.items[].metadata.name'
-```
-
-### 11.2 统计资源数量
-
-```bash
-kubectl get pods -A -o yaml | yq '.items | length'
-```
-
-### 11.3 读取一个字段并用于脚本判断
-
-```bash
-replicas=$(kubectl get deployment web -o yaml | yq -r '.spec.replicas')
-echo "当前副本数: $replicas"
-```
-
-### 11.4 自动筛选异常资源
-
-```bash
-kubectl get pods -A -o yaml | \
-  yq '.items[] | select(.status.phase != "Running") | .metadata.namespace + "/" + .metadata.name'
-```
-
-这类脚本很适合用于巡检、告警和自动化运维。
-
----
-
-## 十二、yq 的常见最佳实践
-
-### 12.1 先看再改
-
-在修改配置前，先用查询命令确认路径是否正确：
-
-```bash
-yq '.spec.template.spec.containers[0].image' deployment.yaml
-```
-
-### 12.2 对生产配置先备份
-
-如果你准备用 `-i` 改写文件，建议先备份：
-
-```bash
+# 安全：先备份
 cp deployment.yaml deployment.yaml.bak
+yq -i '.spec.replicas = 99' deployment.yaml
 ```
 
-### 12.3 使用 `-r` 处理 Shell 脚本
+## 最佳实践
 
-当你希望把结果作为字符串传给脚本时，用 `-r`：
+**先看结构再取字段。** 拿到 YAML 先 `yq '.'` 格式化看结构，确认层级关系后再写过滤器。比直接猜路径高效得多。
 
-```bash
-yq -r '.metadata.name' deployment.yaml
-```
+**脚本中用 `-r`。** 用变量接收 yq 输出时，不加 `-r` 可能带上引号，导致后续字符串匹配失败。
 
-### 12.4 处理复杂 YAML 时，先用 `.` 看结构
+**预览后再写回。** 先不加 `-i` 跑一遍看输出，确认结果正确后再加 `-i` 写回文件。
 
-```bash
-yq '.' config.yaml
-```
+**确认版本再查文档。** 网上教程可能是 Python 版语法。先 `yq --version` 确认版本，再对照对应文档。
 
-尤其在你不知道字段层级时，这一步非常重要。
+## 语法速查
 
-### 12.5 版本差异要注意
+| 操作 | 语法 | 示例 |
+|------|------|------|
+| 输出整个文档 | `.` | `yq '.' file.yaml` |
+| 取字段 | `.field` | `yq '.metadata.name' file.yaml` |
+| 取嵌套字段 | `.a.b.c` | `yq '.spec.replicas' file.yaml` |
+| 取数组元素 | `[0]` | `yq '.items[0]' file.yaml` |
+| 遍历数组 | `.[]` | `yq '.items[]' file.yaml` |
+| 管道 | `\|` | `yq '.items[] \| .name' file.yaml` |
+| 条件筛选 | `select()` | `yq 'select(.kind == "Deployment")' file.yaml` |
+| 构造对象 | `{}` | `yq '{name: .metadata.name}' file.yaml` |
+| 修改字段 | `=` | `yq '.spec.replicas = 5' file.yaml` |
+| 删除字段 | `del()` | `yq 'del(.metadata.annotations)' file.yaml` |
+| 按文档索引 | `select(documentIndex == N)` | 取第 N 个文档 |
+| 输出 JSON | `-o=json` | `yq -o=json '.' file.yaml` |
+| 输出纯文本 | `-r` | `yq -r '.metadata.name' file.yaml` |
+| 写回文件 | `-i` | `yq -i '.spec.replicas = 5' file.yaml` |
+| 美化输出 | `-P` | `yq -P '.' file.yaml` |
 
-如果你在网上看到某些写法和你本机不一致，优先确认 yq 的版本，避免踩坑。
+## 相关阅读
 
----
-
-## 十三、yq 的学习路线建议
-
-如果你是第一次接触 yq，可以按下面顺序学习：
-
-1. 先学会读取字段：`.field`、`.field1.field2`
-2. 学会遍历数组：`.[]`、`[] |`
-3. 学会条件筛选：`select()`
-4. 学会修改配置：`-i` 和赋值语法
-5. 再结合 kubectl、Helm 和 Shell 脚本实战
-
-只要你掌握这几个步骤，就已经足够应付大多数运维工作了。
-
----
-
-## 十四、总结
-
-yq 是处理 YAML、JSON 和配置文件的利器。它的核心价值不是“看起来很高级”，而是：
-
-- 在命令行里把结构化配置当作数据来处理
-- 更高效地提取和修改字段
-- 在 Kubernetes、Shell 脚本和自动化运维里大幅降低操作复杂度
-
-如果你已经掌握了 jq，那么 yq 的学习曲线会非常顺滑。你只需要把“JSON 的思维方式”迁移到“YAML 的场景”，就能很快上手。
-
-对于 Kubernetes 运维工程师来说，yq 不是“可有可无”的工具，而是非常值得长期掌握的命令行技能。
+- [jq 命令详解](../jq-command-guide/)：处理 JSON 的工具，与 yq 配合使用
+- [文本处理三剑客](../text-processing/)：grep、sed、awk 基础
