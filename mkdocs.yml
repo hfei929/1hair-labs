@@ -266,10 +266,10 @@ nav:
 
           - ⚙️ Node:
               - Worker Node 架构: kubernetes/architecture/worker-node.md
-              - Pod 生命周期源码解析: kubernetes/architecture/pod-lifecycle.md
               - Kubelet SyncLoop 原理: kubernetes/architecture/kubelet-syncloop.md
               - CRI gRPC 调用详解: kubernetes/architecture/cri-grpc-deep.md
               - containerd 创建容器全过程: kubernetes/architecture/containerd-from-cri-to-runc.md
+              - Pod 生命周期源码解析: kubernetes/architecture/pod-lifecycle.md
               - Kubelet: kubernetes/architecture/kubelet.md
               - CRI: kubernetes/architecture/cri.md
               - Kube Proxy: kubernetes/architecture/kube-proxy.md
