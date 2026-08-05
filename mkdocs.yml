@@ -258,40 +258,44 @@ nav:
         - 🏗 架构原理: 
           - 🌟 总览: kubernetes/architecture/index.md
 
-          - 🧠 控制平面: 
-              - API Server: kubernetes/architecture/api-server.md
-              - Scheduler: kubernetes/architecture/scheduler.md
-              - Controller Manager: kubernetes/architecture/controller-manager.md
-              - Etcd: kubernetes/architecture/etcd.md
+          - 🧠 Control Plane:
+              - 专题首页: kubernetes/architecture/control-plane/index.md
+              - API Server: kubernetes/architecture/control-plane/api-server.md
+              - Scheduler: kubernetes/architecture/control-plane/scheduler.md
+              - Controller Manager: kubernetes/architecture/control-plane/controller-manager.md
+              - Etcd: kubernetes/architecture/control-plane/etcd.md
 
-          - ⚙️ Node:
-              - Worker Node 架构: kubernetes/architecture/worker-node.md
-              - Kubelet SyncLoop 原理: kubernetes/architecture/kubelet-syncloop.md
-              - CRI gRPC 调用详解: kubernetes/architecture/cri-grpc-deep.md
-              - containerd 创建容器全过程: kubernetes/architecture/containerd-from-cri-to-runc.md
-              - Pod 生命周期源码解析: kubernetes/architecture/pod-lifecycle.md
-              - Kubelet: kubernetes/architecture/kubelet.md
-              - CRI: kubernetes/architecture/cri.md
-              - Kube Proxy: kubernetes/architecture/kube-proxy.md
+          - ⚙️ Node & Runtime:
+              - 专题首页: kubernetes/architecture/node/index.md
+              - Worker Node 架构: kubernetes/architecture/node/worker-node.md
+              - Kubelet SyncLoop 原理: kubernetes/architecture/node/kubelet-syncloop.md
+              - CRI gRPC 调用详解: kubernetes/architecture/node/cri-grpc-deep.md
+              - containerd 创建容器全过程: kubernetes/architecture/node/containerd-from-cri-to-runc.md
+              - Pod 生命周期源码解析: kubernetes/architecture/node/pod-lifecycle.md
+              - Kubelet: kubernetes/architecture/node/kubelet.md
+              - CRI: kubernetes/architecture/node/cri.md
+              - Kube Proxy: kubernetes/architecture/network/kube-proxy.md
 
           - 🌐 Network:
-              - CNI: kubernetes/architecture/cni.md
-              - Ingress: kubernetes/architecture/ingress.md
+              - 专题首页: kubernetes/architecture/network/index.md
+              - Kubernetes 网络模型: kubernetes/architecture/network/network.md
+              - CNI: kubernetes/architecture/network/cni.md
+              - Ingress: kubernetes/architecture/network/ingress.md
 
           - 💾 Storage:
-              - CSI: kubernetes/architecture/csi.md
+              - 专题首页: kubernetes/architecture/storage/index.md
+              - Kubernetes 存储资源: kubernetes/architecture/storage/storage.md
+              - CSI: kubernetes/architecture/storage/csi.md
 
           - 📦 API 资源:
-              - 工作负载资源: kubernetes/architecture/workloads.md
-              - API 资源: kubernetes/architecture/api-resources.md
-              - 存储资源: kubernetes/architecture/storage.md
-              - 网络资源: kubernetes/architecture/network.md
-              - 安全资源: kubernetes/architecture/security.md
-              - 服务资源: kubernetes/architecture/server-resources.md
-              - 其他资源: kubernetes/architecture/other-resources.md
+              - 工作负载资源: kubernetes/architecture/resources/workloads.md
+              - API 资源: kubernetes/architecture/resources/api-resources.md
+              - 安全资源: kubernetes/architecture/resources/security.md
+              - 服务资源: kubernetes/architecture/resources/server-resources.md
+              - 其他资源: kubernetes/architecture/resources/other-resources.md
 
           - 🔬 深入理解: 
-              -  为什么不能直接修改 etcd？: kubernetes/architecture/why-not-directly-modify-etcd.md
+              -  为什么不能直接修改 etcd？: kubernetes/architecture/control-plane/why-not-directly-modify-etcd.md
     
         - 🚀 部署实战: 
             - Docker: kubernetes/practice/docker.md

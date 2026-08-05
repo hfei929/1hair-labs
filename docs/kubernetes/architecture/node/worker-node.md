@@ -37,7 +37,7 @@ tags:
 
 ## 一、引言：Scheduler 决定之后，Pod 真的运行了吗？
 
-在前面的文章中，我们介绍了 Kubernetes 控制面的核心组件——[API Server](api-server.md)、[Scheduler](scheduler.md)、[Controller Manager](controller-manager.md)、[Etcd](etcd.md)。控制面的职责可以概括为一句话：
+在前面的文章中，我们介绍了 Kubernetes 控制面的核心组件——[API Server](control-plane/api-server.md)、[Scheduler](control-plane/scheduler.md)、[Controller Manager](control-plane/controller-manager.md)、[Etcd](control-plane/etcd.md)。控制面的职责可以概括为一句话：
 
 > **维护 Kubernetes 集群的期望状态（Desired State）。**
 
@@ -119,7 +119,7 @@ Worker Node 包含三个核心组件——kubelet、Container Runtime、kube-pro
 
 ### 3.1 kubelet：Node 上的核心代理
 
-kubelet 是运行在每个 Node 上的 **Kubernetes 节点代理**。详细工作原理见 [Kubelet 工作原理详解](kubelet.md)，这里聚焦它在执行链路中的角色：
+kubelet 是运行在每个 Node 上的 **Kubernetes 节点代理**。详细工作原理见 [Kubelet 工作原理详解](node/kubelet.md)，这里聚焦它在执行链路中的角色：
 
 | 职责 | 说明 |
 | --- | --- |
@@ -186,7 +186,7 @@ flowchart LR
 | `RemoveContainer` | 删除容器 |
 | `ListPodSandbox` | 列出所有 Pod Sandbox |
 
-CRI 的详细工作机制见 [CRI 容器运行时接口](cri.md)。
+CRI 的详细工作机制见 [CRI 容器运行时接口](node/cri.md)。
 
 ---
 
@@ -220,7 +220,7 @@ Scheduler 的 Watch 机制发现未调度的 Pod，经过两阶段处理：
 选出最优节点后，Scheduler 通过 API Server 将 `spec.nodeName` 设为 `worker-node-01`。
 
 !!! tip "调度细节"
-    完整的调度流程（NodeSelector、Affinity、Taint/Toleration、TopologySpreadConstraints）见 [Scheduler 工作原理详解](scheduler.md)。
+    完整的调度流程（NodeSelector、Affinity、Taint/Toleration、TopologySpreadConstraints）见 [Scheduler 工作原理详解](control-plane/scheduler.md)。
 
 ---
 
@@ -455,7 +455,7 @@ Kubernetes Worker Node 是「声明式配置」落地为「实际运行容器」
 | 文章 | 说明 |
 | --- | --- |
 | [Kubernetes 架构总览](index.md) | 控制面与 Node 的全景图 |
-| [Kubelet 工作原理详解](kubelet.md) | 节点代理的深度解析 |
-| [Scheduler 工作原理详解](scheduler.md) | Pod 调度全流程 |
-| [CRI 容器运行时接口](cri.md) | kubelet 与 Runtime 之间的标准接口 |
+| [Kubelet 工作原理详解](node/kubelet.md) | 节点代理的深度解析 |
+| [Scheduler 工作原理详解](control-plane/scheduler.md) | Pod 调度全流程 |
+| [CRI 容器运行时接口](node/cri.md) | kubelet 与 Runtime 之间的标准接口 |
 | [容器底层原理](../../linux/base-system/container-internals.md) | Linux Namespace + cgroup 动手实验 |

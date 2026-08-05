@@ -20,14 +20,14 @@ tags:
 
 ## 文章摘要
 
-上一篇 [Worker Node 架构原理](worker-node.md) 从全局视角讲了 API Server → Scheduler → kubelet → CRI → containerd → Linux 这条六层链路。但 kubelet 内部是怎么运转的？它怎么知道有新 Pod 分配给自己？知道之后又怎么一步步把容器跑起来？
+上一篇 [Worker Node 架构原理](node/worker-node.md) 从全局视角讲了 API Server → Scheduler → kubelet → CRI → containerd → Linux 这条六层链路。但 kubelet 内部是怎么运转的？它怎么知道有新 Pod 分配给自己？知道之后又怎么一步步把容器跑起来？
 
 本文往下钻一层——拆解 kubelet 的核心循环 SyncLoop，从 Reflector 的 List + Watch 发现任务，到 PodWorkers 的串行调度，到 SyncPod 的实际执行，再到 PLEG 的持续监控，把 kubelet 内部机制讲透。
 
 Kubelet 的源码不像 API Server 那样有清晰的请求处理链路——它更像一个大循环，不断看、不断比、不断干。社区管这个叫 SyncLoop，是 kubelet 的心脏。
 
 !!! info "阅读前建议"
-    本文假设你已理解 [Worker Node 架构](worker-node.md) 中讲到的 kubelet → CRI → containerd → runc 执行链路。如果没有，建议先读那篇再看本文。本文以 K8s 1.36.1 源码为基准。
+    本文假设你已理解 [Worker Node 架构](node/worker-node.md) 中讲到的 kubelet → CRI → containerd → runc 执行链路。如果没有，建议先读那篇再看本文。本文以 K8s 1.36.1 源码为基准。
 
 ---
 
@@ -253,7 +253,7 @@ Init 容器全部就绪后，kubelet 对 `containers` 数组中的每个容器�
 | 2 | `CreateContainer` | 准备 rootfs 和挂载 |
 | 3 | `StartContainer` | 启动容器进程 |
 
-containerd 拿到这些 CRI 请求后，把镜像转换成 OCI Runtime Spec，交给 runc。runc 才是真正调 Linux 系统调用的那一层——创建 Namespace、设 cgroup、启动容器进程。这跟 [Worker Node 架构](worker-node.md) 里讲的链路一致。
+containerd 拿到这些 CRI 请求后，把镜像转换成 OCI Runtime Spec，交给 runc。runc 才是真正调 Linux 系统调用的那一层——创建 Namespace、设 cgroup、启动容器进程。这跟 [Worker Node 架构](node/worker-node.md) 里讲的链路一致。
 
 ### 容器底层验证
 
@@ -505,7 +505,7 @@ flowchart TD
 
 ## 总结
 
-上一篇 [Worker Node 架构](worker-node.md) 停在六层链路的架构理解层面。本文往下钻了一层——kubelet 内部怎么运转：
+上一篇 [Worker Node 架构](node/worker-node.md) 停在六层链路的架构理解层面。本文往下钻了一层——kubelet 内部怎么运转：
 
 1. **Reflector（List + Watch）**：发现任务——不轮询，用长连接监听 Pod 变更
 2. **SyncLoop（select 四路输入）**：核心调度——API Server 事件、PLEG 事件、Runtime 事件、定时 Sync，统一走 SyncPod
@@ -521,9 +521,9 @@ flowchart TD
 
 | 文章 | 说明 |
 | --- | --- |
-| [Worker Node 架构原理](worker-node.md) | 全局视角——六层执行链路 |
-| [Kubelet 工作原理详解](kubelet.md) | kubelet 组件级深度解析 |
-| [CRI 容器运行时接口](cri.md) | kubelet 与 Runtime 之间的标准接口 |
+| [Worker Node 架构原理](node/worker-node.md) | 全局视角——六层执行链路 |
+| [Kubelet 工作原理详解](node/kubelet.md) | kubelet 组件级深度解析 |
+| [CRI 容器运行时接口](node/cri.md) | kubelet 与 Runtime 之间的标准接口 |
 | [Kubernetes 架构总览](index.md) | 控制面与 Node 全景图 |
 | [容器底层原理](../../linux/base-system/container-internals.md) | Linux Namespace + cgroup 动手实验 |
 

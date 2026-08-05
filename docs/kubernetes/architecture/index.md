@@ -95,28 +95,28 @@ Load Balancer
 ## 深入学习路线
 
 ### Control Plane 组件
-- [API Server](api-server.md)：理解如何安全地提供集群接口
-- [Scheduler](scheduler.md)：掌握 Pod 调度决策过程
-- [Controller Manager](controller-manager.md)：了解控制器如何维护声明状态
-- [Etcd](etcd.md)：掌握数据一致性和高可用方案
+- [API Server](control-plane/api-server.md)：理解如何安全地提供集群接口
+- [Scheduler](control-plane/scheduler.md)：掌握 Pod 调度决策过程
+- [Controller Manager](control-plane/controller-manager.md)：了解控制器如何维护声明状态
+- [Etcd](control-plane/etcd.md)：掌握数据一致性和高可用方案
 
 ### Worker Node 组件
-- [Kubelet](kubelet.md)：深入节点级别的容器管理
-- [Kube Proxy](kube-proxy.md)：理解服务网络实现
+- [Kubelet](node/kubelet.md)：深入节点级别的容器管理
+- [Kube Proxy](network/kube-proxy.md)：理解服务网络实现
 
 ### 扩展接口
-- [CNI](cni.md)：容器网络接口
-- [CSI](csi.md)：容器存储接口
-- [CRI](cri.md)：容器运行时接口
+- [CNI](network/cni.md)：容器网络接口
+- [CSI](storage/csi.md)：容器存储接口
+- [CRI](node/cri.md)：容器运行时接口
 
 ### Kubernetes 资源
-- [API 资源](api-resources.md)：理解 API 分组和资源模型
-- [工作负载资源](workloads.md)：掌握 Deployment、StatefulSet、DaemonSet 等
-- [服务资源](services.md)：理解 Service、Ingress 等网络资源
-- [存储资源](storage.md)：掌握 PVC、StorageClass、ConfigMap 等
-- [网络资源](network.md)：理解 NetworkPolicy、DNS 等
-- [安全资源](security.md)：掌握 RBAC、SecurityContext 等
-- [其他资源](other-resources.md)：Namespace、ResourceQuota、HPA 等
+- [API 资源](resources/api-resources.md)：理解 API 分组和资源模型
+- [工作负载资源](resources/workloads.md)：掌握 Deployment、StatefulSet、DaemonSet 等
+- [服务资源](resources/server-resources.md)：理解 Service、Ingress 等网络资源
+- [存储资源](storage/storage.md)：掌握 PVC、StorageClass、ConfigMap 等
+- [网络资源](network/network.md)：理解 NetworkPolicy、DNS 等
+- [安全资源](resources/security.md)：掌握 RBAC、SecurityContext 等
+- [其他资源](resources/other-resources.md)：Namespace、ResourceQuota、HPA 等
 
 ## 常见问题
 

@@ -986,8 +986,8 @@ CRI 是 Kubernetes 与容器运行时之间的桥梁。
 
 ## 相关阅读
 
-- [Kubernetes Kubelet 工作原理](kubelet.md)
-- [Kubernetes ETCD 工作原理](etcd.md)
+- [Kubernetes Kubelet 工作原理](node/kubelet.md)
+- [Kubernetes ETCD 工作原理](control-plane/etcd.md)
 - [Kubernetes Pod 生命周期详解](.)
 - [Containerd 工作原理]()
 - [OCI 容器标准详解]()

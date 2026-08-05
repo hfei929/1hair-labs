@@ -993,8 +993,8 @@ ETCD 是 Kubernetes 最核心的数据存储组件。
 
 ## 相关阅读
 
-- [Kubernetes API Server 工作原理](api-server.md)
-- [Kubernetes Controller Manager 工作原理](controller-manager.md)
-- [Kubernetes Scheduler 工作原理](scheduler.md)
+- [Kubernetes API Server 工作原理](control-plane/api-server.md)
+- [Kubernetes Controller Manager 工作原理](control-plane/controller-manager.md)
+- [Kubernetes Scheduler 工作原理](control-plane/scheduler.md)
 - [Kubernetes 高可用架构详解](../practice/single-master-to-ha.md)
 - [ETCD 备份与恢复实战](../../lab/failover-test-3.md)

@@ -954,7 +954,7 @@ CSI 是 Kubernetes 存储体系的核心接口标准。
 
 ## 相关阅读
 
-- [Kubernetes CRI 工作原理](cri.md)
+- [Kubernetes CRI 工作原理](node/cri.md)
 - [Kubernetes PV 与 PVC 详解]()
 - [Kubernetes StorageClass 详解]()
 - [Kubernetes StatefulSet 工作原理]()

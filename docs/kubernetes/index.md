@@ -31,22 +31,33 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 
 ## 内容索引
 
-### 集群架构
+### 控制平面
 
-理解 Kubernetes 各组件的职责与交互方式，是从"会用"走向"能排障"的关键。
+理解控制平面是理解 Kubernetes 工作机制的第一层入口，核心在于“集群如何做决策和维护期望状态”。
 
 | 文章 | 说明 |
 |---|---|
+| [Control Plane 专题](architecture/control-plane/) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
 | [API Server](architecture/api-server/) | 集群统一入口，所有操作经过这里 |
 | [ETCD](architecture/etcd/) | 集群状态存储，唯一有状态组件 |
 | [Scheduler](architecture/scheduler/) | Pod 调度决策 |
 | [Controller Manager](architecture/controller-manager/) | 控制循环与状态协调 |
+
+### Node 与运行时
+
+节点层是 Kubernetes 真正“执行工作负载”的地方，理解这里的链路才能把“调度”和“运行”串起来。
+
+| 文章 | 说明 |
+|---|---|
+| [Node & Runtime 专题](architecture/node/) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
+| [Worker Node 架构](architecture/worker-node/) | 节点层的职责与整体执行链路 |
+| [Pod 生命周期](architecture/pod-lifecycle/) | 从 Pending 到 Running 的完整生命周期 |
 | [Kubelet](architecture/kubelet/) | 节点代理，管理 Pod 生命周期 |
+| [Kubelet SyncLoop](architecture/kubelet-syncloop/) | kubelet 如何持续调谐 Pod 状态 |
+| [CRI](architecture/cri/) | 容器运行时接口 |
+| [CRI gRPC 调用详解](architecture/cri-grpc-deep/) | kubelet 与运行时之间的接口细节 |
+| [containerd 创建容器全过程](architecture/containerd-from-cri-to-runc/) | 从 CRI 到 runc 的完整执行路径 |
 | [Kube Proxy](architecture/kube-proxy/) | 服务发现与流量转发 |
-| [Workloads](architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
-| [API Resources](architecture/api-resources/) | 集群 API 资源全景 |
-| [Server Resources](architecture/server-resources/) | 节点资源与容量管理 |
-| [Other Resources](architecture/other-resources/) | 其他集群资源 |
 
 ### 网络
 
@@ -54,6 +65,7 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 
 | 文章 | 说明 |
 |---|---|
+| [Network 专题](architecture/network/) | 网络模型、CNI、Service 与 Ingress 的统一入口 |
 | [Kubernetes 网络模型](architecture/network/) | Pod 网络、Service 网络与节点网络 |
 | [CNI](architecture/cni/) | 容器网络接口与主流插件 |
 | [Ingress](architecture/ingress/) | 七层流量入口与 Ingress Controller |
@@ -62,14 +74,18 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 
 | 文章 | 说明 |
 |---|---|
+| [Storage 专题](architecture/storage/) | PV / PVC / StorageClass / CSI 的统一入口 |
 | [存储系统](architecture/storage/) | PV / PVC / StorageClass |
 | [CSI](architecture/csi/) | 容器存储接口与驱动 |
 
-### 运行时与安全
+### 资源与安全
 
 | 文章 | 说明 |
 |---|---|
-| [CRI](architecture/cri/) | 容器运行时接口 |
+| [Workloads](architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
+| [API Resources](architecture/api-resources/) | 集群 API 资源全景 |
+| [Server Resources](architecture/server-resources/) | 节点资源与容量管理 |
+| [Other Resources](architecture/other-resources/) | 其他集群资源 |
 | [安全机制](architecture/security/) | RBAC / SecurityContext / Pod Security |
 
 ### 最佳实践
