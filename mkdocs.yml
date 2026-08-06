@@ -274,13 +274,13 @@ nav:
               - Pod 生命周期源码解析: kubernetes/architecture/node/pod-lifecycle.md
               - Kubelet: kubernetes/architecture/node/kubelet.md
               - CRI: kubernetes/architecture/node/cri.md
-              - Kube Proxy: kubernetes/architecture/network/kube-proxy.md
 
           - 🌐 Network:
               - 专题首页: kubernetes/architecture/network/index.md
-              - Kubernetes 网络模型: kubernetes/architecture/network/network.md
+              - Pod 网络创建全过程: kubernetes/architecture/network/pod-network-creation.md
               - CNI: kubernetes/architecture/network/cni.md
               - Ingress: kubernetes/architecture/network/ingress.md
+              - Kube Proxy: kubernetes/architecture/network/kube-proxy.md
 
           - 💾 Storage:
               - 专题首页: kubernetes/architecture/storage/index.md

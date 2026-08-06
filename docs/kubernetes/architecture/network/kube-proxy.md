@@ -833,4 +833,4 @@ Kube-Proxy 是 Kubernetes Service 网络模型的核心组件。
 * [Kubernetes Service 详解](resources/server-resources.md)
 * [Kubernetes CNI 工作原理](network/cni.md)
 * [Kubernetes Ingress 工作原理](network/ingress.md)
-* [Kubernetes 网络模型详解](network/network.md)
+* [Kubernetes Network 专题](index.md)

@@ -444,44 +444,57 @@ StartContainer() -> 生成 Task，并让它开始执行
 
 > containerd 不是已经在管理容器了吗？为什么还要多一个 `shim`？
 
-原因很简单：
+要回答这个问题，首先要澄清一个常见误解——**shim 并不是 containerd 的“子进程”**。
 
-如果 containerd 直接把容器进程作为它自己的子进程管理，那么一旦 containerd 重启、崩溃、升级，容器进程可能会受到影响。
+在节点上执行：
 
-因此 containerd 设计了一个中间层：
-
-```text
-containerd
-  ↓
-containerd-shim
-  ↓
-runc
-  ↓
-container process
+```bash
+ps -ef | grep containerd-shim
 ```
 
-### 10.1 shim 的作用
+通常会看到：
 
-`containerd-shim` 的作用主要有四个：
+```text
+containerd-shim-runc-v2 的 PPID 是 1
+```
 
-1. 作为容器进程与 containerd 的中间代理
-2. 负责保存 stdio（标准输入输出）
-3. 负责收集容器退出状态
-4. 让 containerd 和容器进程解耦，提升稳定性
+也就是 shim 最终由 systemd / init 接管，而不是挂在 containerd 下面。
 
-### 10.2 为什么要解耦？
+原因是：shim 启动后，会**主动脱离 containerd 的进程树**，独立维护容器生命周期。
 
-因为容器进程本质上是一个 Linux 进程。
+### 10.1 准确的关系应该怎么理解？
 
-如果 containerd 直接持有它，那么 containerd 一旦重启，进程生命周期管理就会变得很脆弱。
+更准确的表述是：
 
-shim 的引入，使得：
+> containerd 负责**创建和管理** shim，shim 负责**管理具体容器进程**，两者之间通过 **ttrpc + Unix Socket** 通信，而不是依靠 Linux 父子进程关系来绑定。
 
-- containerd 只负责调度
-- shim 负责和具体容器进程打交道
-- 容器即使在父进程重启后也能继续稳定工作
+```mermaid
+flowchart LR
+    classDef runtime fill:#EAF8EE,stroke:#3B8C5A,stroke-width:2px,color:#0F172A;
+    classDef bridge fill:#FFF4E5,stroke:#D97706,stroke-width:2px,color:#0F172A;
+    classDef executor fill:#F4EBFF,stroke:#8B5CF6,stroke-width:2px,color:#0F172A;
+    classDef kernel fill:#EAF3FF,stroke:#4C78A8,stroke-width:2px,color:#0F172A;
 
-这就是 containerd 设计中很关键的一层抽象。
+    CTD[containerd] <-->|ttrpc / Unix Socket| Shim[containerd-shim]
+    Shim --> Runc[runc]
+    Runc --> Proc[container process]
+
+    class CTD runtime;
+    class Shim bridge;
+    class Runc executor;
+    class Proc kernel;
+```
+
+### 10.2 shim 的核心价值
+
+shim 的存在，让三个重要场景成为可能：
+
+- **containerd 重启时，已有容器继续运行**，不会跟着一起挂掉
+- **containerd 升级时，业务 Pod 不受影响**，不需要中断
+- **Runtime 管理与容器生命周期实现解耦**，各司其职
+
+这就是 containerd 设计中非常关键的一层抽象——它不是“父进程管子进程”的模式，而是“通过进程间通信协作”的模式。
+
 
 ---
 

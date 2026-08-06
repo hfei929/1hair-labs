@@ -114,7 +114,7 @@ Load Balancer
 - [工作负载资源](resources/workloads.md)：掌握 Deployment、StatefulSet、DaemonSet 等
 - [服务资源](resources/server-resources.md)：理解 Service、Ingress 等网络资源
 - [存储资源](storage/storage.md)：掌握 PVC、StorageClass、ConfigMap 等
-- [网络资源](network/network.md)：理解 NetworkPolicy、DNS 等
+- 网络资源：详见 [Network 专题](network/index.md)
 - [安全资源](resources/security.md)：掌握 RBAC、SecurityContext 等
 - [其他资源](resources/other-resources.md)：Namespace、ResourceQuota、HPA 等
 

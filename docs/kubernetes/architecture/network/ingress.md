@@ -18,7 +18,7 @@ author: HairLabs
 
 ---
 
-# Kubernetes Ingress 工作原理详解：域名访问、HTTPS证书与流量入口一次讲透
+# Kubernetes Ingress 工作原理详解：域名访问、HTTPS证书与流量入口
 
 ## 文章摘要
 
