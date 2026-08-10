@@ -278,6 +278,7 @@ nav:
           - 🌐 Network:
               - 专题首页: kubernetes/architecture/network/index.md
               - Pod 网络创建全过程: kubernetes/architecture/network/pod-network-creation.md
+              - Calico BGP 跨节点通信: kubernetes/architecture/network/calico-bgp.md
               - CNI: kubernetes/architecture/network/cni.md
               - Ingress: kubernetes/architecture/network/ingress.md
               - Kube Proxy: kubernetes/architecture/network/kube-proxy.md
