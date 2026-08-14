@@ -316,6 +316,7 @@ nav:
         - 🧰 工具生态:
              - k9s: kubernetes/tools/k9s.md
              - headlamp: kubernetes/tools/headlamp.md
+             - KYAML 实测：给 YAML 加的约束药: kubernetes/tools/kyaml.md
         
         - 🔍 故障排查: lab/index.md
 

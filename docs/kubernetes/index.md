@@ -108,6 +108,7 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 |---|---|
 | [K9s](tools/k9s/) | 终端 K8s 管理工具 |
 | [Headlamp](tools/headlamp/) | Web UI 集群管理工具 |
+| [KYAML](tools/kyaml.md) | K8s 更安全的 YAML 方言与格式化工具 |
 
 ---
 
