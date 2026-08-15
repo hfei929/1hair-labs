@@ -531,6 +531,8 @@ kubectl apply -f my-app.yaml
 
 ## 相关阅读
 
+- [yq 命令详解](../../linux/shell/yq-command-guide.md) — YAML 处理的另一件利器，同样在 K8s 1.36.1 集群实测，与 KYAML 互补：一个管「格式与类型安全」，一个管「查询与改写」
+- [jq 命令详解](../../linux/shell/jq-command-guide.md) — JSON 输出的处理参照，读完「为什么 JSON 不是 YAML 的替代品」，处理 `-o json` 时它更顺手
+- [Kubernetes API 资源详解](../architecture/resources/api-resources.md) — ConfigMap 等核心资源的统一结构，Norway Bug 之所以被 API Server 拦住，根源就在字段类型
 - [kubectl drain 到底做了什么？](../practice/kubectl-drain.md) — 同样是 kubectl 行为层面的深挖
 - [K9s](k9s.md) / [Headlamp](headlamp.md) — 同属工具生态，对比不同的集群交互方式
-- [K8s 从入门到上线完整路线](../K8s-beginner-to-production.md) — 入门时先吃透 ConfigMap 等核心对象
