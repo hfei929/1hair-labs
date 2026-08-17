@@ -284,6 +284,7 @@ nav:
               - Calico BGP 跨节点通信: kubernetes/architecture/network/calico-bgp.md
               - ClusterIP 链路拆解: kubernetes/architecture/network/clusterip-link-deep.md
               - Service 域名到 ClusterIP 链路: kubernetes/architecture/network/service-dns-to-clusterip.md
+              - 一行 curl 的完整旅程: kubernetes/architecture/network/curl-full-link.md
 
           - 💾 Storage:
               - 专题首页: kubernetes/architecture/storage/index.md
