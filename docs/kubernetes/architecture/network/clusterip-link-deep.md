@@ -313,55 +313,9 @@ DNAT 把目标 IP 从 ClusterIP 改成了 Pod IP，包成功到达 Pod。但 Pod
 
 ### conntrack 连接表
 
-Linux 内核的 conntrack（Connection Tracking）模块记录每一条 NAT 过的连接。DNAT 执行时，conntrack 在连接表里创建一条记录：
+关于 `conntrack` 的工具用法、条目字段解析与实测示例，已统一放在站内专页：[conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
 
-```
-原始方向: src=10.244.X.X  dst=10.101.10.146  (ClusterIP)
-DNAT 后:  src=10.244.X.X  dst=10.244.5.11    (Pod IP)
-```
-
-当回包回来时（`src=10.244.5.11 dst=10.244.X.X`），conntrack 查到这条连接记录，执行**反向 NAT**：把源 IP 从 Pod IP 改回 ClusterIP。发起方收到的包看起来就像是从 ClusterIP 直接回的。
-
-```bash
-# 📸 安装 conntrack 工具
-sudo apt install -y conntrack
-# 让 Pod 访问 Service 产生连接
-kubectl exec -it nginx-test -- curl -s 10.101.10.146 > /dev/null
-# 立刻查看 conntrack 表
-sudo conntrack -L | grep 10.101.10.146
-```
-
-```bash
-# 安装输出
-Installing:
-  conntrack
-Summary:
-  Upgrading: 0, Installing: 1, Removing: 0, Not Upgrading: 92
-  Download size: 35.6 kB
-  Space needed: 119 kB / 44.6 GB available
-...
-Setting up conntrack (1:1.4.8-2) ...
-```
-
-```
-conntrack v1.4.8 (conntrack-tools): 199 flow entries have been shown.
-```
-
-!!! warning "conntrack -L 可能看不到 Service 连接"
-    我跑的时候 `conntrack -L | grep 10.101.10.146` 返回空——199 条流没有一条匹配 ClusterIP。原因是 `curl` 产生的 TCP 连接非常短命，请求完成后 conntrack 条目可能已经过了 ESTABLISHED 状态进入 TIME_WAIT 或被回收。
-
-    要抓到真实的 conntrack 条目，需要让连接保持活跃。方法是在一个终端跑 `kubectl exec -it nginx-test -- curl -s 10.101.10.146` 的同时，另一个终端立刻跑 `sudo conntrack -L | grep 10.101.10.146`。或者用 `curl --keepalive-time 60` 保持连接。
-
-    如果还是看不到，可以查所有 conntrack 条目中跟 Pod IP 相关的：`sudo conntrack -L | grep 10.244`——DNAT 后的目标 IP 会出现在 conntrack 表的 `dport` 字段里。
-
-conntrack 表里每条记录的关键字段：
-
-```
-原始方向: src=10.244.5.11  dst=10.101.10.146  (ClusterIP)
-DNAT 后:  src=10.244.5.11  dst=10.244.30.119  (Pod IP)
-```
-
-当回包回来时（`src=10.244.30.119 dst=10.244.5.11`），conntrack 查到这条连接记录，执行**反向 NAT**：把源 IP 从 Pod IP 改回 ClusterIP。发起方收到的包看起来就像是从 ClusterIP 直接回的。
+上文中提到的 DNAT/REPLY 判定方法与实测命令均已迁移到该指南；此处保留对 DNAT 与路由的整体链路说明，避免内容重复。
 
 ### 完整包流转链路
 

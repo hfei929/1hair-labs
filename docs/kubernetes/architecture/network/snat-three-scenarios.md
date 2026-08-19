@@ -203,18 +203,9 @@ iptables 规则的执行顺序：
 
 ### 3.3 conntrack 证据
 
-在 curl 全链路文章中已经实测过 hairpin NAT 的 conntrack 条目：
+关于 `conntrack` 的命令用法、条目字段解析和大量实测输出，已集中整理在站内专页，建议阅读：[conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
 
-```
-src=10.244.5.12 dst=10.100.241.29 sport=34188 dport=80
-src=10.244.5.12 dst=192.168.114.148 sport=80 dport=34188 [ASSURED]
-```
-
-ORIGINAL 方向：`src=Pod, dst=ClusterIP`
-REPLY 方向：`src=Pod:80, dst=节点IP`——注意这里的 dst 是节点 IP 而不是 Pod IP，说明回包经过了 SNAT（conntrack 的 REPLY 方向记录的是 NAT 改写后的真实地址，详见 [第六节](#62-conntrack-snat)的解释）。
-
-!!! tip "详细实测数据"
-    hairpin NAT 的完整 strace + conntrack 实测数据见 [一行 curl 的完整旅程](./curl-full-link.md#conntrack-dnat-round-robin-hairpin)，这里不重复展开。
+此处保留场景级别的描述，具体 `conntrack -L`/`conntrack -E` 输出示例与分析请到上文链接查看。
 
 ## 四、场景二：节点访问 Service
 
@@ -504,43 +495,62 @@ Local 模式下 nginx Pod 的 access.log：
 
 ## 七、三种场景的 Mermaid 总图
 
+### 场景 1：Hairpin NAT
+ 
 ```mermaid
-flowchart TB
-    subgraph "场景 1: Hairpin NAT"
-        H1["Pod 10.244.5.12<br/>访问 Service"] --> H2{"DNAT 选中<br/>自己？"}
-        H2 -->|"是"| H3["KUBE-MARK-MASQ<br/>打标记"]
-        H3 --> H4["MASQUERADE<br/>src → 节点 IP"]
-        H4 --> H5["包到达自己<br/>回包原路返回"]
-    end
-
-    subgraph "场景 2: 节点访问 Service"
-        N1["节点进程<br/>curl ClusterIP"] --> N2["OUTPUT 链<br/>KUBE-SERVICES"]
-        N2 --> N3["DNAT 选后端 Pod"]
-        N3 --> N4{"后端在本节点？"}
-        N4 -->|"是"| N5["走 cali 接口<br/>直连 Pod"]
-        N4 -->|"否"| N6["走 IPIP 隧道<br/>跨节点转发"]
-    end
-
-    subgraph "场景 3: NodePort 外部流量"
-        E1["外部客户端<br/>访问 NodePort"] --> E2{"externalTrafficPolicy"}
-        E2 -->|"Cluster"| E3["DNAT 选任意 Pod<br/>MASQUERADE<br/>src → 节点 IP"]
-        E2 -->|"Local"| E4["DNAT 只选本节点 Pod<br/>不做 SNAT<br/>保留客户端 IP"]
-        E3 --> E5{"后端在本节点？"}
-        E5 -->|"否"| E6["跨节点 IPIP<br/>回包原路返回"]
-        E5 -->|"是"| E7["直连 Pod"]
-        E4 --> E8{"本节点有 Pod？"}
-        E8 -->|"否"| E9["DROP"]
-        E8 -->|"是"| E7
-    end
-
+flowchart TD
+    H1["Pod 10.244.5.12<br/>访问 Service"] --> H2{"DNAT 选中<br/>自己？"}
+    H2 -->|"是"| H3["KUBE-MARK-MASQ<br/>打标记"]
+    H3 --> H4["MASQUERADE<br/>src → 节点 IP"]
+    H4 --> H5["包到达自己<br/>回包原路返回"]
+ 
     classDef problem fill:#FCE7F3,stroke:#DB2777,color:#0F172A
     classDef snat fill:#FEF3C7,stroke:#D97706,color:#0F172A
     classDef normal fill:#DBEAFE,stroke:#2563EB,color:#0F172A
+ 
+    class H3,H4 snat
+    class H1,H2 normal
+```
+ 
+### 场景 2：节点访问 Service
+ 
+```mermaid
+flowchart TD
+    N1["节点进程<br/>curl ClusterIP"] --> N2["OUTPUT 链<br/>KUBE-SERVICES"]
+    N2 --> N3["KUBE-SVC: ! -s Pod网段<br/>打 KUBE-MARK-MASQ 标记"]
+    N3 --> N4["DNAT 选后端 Pod"]
+    N4 --> N5{"后端在本节点？"}
+    N5 -->|"是"| N6["走 cali 接口<br/>MASQUERADE src → 物理 IP"]
+    N5 -->|"否"| N7["走 IPIP 隧道<br/>MASQUERADE src → tunl0 IP"]
+ 
+    classDef snat fill:#FEF3C7,stroke:#D97706,color:#0F172A
+    classDef normal fill:#DBEAFE,stroke:#2563EB,color:#0F172A
+ 
+    class N3,N6,N7 snat
+    class N1,N2,N4,N5 normal
+```
+ 
+### 场景 3：NodePort 外部流量
+ 
+```mermaid
+flowchart TD
+    E1["外部客户端<br/>访问 NodePort"] --> E2{"externalTrafficPolicy"}
+    E2 -->|"Cluster"| E3["KUBE-EXT 无条件打标记<br/>MASQUERADE src → 节点 IP"]
+    E2 -->|"Local"| E4["KUBE-EXT --src-type LOCAL<br/>外部流量不匹配<br/>不打标记"]
+    E3 --> E5{"后端在本节点？"}
+    E5 -->|"否"| E6["跨节点 IPIP<br/>回包原路返回"]
+    E5 -->|"是"| E7["直连 Pod"]
+    E4 --> E8{"本节点有 Pod？"}
+    E8 -->|"否"| E9["DROP"]
+    E8 -->|"是"| E7
+ 
+    classDef snat fill:#FEF3C7,stroke:#D97706,color:#0F172A
+    classDef normal fill:#DBEAFE,stroke:#2563EB,color:#0F172A
     classDef drop fill:#FEE2E2,stroke:#DC2626,color:#0F172A
-
-    class H3,H4,E3 snat
+ 
+    class E3 snat
     class E9 drop
-    class H1,H2,N1,N2,N3,E1,E2,E8 normal
+    class E1,E2,E4,E5,E8 normal
 ```
 
 ## 八、验证命令清单
