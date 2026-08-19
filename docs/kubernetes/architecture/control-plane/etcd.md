@@ -964,7 +964,7 @@ Kubernetes 仅支持 ETCD。
 
 ## 生产实践
 
-在一次 [Kubernetes 1.34→1.35 升级过程中](../practice/cluster-upgrade.md)，由于 kubelet 参数异常，导致 ETCD Static Pod
+在一次 [Kubernetes 1.34→1.35 升级过程中](../../practice/cluster-upgrade.md)，由于 kubelet 参数异常，导致 ETCD Static Pod
 无法正常重建，最终出现：
 ```bash
 static Pod hash for component etcd
@@ -993,8 +993,8 @@ ETCD 是 Kubernetes 最核心的数据存储组件。
 
 ## 相关阅读
 
-- [Kubernetes API Server 工作原理](control-plane/api-server.md)
-- [Kubernetes Controller Manager 工作原理](control-plane/controller-manager.md)
-- [Kubernetes Scheduler 工作原理](control-plane/scheduler.md)
-- [Kubernetes 高可用架构详解](../practice/single-master-to-ha.md)
-- [ETCD 备份与恢复实战](../../lab/failover-test-3.md)
+- [Kubernetes API Server 工作原理](api-server.md)
+- [Kubernetes Controller Manager 工作原理](controller-manager.md)
+- [Kubernetes Scheduler 工作原理](scheduler.md)
+- [Kubernetes 高可用架构详解](../../practice/single-master-to-ha.md)
+- [ETCD 备份与恢复实战](../../../lab/failover-test-3.md)

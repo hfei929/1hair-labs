@@ -26,7 +26,7 @@ tags:
 这篇就来拆这条链路。拆开以后发现现象：**第一，用"完整域名"反而比用"短域名"触发更多 DNS 查询**——这跟直觉完全相反；**第二，DNS 查询本身也要经过上一篇拆的 iptables DNAT**——CoreDNS 也是一个 Service，kube-dns 的 ClusterIP 同样是虚拟 IP。
 
 !!! note "前置阅读"
-    本文是 [Service ClusterIP 为什么 ping 不通？kube-proxy + iptables 链路拆解](../service-kube-proxy-iptables/) 的续篇。上一篇拆的是"拿到 ClusterIP 之后包怎么到 Pod"，这篇拆的是"域名怎么变成 ClusterIP"。如果你还没读上一篇，建议先读，因为 DNS 查询的包流转也会经过 iptables KUBE-SERVICES 链。
+    本文是 [Service ClusterIP 为什么 ping 不通？kube-proxy + iptables 链路拆解](kube-proxy.md) 的续篇。上一篇拆的是"拿到 ClusterIP 之后包怎么到 Pod"，这篇拆的是"域名怎么变成 ClusterIP"。如果你还没读上一篇，建议先读，因为 DNS 查询的包流转也会经过 iptables KUBE-SERVICES 链。
 
 ## 二、从 Pod 的 /etc/resolv.conf 说起
 
@@ -673,11 +673,11 @@ kubectl -n kube-system logs -f <coredns-pod>
 
 ## 十、相关阅读
 
-- [Service ClusterIP 为什么 ping 不通？kube-proxy + iptables 链路拆解](../service-kube-proxy-iptables/)——上一篇。本文的 DNS 查询路径直接复用了那篇拆的 iptables KUBE-SERVICES → KUBE-SVC → KUBE-SEP 链路
-- [Calico 跨节点通信原理](../calico-bgp/)——BGP 路由、IPIP 隧道。CoreDNS Pod 之间的跨节点通信也走这条路
-- [Pod 网络创建全过程](../pod-network-creation/)——veth pair、IP 分配。CoreDNS Pod 的 IP 就是通过 CNI 分配的
+- [Service ClusterIP 为什么 ping 不通？kube-proxy + iptables 链路拆解](kube-proxy.md)——上一篇。本文的 DNS 查询路径直接复用了那篇拆的 iptables KUBE-SERVICES → KUBE-SVC → KUBE-SEP 链路
+- [Calico 跨节点通信原理](calico-bgp.md)——BGP 路由、IPIP 隧道。CoreDNS Pod 之间的跨节点通信也走这条路
+- [Pod 网络创建全过程](pod-network-creation.md)——veth pair、IP 分配。CoreDNS Pod 的 IP 就是通过 CNI 分配的
 - [kube-proxy 工作原理详解](https://1hairlabs.cn/kubernetes/architecture/network/kube-proxy/)——站点入门文章，kube-dns Service 的 iptables 规则跟普通 Service 完全一样
-- [Kubernetes Pod 生命周期源码解析](../pod-lifecycle/)——Pod 从 Pending 到 Running 的完整链路
+- [Kubernetes Pod 生命周期源码解析](../node/pod-lifecycle.md)——Pod 从 Pending 到 Running 的完整链路
 
 ---
 

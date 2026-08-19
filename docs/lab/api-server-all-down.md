@@ -38,9 +38,9 @@ API Server 是 Kubernetes 控制平面的核心入口，也是所有资源操作
 !!! tip "系列文章"
     本文是 **Kubernetes Cluster HA 故障演练** 系列的第四篇。
 
-    - [EP.1：一台 Master 宕机](/lab/failover-test-1/) —— 验证单 Master 故障下集群是否无感知
-    - [EP.2：LB 节点整机宕机](/lab/failover-test-2/) —— 验证 VIP 漂移与 kubectl 中断时间
-    - [EP.3：ETCD 多数派失效](/lab/failover-test-3/) —— 验证控制面瘫痪与数据面存活
+    - [EP.1：一台 Master 宕机](failover-test-1.md) —— 验证单 Master 故障下集群是否无感知
+    - [EP.2：LB 节点整机宕机](failover-test-2.md) —— 验证 VIP 漂移与 kubectl 中断时间
+    - [EP.3：ETCD 多数派失效](failover-test-3.md) —— 验证控制面瘫痪与数据面存活
     - **EP.4：API Server 全挂**（本文）—— 验证控制面入口消失后各组件的降级行为
 
 ---
@@ -89,7 +89,7 @@ flowchart TB
     M3 --> OK2[✅ running]
 ```
 
-如果 `master01` 上的 API Server 进程异常退出，但负载均衡器的健康检查正常且其余两个实例正常运行，那么用户几乎无感知——`kubectl` 请求会自动转发到 `master02` 或 `master03`，集群功能不受任何影响。这正是 [EP.1 故障演练](/lab/failover-test-1/) 中验证过的场景。
+如果 `master01` 上的 API Server 进程异常退出，但负载均衡器的健康检查正常且其余两个实例正常运行，那么用户几乎无感知——`kubectl` 请求会自动转发到 `master02` 或 `master03`，集群功能不受任何影响。这正是 [EP.1 故障演练](failover-test-1.md) 中验证过的场景。
 
 **场景二：所有 API Server 实例不可用**
 
@@ -121,7 +121,7 @@ kubectl get nodes
 etcdserver: request timed out
 ```
 
-这种场景下，部分"只读"且能被 Watch Cache 响应的请求可能短暂成功，但任何写操作或需要从 etcd 获取最新版本的请求都会报错。其影响与 API Server 全宕类似，但故障现象更"诡异"。这正是 [EP.3：ETCD 多数派失效](/lab/failover-test-3/) 中验证过的场景。
+这种场景下，部分"只读"且能被 Watch Cache 响应的请求可能短暂成功，但任何写操作或需要从 etcd 获取最新版本的请求都会报错。其影响与 API Server 全宕类似，但故障现象更"诡异"。这正是 [EP.3：ETCD 多数派失效](failover-test-3.md) 中验证过的场景。
 
 本文重点讨论的是**场景二：所有 API Server 实例同时不可用**，这也是最能帮助我们理解控制面与数据面边界的场景。
 
@@ -141,7 +141,7 @@ etcdserver: request timed out
    Kubernetes 组件之间极少直接通信。例如 Controller 从不直接命令 kubelet 启动容器，而是通过 API Server 更新 Pod 对象，再由 kubelet 自行发现并执行。这种模式使得整个系统具备极高的扩展性与容错性。
 
 !!! note "延伸阅读"
-    关于 API Server 的六大核心职责、请求处理流水线以及 Watch 机制的深入解析，请参阅 [Kubernetes API Server 详解：集群的神经中枢与统一入口](/kubernetes/architecture/api-server/)。
+    关于 API Server 的六大核心职责、请求处理流水线以及 Watch 机制的深入解析，请参阅 [Kubernetes API Server 详解：集群的神经中枢与统一入口](../kubernetes/architecture/control-plane/api-server.md)。
 
 下表总结了各组件对 API Server 的依赖关系及故障影响：
 
@@ -324,7 +324,7 @@ API Server 不可用后，kubelet 的以下功能会受到影响：
     API Server 故障期间，kubelet **仍然能够继续维护已运行的容器**，执行本地探针与重启策略。但它无法获取新的 Pod 配置，也无法向控制面同步节点及 Pod 的最新状态。节点上的业务容器不会因为 API Server 宕机而终止。
 
 !!! tip "延伸阅读"
-    关于 kubelet 的完整工作原理、PLEG 机制与 Pod 生命周期管理，请参阅 [Kubelet 工作原理详解：Node 节点上的核心管家](/kubernetes/architecture/kubelet/)。
+    关于 kubelet 的完整工作原理、PLEG 机制与 Pod 生命周期管理，请参阅 [Kubelet 工作原理详解：Node 节点上的核心管家](../kubernetes/architecture/node/kubelet.md)。
 
 ### 2.4 kube-proxy：已有网络规则不会立即消失
 
@@ -365,7 +365,7 @@ kube-proxy 通过 Watch API Server 获取 Service、Endpoints（或 EndpointSlic
     etcd 的运行完全独立于 API Server。API Server 只是 etcd 的一个客户端，API Server 宕机不会导致 etcd 停止。只要 etcd 集群自身满足法定人数（quorum），它就会继续运行，直到 API Server 恢复。
 
 !!! tip "延伸阅读"
-    关于 etcd 在 Kubernetes 中的角色、Raft 一致性协议以及为什么不能直接修改 etcd 数据，请参阅 [为什么 Kubernetes 不允许直接修改 etcd？](/kubernetes/architecture/why-not-directly-modify-etcd/) 和 [etcd 架构详解](/kubernetes/architecture/etcd/)。
+    关于 etcd 在 Kubernetes 中的角色、Raft 一致性协议以及为什么不能直接修改 etcd 数据，请参阅 [为什么 Kubernetes 不允许直接修改 etcd？](../kubernetes/architecture/control-plane/why-not-directly-modify-etcd.md) 和 [etcd 架构详解](../kubernetes/architecture/control-plane/etcd.md)。
 
 ### 2.6 已有 Pod 的生命周期：为什么 Pod 不会被杀？
 
@@ -924,9 +924,9 @@ flowchart LR
 !!! tip "故障演练系列"
     本站的故障实验室已经完成了多轮演练，欢迎结合阅读：
 
-    - [EP.1：一台 Master 宕机](/lab/failover-test-1/) —— 单 Master 故障，集群无感知
-    - [EP.2：LB 节点整机宕机](/lab/failover-test-2/) —— VIP 漂移，kubectl 短暂卡顿
-    - [EP.3：ETCD 多数派失效](/lab/failover-test-3/) —— 控制面瘫痪，数据面存活
+    - [EP.1：一台 Master 宕机](failover-test-1.md) —— 单 Master 故障，集群无感知
+    - [EP.2：LB 节点整机宕机](failover-test-2.md) —— VIP 漂移，kubectl 短暂卡顿
+    - [EP.3：ETCD 多数派失效](failover-test-3.md) —— 控制面瘫痪，数据面存活
 
 ---
 
@@ -946,7 +946,7 @@ flowchart LR
 
 **Q4：多 Master 环境下只有一个 API Server 挂了有影响吗？**
 
-**A：正常无影响。** 负载均衡器会自动将流量导向健康的 API Server 实例。这正是 [EP.1 故障演练](/lab/failover-test-1/) 中验证过的场景。
+**A：正常无影响。** 负载均衡器会自动将流量导向健康的 API Server 实例。这正是 [EP.1 故障演练](failover-test-1.md) 中验证过的场景。
 
 **Q5：API Server 恢复后，故障期间的数据会丢失吗？**
 
@@ -981,9 +981,9 @@ flowchart LR
 
 | 文章 | 故障场景 | 核心验证 |
 | --- | --- | --- |
-| [EP.1：一台 Master 宕机](/lab/failover-test-1/) | 强制关闭一台 Master 节点 | kubectl 是否中断、etcd 多数派是否保持、业务是否受影响 |
-| [EP.2：LB 节点整机宕机](/lab/failover-test-2/) | 打挂 Keepalived + HAProxy | VIP 能否自动漂移、kubectl 是否中断 |
-| [EP.3：ETCD 多数派失效](/lab/failover-test-3/) | 停掉 3 个 etcd 中的 2 个 | 控制面是否瘫痪、数据面是否存活 |
+| [EP.1：一台 Master 宕机](failover-test-1.md) | 强制关闭一台 Master 节点 | kubectl 是否中断、etcd 多数派是否保持、业务是否受影响 |
+| [EP.2：LB 节点整机宕机](failover-test-2.md) | 打挂 Keepalived + HAProxy | VIP 能否自动漂移、kubectl 是否中断 |
+| [EP.3：ETCD 多数派失效](failover-test-3.md) | 停掉 3 个 etcd 中的 2 个 | 控制面是否瘫痪、数据面是否存活 |
 | **EP.4：API Server 全挂（本文）** | 停止所有 API Server 实例 | 各组件降级行为、Pod 是否存活、集群如何自愈 |
 
 ## 参考资料
@@ -992,7 +992,7 @@ flowchart LR
 - [Kubernetes 官方文档：Control Plane-Node Communication](https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/)
 - [Kubernetes 官方文档：Kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)
 - [client-go Informer 工作机制](https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md)
-- [API Server 详解](/kubernetes/architecture/api-server/)
-- [Controller Manager 详解](/kubernetes/architecture/controller-manager/)
-- [Kubelet 详解](/kubernetes/architecture/kubelet/)
-- [为什么不能直接修改 etcd](/kubernetes/architecture/why-not-directly-modify-etcd/)
+- [API Server 详解](../kubernetes/architecture/control-plane/api-server.md)
+- [Controller Manager 详解](../kubernetes/architecture/control-plane/controller-manager.md)
+- [Kubelet 详解](../kubernetes/architecture/node/kubelet.md)
+- [为什么不能直接修改 etcd](../kubernetes/architecture/control-plane/why-not-directly-modify-etcd.md)

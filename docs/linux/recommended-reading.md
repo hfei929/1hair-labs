@@ -98,12 +98,12 @@ Linux 的学习资源浩如烟海，但质量参差不齐。踩过坑的人都�
 
 | 阶段 | 本站文章 | 推荐书目 |
 | --- | --- | --- |
-| 1. 系统基础 | [目录结构](../base-system/linux-directory-structure.md)、[常用命令](../base-system/common-commands.md) | 《鸟哥基础篇》或《The Linux Command Line》 |
-| 2. 权限与安全 | [用户和权限](../security/user-and-permission.md)、[SSH 安全](../security/ssh-hardening.md) | 《Linux 系统管理技术手册》安全章节 |
-| 3. 网络 | [网络管理](../network/network.md)、[网络概览](../network/index.md) | 《TCP/IP Illustrated》卷一 |
-| 4. 存储 | [存储管理](../storage/storage.md)、[存储概览](../storage/index.md) | 《Linux 系统管理技术手册》存储章节 |
-| 5. 性能 | [性能概览](../performance/index.md)、[性能优化](../performance/performance-optimization.md) | 《Systems Performance》 |
-| 6. Shell | [Shell 基础](../shell/index.md) | 《Linux 命令行与 Shell 脚本编程大全》 |
+| 1. 系统基础 | [目录结构](base-system/linux-directory-structure.md)、[常用命令](base-system/common-commands.md) | 《鸟哥基础篇》或《The Linux Command Line》 |
+| 2. 权限与安全 | [用户和权限](security/user-and-permission.md)、[SSH 安全](security/ssh-hardening.md) | 《Linux 系统管理技术手册》安全章节 |
+| 3. 网络 | [网络管理](network/network.md)、[网络概览](network/index.md) | 《TCP/IP Illustrated》卷一 |
+| 4. 存储 | [存储管理](storage/storage.md)、[存储概览](storage/index.md) | 《Linux 系统管理技术手册》存储章节 |
+| 5. 性能 | [性能概览](performance/index.md)、[性能优化](performance/performance-optimization.md) | 《Systems Performance》 |
+| 6. Shell | [Shell 基础](shell/index.md) | 《Linux 命令行与 Shell 脚本编程大全》 |
 
 ---
 

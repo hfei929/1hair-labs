@@ -37,10 +37,10 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 | 文章 | 说明 |
 |---|---|
 | [Control Plane 专题](architecture/control-plane/index.md) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
-| [API Server](architecture/api-server/) | 集群统一入口，所有操作经过这里 |
-| [ETCD](architecture/etcd/) | 集群状态存储，唯一有状态组件 |
-| [Scheduler](architecture/scheduler/) | Pod 调度决策 |
-| [Controller Manager](architecture/controller-manager/) | 控制循环与状态协调 |
+| [API Server](architecture/control-plane/api-server.md) | 集群统一入口，所有操作经过这里 |
+| [ETCD](architecture/control-plane/etcd.md) | 集群状态存储，唯一有状态组件 |
+| [Scheduler](architecture/control-plane/scheduler.md) | Pod 调度决策 |
+| [Controller Manager](architecture/control-plane/controller-manager.md) | 控制循环与状态协调 |
  | [Control Plane 专题](architecture/control-plane/index.md) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
  | [API Server](architecture/control-plane/api-server.md) | 集群统一入口，所有操作经过这里 |
  | [ETCD](architecture/control-plane/etcd.md) | 集群状态存储，唯一有状态组件 |
@@ -49,14 +49,14 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 | 文章 | 说明 |
 |---|---|
 | [Node & Runtime 专题](architecture/node/index.md) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
-| [Worker Node 架构](architecture/worker-node/) | 节点层的职责与整体执行链路 |
-| [Pod 生命周期](architecture/pod-lifecycle/) | 从 Pending 到 Running 的完整生命周期 |
-| [Kubelet](architecture/kubelet/) | 节点代理，管理 Pod 生命周期 |
-| [Kubelet SyncLoop](architecture/kubelet-syncloop/) | kubelet 如何持续调谐 Pod 状态 |
+| [Worker Node 架构](architecture/node/worker-node.md) | 节点层的职责与整体执行链路 |
+| [Pod 生命周期](architecture/node/pod-lifecycle.md) | 从 Pending 到 Running 的完整生命周期 |
+| [Kubelet](architecture/node/kubelet.md) | 节点代理，管理 Pod 生命周期 |
+| [Kubelet SyncLoop](architecture/node/kubelet-syncloop.md) | kubelet 如何持续调谐 Pod 状态 |
  | [Node & Runtime 专题](architecture/node/index.md) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
-| [CRI gRPC 调用详解](architecture/cri-grpc-deep/) | kubelet 与运行时之间的接口细节 |
-| [containerd 创建容器全过程](architecture/containerd-from-cri-to-runc/) | 从 CRI 到 runc 的完整执行路径 |
-| [Kube Proxy](architecture/kube-proxy/) | 服务发现与流量转发 |
+| [CRI gRPC 调用详解](architecture/node/cri-grpc-deep.md) | kubelet 与运行时之间的接口细节 |
+| [containerd 创建容器全过程](architecture/node/containerd-from-cri-to-runc.md) | 从 CRI 到 runc 的完整执行路径 |
+| [Kube Proxy](architecture/network/kube-proxy.md) | 服务发现与流量转发 |
 
 ### 网络
 
@@ -66,8 +66,8 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 |---|---|
 | [Network 专题](architecture/network/index.md) | 网络模型、CNI、Service 与 Ingress 的统一入口 |
 | [Kubernetes 网络模型](architecture/network/index.md) | Pod 网络、Service 网络与节点网络 |
-| [CNI](architecture/cni/) | 容器网络接口与主流插件 |
-| [Ingress](architecture/ingress/) | 七层流量入口与 Ingress Controller |
+| [CNI](architecture/network/cni.md) | 容器网络接口与主流插件 |
+| [Ingress](architecture/network/ingress.md) | 七层流量入口与 Ingress Controller |
 
 ### 存储
 
@@ -75,17 +75,17 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 |---|---|
 | [Storage 专题](architecture/storage/index.md) | PV / PVC / StorageClass / CSI 的统一入口 |
 | [存储系统](architecture/storage/index.md) | PV / PVC / StorageClass |
-| [CSI](architecture/csi/) | 容器存储接口与驱动 |
+| [CSI](architecture/storage/csi.md) | 容器存储接口与驱动 |
 
 ### 资源与安全
 
 | 文章 | 说明 |
 |---|---|
-| [Workloads](architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
-| [API Resources](architecture/api-resources/) | 集群 API 资源全景 |
-| [Server Resources](architecture/server-resources/) | 节点资源与容量管理 |
-| [Other Resources](architecture/other-resources/) | 其他集群资源 |
-| [安全机制](architecture/security/) | RBAC / SecurityContext / Pod Security |
+| [Workloads](architecture/resources/workloads.md) | Pod / Deployment / StatefulSet / DaemonSet |
+| [API Resources](architecture/resources/api-resources.md) | 集群 API 资源全景 |
+| [Server Resources](architecture/resources/server-resources.md) | 节点资源与容量管理 |
+| [Other Resources](architecture/resources/other-resources.md) | 其他集群资源 |
+| [安全机制](architecture/resources/security.md) | RBAC / SecurityContext / Pod Security |
 
 ### 最佳实践
 

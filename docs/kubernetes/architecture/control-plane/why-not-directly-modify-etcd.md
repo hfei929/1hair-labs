@@ -75,7 +75,7 @@ flowchart LR
 
 但真实的数据流远比这复杂。在继续深入之前，建议先回顾站内两篇前置文章：
 
-- [Kubernetes API Server 详解](./api-resources.md)：集群的神经中枢与统一入口 —— 理解 API Server 在控制面中的核心地位
+- [Kubernetes API Server 详解](../resources/api-resources.md)：集群的神经中枢与统一入口 —— 理解 API Server 在控制面中的核心地位
 - [Kubernetes ETCD 工作原理详解](./etcd.md) —— 理解 etcd 的数据存储机制与 Raft 一致性算法
 
 真实的请求链路是这样的：
@@ -328,9 +328,9 @@ etcd 从来不是 Kubernetes 对外暴露的接口，只是控制面的底层状
 
 |序号|	文章|	说明|
 |---|---|---|
-|1	|[Kubernetes API Server 详解：集群的神经中枢与统一入口](control-plane/api-server.md)	|理解 API Server 的六大核心职责|
-|2	|[Kubernetes ETCD 工作原理详解](control-plane/etcd.md)	|理解 etcd 的数据存储与 Raft 算法|
-|3	|[为什么 Kubernetes 不允许直接修改 etcd？（本文）](control-plane/why-not-directly-modify-etcd.md)|	API Server 存在的真正意义|
+|1	|[Kubernetes API Server 详解：集群的神经中枢与统一入口](api-server.md)	|理解 API Server 的六大核心职责|
+|2	|[Kubernetes ETCD 工作原理详解](etcd.md)	|理解 etcd 的数据存储与 Raft 算法|
+|3	|[为什么 Kubernetes 不允许直接修改 etcd？（本文）](why-not-directly-modify-etcd.md)|	API Server 存在的真正意义|
 |4	|如果 API Server 挂了，整个 Kubernetes 集群会发生什么？|（敬请期待）	API Server 的容灾边界实验|
 
 ## 参考资料

@@ -778,5 +778,5 @@ jq '.items[] | select(.metadata.namespace == "kube-system")' /tmp/pods.json | jq
 
 ## 相关阅读
 
-- [yq 命令详解](../yq-command-guide/)：处理 YAML 的工具，与 jq 配合使用
-- [文本处理三剑客](../text-processing/)：grep、sed、awk 基础
+- [yq 命令详解](yq-command-guide.md)：处理 YAML 的工具，与 jq 配合使用
+- [文本处理三剑客](text-processing.md)：grep、sed、awk 基础

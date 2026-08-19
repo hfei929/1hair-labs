@@ -17,8 +17,8 @@ Node 与运行时是 Kubernetes 最接近“实际执行层”的部分。这里
 
 ## 推荐阅读
 
-- [Worker Node 架构原理](../worker-node.md)
-- [Kubernetes Pod 生命周期源码解析](../pod-lifecycle.md)
-- [Kubelet SyncLoop 工作原理](../kubelet-syncloop.md)
-- [CRI gRPC 调用详解](../cri-grpc-deep.md)
-- [containerd 创建容器全过程](../containerd-from-cri-to-runc.md)
+- [Worker Node 架构原理](worker-node.md)
+- [Kubernetes Pod 生命周期源码解析](pod-lifecycle.md)
+- [Kubelet SyncLoop 工作原理](kubelet-syncloop.md)
+- [CRI gRPC 调用详解](cri-grpc-deep.md)
+- [containerd 创建容器全过程](containerd-from-cri-to-runc.md)

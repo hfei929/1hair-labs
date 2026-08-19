@@ -845,7 +845,7 @@ Kubernetes 1.36
 
 ## 相关阅读
   - [kubectl drain 到底做了什么？](../practice/kubectl-drain.md)
-  - [Kubernetes 架构详解：从 API Server 到 ETCD](../architecture/etcd.md)
-  - [Kubernetes Control Plane 组件详解](../architecture/controller-manager.md)
+  - [Kubernetes 架构详解：从 API Server 到 ETCD](../architecture/control-plane/etcd.md)
+  - [Kubernetes Control Plane 组件详解](../architecture/control-plane/controller-manager.md)
   - [Kubernetes ETCD 备份与恢复实战](../../lab/failover-test-1.md)
   - [Kubernetes Pod OOM 故障排查指南](../../lab/pod-oom-test.md)

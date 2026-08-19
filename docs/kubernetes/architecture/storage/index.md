@@ -16,5 +16,5 @@ description: Kubernetes 存储模型、PV、PVC、StorageClass 与 CSI 的归档
 
 ## 推荐阅读
 
-- [Kubernetes 存储资源](../storage.md)
-- [CSI 原理](../csi.md)
+- [Kubernetes 存储资源](storage.md)
+- [CSI 原理](csi.md)

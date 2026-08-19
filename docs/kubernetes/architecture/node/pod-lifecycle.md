@@ -381,7 +381,7 @@ Events:
 
 Scheduler 把 `nodeName` 写回 API Server 之后，目标节点上的 kubelet 通过 Reflector 的 List + Watch 机制收到了这个变更。Watch 推送的是一个 ADD 事件，封装成 `PodUpdate` 通过 Channel 传给 SyncLoop。
 
-这部分在[SyncLoop 那篇文章](../kubelet-syncloop)里详细拆过，这里只引用结论：SyncLoop 收到 ADD 事件后，把 Pod 交给 PodWorkers，PodWorkers 按 Pod 维度串行调用 `SyncPod()`。
+这部分在[SyncLoop 那篇文章](kubelet-syncloop.md)里详细拆过，这里只引用结论：SyncLoop 收到 ADD 事件后，把 Pod 交给 PodWorkers，PodWorkers 按 Pod 维度串行调用 `SyncPod()`。
 
 ### SyncPod 源码解析
 
@@ -478,7 +478,7 @@ func (m *kubeGenericRuntimeManager) computePodActions(
 
 ## 七、阶段四：ContainerCreating——容器创建的五个子步骤
 
-Pod 进入 ContainerCreating 阶段后，kubelet 通过 CRI 依次调用 containerd，执行五个子步骤。这部分在[CRI 那篇文章](../cri-grpc)和[containerd 那篇文章](../containerd)里详细拆过，这里按时间线串联。
+Pod 进入 ContainerCreating 阶段后，kubelet 通过 CRI 依次调用 containerd，执行五个子步骤。这部分在[CRI 那篇文章](cri-grpc-deep.md)和[containerd 那篇文章](containerd-from-cri-to-runc.md)里详细拆过，这里按时间线串联。
 
 ### 子步骤时间线
 
@@ -738,7 +738,7 @@ status:
 这就是 K8s 容器自动重启的底层机制——不是 Controller Manager 在远程重启，是本节点 kubelet 通过 PLEG 感知后自己处理的。
 
 !!! tip "PLEG 与 SyncLoop 的详细机制"
-    PLEG 的 relist 循环、SyncLoop 的四路输入、PodWorkers 的串行设计，在 [SyncLoop 那篇文章](../kubelet-syncloop)里详细拆过。这里只引用结论：PLEG 是 kubelet 感知真实世界变化的"眼睛"。
+    PLEG 的 relist 循环、SyncLoop 的四路输入、PodWorkers 的串行设计，在 [SyncLoop 那篇文章](kubelet-syncloop.md)里详细拆过。这里只引用结论：PLEG 是 kubelet 感知真实世界变化的"眼睛"。
 
 ## 九、阶段六：Pod 删除——反向流程
 
@@ -1017,11 +1017,11 @@ flowchart TD
 
 ## 十四、相关阅读
 
-- [Kubernetes kubelet SyncLoop 原理](../kubelet-syncloop)——SyncLoop 四路输入、PodWorkers 串行设计、PLEG relist 机制详解
-- [Kubernetes CRI 原理](../cri-grpc)——三个 gRPC 请求的 protobuf 定义、参数和返回值
-- [containerd 创建容器全过程](../containerd)——containerd 内部五个模块、Snapshotter、containerd-shim 机制
-- [Kubernetes CNI 网络原理](../cni)（计划中）——Pod IP 是怎么来的
-- [Kubernetes CSI 存储机制](../csi)（计划中）——Volume 挂载和卸载流程
+- [Kubernetes kubelet SyncLoop 原理](kubelet-syncloop.md)——SyncLoop 四路输入、PodWorkers 串行设计、PLEG relist 机制详解
+- [Kubernetes CRI 原理](cri-grpc-deep.md)——三个 gRPC 请求的 protobuf 定义、参数和返回值
+- [containerd 创建容器全过程](containerd-from-cri-to-runc.md)——containerd 内部五个模块、Snapshotter、containerd-shim 机制
+- [Kubernetes CNI 网络原理](../network/cni.md)（计划中）——Pod IP 是怎么来的
+- [Kubernetes CSI 存储机制](../storage/csi.md)（计划中）——Volume 挂载和卸载流程
 
 ---
 

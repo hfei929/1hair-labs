@@ -101,7 +101,7 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 目录结构说明](../linux/base-system/linux-directory-structure) | 理解 FHS 标准和每个目录的用途 |
+| [Linux 目录结构说明](../linux/base-system/linux-directory-structure.md) | 理解 FHS 标准和每个目录的用途 |
 | [Linux 常用命令](../linux/base-system/common-commands.md) | 日常运维高频命令速查 |
 | [Linux 完整命令](../linux/base-system/all-commands.md) | 按功能分类的完整命令参考 |
 | [Linux 软件包管理](../linux/base-system/package-management.md) | apt / yum / dnf / dpkg / rpm |
@@ -110,7 +110,7 @@ mindmap
 | [Linux 系统故障排除](../linux/base-system/troubleshooting.md) | 常见系统故障的定位方法 |
 | [用户和权限管理](../linux/security/user-and-permission.md) | 用户/组/ACL/SELinux 基础 |
 | [性能优化](../linux/performance/performance-optimization.md) | CPU / 内存 / IO / 网络调优 |
-| [Shell 脚本](../linux/shell/shell/) | Shell 基础语法和常用脚本 |
+| [Shell 脚本](../linux/shell/index.md) | Shell 基础语法和常用脚本 |
 
 **学完后你应该能够：**
 
@@ -187,23 +187,23 @@ mindmap
 | 文章 | 说明 |
 |---|---|
 | [Kubernetes 架构总览](../kubernetes/architecture/index.md) | 控制平面 / 数据平面 / 组件协作 |
-| [API Server](../kubernetes/architecture/api-server/) | 集群入口与认证授权 |
-| [Scheduler](../kubernetes/architecture/scheduler/) | 调度算法与节点选择 |
-| [Controller Manager](../kubernetes/architecture/controller-manager/) | 控制循环与声明式模型 |
-| [Kubelet](../kubernetes/architecture/kubelet/) | 节点代理与 Pod 生命周期 |
-| [Kube-Proxy](../kubernetes/architecture/kube-proxy/) | Service 转发与负载均衡 |
-| [etcd](../kubernetes/architecture/etcd/) | 集群状态存储与一致性 |
-| [CNI](../kubernetes/architecture/cni/) | 容器网络接口与插件 |
-| [Ingress](../kubernetes/architecture/ingress/) | 七层路由与流量管理 |
-| [CRI](../kubernetes/architecture/cri/) | 容器运行时接口 |
-| [CSI](../kubernetes/architecture/csi/) | 容器存储接口 |
-| [API Resources](../kubernetes/architecture/api-resources/) | 资源对象总览 |
-| [Workloads](../kubernetes/architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
-| [Server Resources](../kubernetes/architecture/server-resources/) | Node / Namespace / ResourceQuota |
+| [API Server](../kubernetes/architecture/control-plane/api-server.md) | 集群入口与认证授权 |
+| [Scheduler](../kubernetes/architecture/control-plane/scheduler.md) | 调度算法与节点选择 |
+| [Controller Manager](../kubernetes/architecture/control-plane/controller-manager.md) | 控制循环与声明式模型 |
+| [Kubelet](../kubernetes/architecture/node/kubelet.md) | 节点代理与 Pod 生命周期 |
+| [Kube-Proxy](../kubernetes/architecture/network/kube-proxy.md) | Service 转发与负载均衡 |
+| [etcd](../kubernetes/architecture/control-plane/etcd.md) | 集群状态存储与一致性 |
+| [CNI](../kubernetes/architecture/network/cni.md) | 容器网络接口与插件 |
+| [Ingress](../kubernetes/architecture/network/ingress.md) | 七层路由与流量管理 |
+| [CRI](../kubernetes/architecture/node/cri.md) | 容器运行时接口 |
+| [CSI](../kubernetes/architecture/storage/csi.md) | 容器存储接口 |
+| [API Resources](../kubernetes/architecture/resources/api-resources.md) | 资源对象总览 |
+| [Workloads](../kubernetes/architecture/resources/workloads.md) | Pod / Deployment / StatefulSet / DaemonSet |
+| [Server Resources](../kubernetes/architecture/resources/server-resources.md) | Node / Namespace / ResourceQuota |
 | [Storage](../kubernetes/architecture/storage/index.md) | PV / PVC / StorageClass |
 | [Network](../kubernetes/architecture/network/index.md) | Service / DNS / NetworkPolicy |
-| [Security](../kubernetes/architecture/security/) | RBAC / ServiceAccount / PodSecurity |
-| [Other Resources](../kubernetes/architecture/other-resources/) | ConfigMap / Secret / HPAs |
+| [Security](../kubernetes/architecture/resources/security.md) | RBAC / ServiceAccount / PodSecurity |
+| [Other Resources](../kubernetes/architecture/resources/other-resources.md) | ConfigMap / Secret / HPAs |
 
 #### 部署实践
 

@@ -88,7 +88,7 @@ mindmap
 
 不确定从哪里开始？先看这篇：
 
-👉 [K8s 从入门到上线完整路线](../K8s-beginner-to-production/) — 7 个阶段，每阶段附"今日任务"，直接照着做。
+👉 [K8s 从入门到上线完整路线](K8s-beginner-to-production.md) — 7 个阶段，每阶段附"今日任务"，直接照着做。
 
 按你的阶段选择入口：
 
@@ -119,12 +119,12 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [API Server](../architecture/api-server/) | 所有操作的唯一入口 |
-| [ETCD](../architecture/etcd/) | 集群的"大脑记忆" |
-| [Scheduler](../architecture/scheduler/) | Pod 放到哪个节点，谁决定 |
-| [Controller Manager](../architecture/controller-manager/) | 声明式状态如何收敛 |
-| [Kubelet](../architecture/kubelet/) | 节点上的 Pod 管家 |
-| [Kube Proxy](../architecture/kube-proxy/) | Service 背后的流量转发 |
+| [API Server](architecture/control-plane/api-server.md) | 所有操作的唯一入口 |
+| [ETCD](architecture/control-plane/etcd.md) | 集群的"大脑记忆" |
+| [Scheduler](architecture/control-plane/scheduler.md) | Pod 放到哪个节点，谁决定 |
+| [Controller Manager](architecture/control-plane/controller-manager.md) | 声明式状态如何收敛 |
+| [Kubelet](architecture/node/kubelet.md) | 节点上的 Pod 管家 |
+| [Kube Proxy](architecture/network/kube-proxy.md) | Service 背后的流量转发 |
 
 **学完后你应该能够：**
 
@@ -152,8 +152,8 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Workloads](../architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
-| [API Resources](../architecture/api-resources/) | 集群 API 资源全景 |
+| [Workloads](architecture/resources/workloads.md) | Pod / Deployment / StatefulSet / DaemonSet |
+| [API Resources](architecture/resources/api-resources.md) | 集群 API 资源全景 |
 
 **学完后你应该能够：**
 
@@ -180,10 +180,10 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 
 | 文章 | 说明 |
 |---|---|
-| [Kubernetes 网络模型](../architecture/network/) | 三层网络的关淤 |
-| [CNI](../architecture/cni/) | 容器网络接口与主流插件对比 |
-| [Ingress](../architecture/ingress/) | 七层流量入口 |
-| [Kube Proxy](../architecture/kube-proxy/) | iptables vs IPVS |
+| [Kubernetes 网络模型](../linux/network/network.md) | 三层网络的关淤 |
+| [CNI](architecture/network/cni.md) | 容器网络接口与主流插件对比 |
+| [Ingress](architecture/network/ingress.md) | 七层流量入口 |
+| [Kube Proxy](architecture/network/kube-proxy.md) | iptables vs IPVS |
 
 **学完后你应该能够：**
 
@@ -209,8 +209,8 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 
 | 文章 | 说明 |
 |---|---|
-| [存储系统](../architecture/storage/) | PV / PVC / StorageClass |
-| [CSI](../architecture/csi/) | 容器存储接口 |
+| [存储系统](architecture/storage/index.md) | PV / PVC / StorageClass |
+| [CSI](architecture/storage/csi.md) | 容器存储接口 |
 
 **学完后你应该能够：**
 
@@ -236,11 +236,11 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 
 | 文章 | 说明 |
 |---|---|
-| [单 Master 集群部署](../practice/single-master-deployment/) | 第一套 K8s 集群 |
-| [Docker 与 K8s](../practice/docker/) | 容器运行时选型 |
-| [从单 Master 到 HA](../practice/single-master-to-ha/) | 升级路径 |
-| [HA 集群实践](../practice/ha-cluster/) | HAProxy + Keepalived + 3 Master |
-| [K8s 从入门到上线完整路线](../K8s-beginner-to-production/) | 全局视角的实战路线 |
+| [单 Master 集群部署](practice/single-master-deployment.md) | 第一套 K8s 集群 |
+| [Docker 与 K8s](practice/docker.md) | 容器运行时选型 |
+| [从单 Master 到 HA](practice/single-master-to-ha.md) | 升级路径 |
+| [HA 集群实践](practice/ha-cluster.md) | HAProxy + Keepalived + 3 Master |
+| [K8s 从入门到上线完整路线](K8s-beginner-to-production.md) | 全局视角的实战路线 |
 
 **学完后你应该能够：**
 
@@ -267,10 +267,10 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 
 | 文章 | 说明 |
 |---|---|
-| [Requests vs Limits](../practice/requests-vs-limits/) | 调度信号 ≠ 运行时限制 |
-| [资源优化](../practice/resource-optimization/) | 集群资源调优方法 |
-| [安全机制](../architecture/security/) | RBAC / SecurityContext |
-| [10 条实战经验](../practice/10-takeaways/) | 生产环境踩坑总结 |
+| [Requests vs Limits](practice/requests-vs-limits.md) | 调度信号 ≠ 运行时限制 |
+| [资源优化](practice/resource-optimization.md) | 集群资源调优方法 |
+| [安全机制](architecture/resources/security.md) | RBAC / SecurityContext |
+| [10 条实战经验](practice/10-takeaways.md) | 生产环境踩坑总结 |
 
 **学完后你应该能够：**
 
@@ -296,8 +296,8 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 
 | 文章 | 说明 |
 |---|---|
-| [集群升级](../practice/cluster-upgrade/) | 版本升级流程与风险控制 |
-| [kubectl drain](../practice/kubectl-drain/) | 节点维护操作详解 |
+| [集群升级](practice/cluster-upgrade.md) | 版本升级流程与风险控制 |
+| [kubectl drain](practice/kubectl-drain.md) | 节点维护操作详解 |
 
 > 后续补充：ETCD 备份与恢复演练、集群灾备方案、Prometheus + Grafana 监控集成。
 

@@ -16,7 +16,7 @@ description: Kubernetes 控制平面核心组件，如 API Server、Scheduler、
 
 ## 推荐阅读
 
-- [API Server](../api-server.md)
-- [Scheduler](../scheduler.md)
-- [Controller Manager](../controller-manager.md)
-- [Etcd](../etcd.md)
+- [API Server](api-server.md)
+- [Scheduler](scheduler.md)
+- [Controller Manager](controller-manager.md)
+- [Etcd](etcd.md)

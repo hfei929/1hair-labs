@@ -630,9 +630,9 @@ kubectl explain pod.spec
 
 ## 相关阅读
 
-* [Kubernetes Scheduler 工作原理](control-plane/scheduler.md)
-* [Kubernetes Controller Manager 工作原理](control-plane/controller-manager.md)
-* [Kubernetes Kubelet 工作原理](node/kubelet.md)
-* [Kubernetes ETCD 工作原理](control-plane/etcd.md)
-* [Kubernetes CNI 网络模型解析](network/cni.md)
-* [Kubernetes CSI 存储架构解析](storage/csi.md)
+* [Kubernetes Scheduler 工作原理](scheduler.md)
+* [Kubernetes Controller Manager 工作原理](controller-manager.md)
+* [Kubernetes Kubelet 工作原理](../node/kubelet.md)
+* [Kubernetes ETCD 工作原理](etcd.md)
+* [Kubernetes CNI 网络模型解析](../network/cni.md)
+* [Kubernetes CSI 存储架构解析](../storage/csi.md)

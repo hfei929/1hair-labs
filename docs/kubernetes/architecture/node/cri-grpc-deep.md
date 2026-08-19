@@ -20,12 +20,12 @@ tags:
 
 ## 文章摘要
 
-上一篇 [Kubelet SyncLoop 原理](node/kubelet-syncloop.md) 讲到 `SyncPod()` 最终通过 CRI 调用 containerd，但没说 CRI 这一层具体长什么样。本文往下再钻一层：**kubelet 通过 gRPC 向 containerd 发了哪些请求？每个请求的参数和返回值是什么？**
+上一篇 [Kubelet SyncLoop 原理](kubelet-syncloop.md) 讲到 `SyncPod()` 最终通过 CRI 调用 containerd，但没说 CRI 这一层具体长什么样。本文往下再钻一层：**kubelet 通过 gRPC 向 containerd 发了哪些请求？每个请求的参数和返回值是什么？**
 
 读完你会理解：kubelet 自己不创建容器——它只是通过一条 Unix Socket 上的 gRPC 连接，向 containerd 依次发送 `RunPodSandbox` → `CreateContainer` → `StartContainer` 三个核心请求。
 
 !!! info "与 CRI 概念文章的关系"
-    本站已有 [CRI 容器运行时接口](node/cri.md) 全面介绍 CRI 的来龙去脉、OCI/Docker/containerd 生态对比。本文聚焦其中一层——**gRPC 协议层的具体调用**，是 SyncLoop 文章的深度延续。建议按顺序阅读：Worker Node 架构 → SyncLoop 原理 → CRI gRPC 调用。
+    本站已有 [CRI 容器运行时接口](cri.md) 全面介绍 CRI 的来龙去脉、OCI/Docker/containerd 生态对比。本文聚焦其中一层——**gRPC 协议层的具体调用**，是 SyncLoop 文章的深度延续。建议按顺序阅读：Worker Node 架构 → SyncLoop 原理 → CRI gRPC 调用。
 
 ---
 
@@ -51,7 +51,7 @@ flowchart LR
 
 ## 二、前置概念速览
 
-!!! info "CRI 与 containerd 的基础概念请参考已发布的 [CRI 容器运行时接口](node/cri.md)"
+!!! info "CRI 与 containerd 的基础概念请参考已发布的 [CRI 容器运行时接口](cri.md)"
     本文不再重复 CRI 的定义、OCI/Docker/containerd 生态对比等内容。这里仅做最简回顾：
 
 -   **CRI**：Kubernetes 定义的容器运行时标准 gRPC 接口
@@ -195,7 +195,7 @@ service ImageService {
 
 ## 七、SyncPod 内部到底调用哪些 CRI 方法？
 
-回顾 [SyncLoop 文章](node/kubelet-syncloop.md)，SyncPod 执行时按顺序调三个核心 CRI 方法：
+回顾 [SyncLoop 文章](kubelet-syncloop.md)，SyncPod 执行时按顺序调三个核心 CRI 方法：
 
 ```mermaid
 sequenceDiagram
@@ -515,11 +515,11 @@ flowchart LR
 
 | 文章 | 说明 |
 | --- | --- |
-| [Worker Node 架构原理](node/worker-node.md) | 全局视角：六层执行链路 |
-| [Kubelet SyncLoop 原理](node/kubelet-syncloop.md) | SyncPod 内部机制——本文是它的续篇 |
-| [CRI 容器运行时接口](node/cri.md) | CRI/O CI/Docker/containerd 生态全貌 |
-| [Kubelet 工作原理详解](node/kubelet.md) | kubelet 组件级深度解析 |
-| [容器底层原理](../../linux/base-system/container-internals.md) | Linux Namespace + cgroup 动手实验 |
+| [Worker Node 架构原理](worker-node.md) | 全局视角：六层执行链路 |
+| [Kubelet SyncLoop 原理](kubelet-syncloop.md) | SyncPod 内部机制——本文是它的续篇 |
+| [CRI 容器运行时接口](cri.md) | CRI/O CI/Docker/containerd 生态全貌 |
+| [Kubelet 工作原理详解](kubelet.md) | kubelet 组件级深度解析 |
+| [容器底层原理](../../../linux/base-system/container-internals.md) | Linux Namespace + cgroup 动手实验 |
 
 ---
 
@@ -542,7 +542,7 @@ flowchart LR
 
 本文是 Worker Node 系列的第三篇。下一篇自然衔接：
 
-> [Kubernetes containerd 原理：从 CRI 请求到 runc 启动容器全过程](node/containerd-from-cri-to-runc.md)
+> [Kubernetes containerd 原理：从 CRI 请求到 runc 启动容器全过程](containerd-from-cri-to-runc.md)
 
 回答读者追问：containerd 收到 `CreateContainer` 后，到底发生了什么？形成完整链路：
 

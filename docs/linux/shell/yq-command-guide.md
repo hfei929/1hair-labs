@@ -22,7 +22,7 @@ tags:
 
 YAML 是 Kubernetes、Helm、Ansible 等工具的核心配置格式。`grep` 和 `awk` 处理 YAML 的嵌套结构往往很痛苦——缩进层级、数组索引、多文档分隔，这些都不是文本工具擅长的。
 
-`yq` 把 YAML 当作数据结构来处理，支持按层级提取字段、条件筛选、格式转换和原地修改。如果你已经熟悉 [jq](../jq-command-guide/)，yq 的学习曲线会非常顺滑。
+`yq` 把 YAML 当作数据结构来处理，支持按层级提取字段、条件筛选、格式转换和原地修改。如果你已经熟悉 [jq](jq-command-guide.md)，yq 的学习曲线会非常顺滑。
 
 本文以 mikefarah/yq（Go 版）v4 为例，所有命令均在测试集群（3 Master + 3 Worker，K8s 1.36.1）上实际运行验证。
 
@@ -646,5 +646,5 @@ yq -i '.spec.replicas = 99' deployment.yaml
 
 ## 相关阅读
 
-- [jq 命令详解](../jq-command-guide/)：处理 JSON 的工具，与 yq 配合使用
-- [文本处理三剑客](../text-processing/)：grep、sed、awk 基础
+- [jq 命令详解](jq-command-guide.md)：处理 JSON 的工具，与 yq 配合使用
+- [文本处理三剑客](text-processing.md)：grep、sed、awk 基础

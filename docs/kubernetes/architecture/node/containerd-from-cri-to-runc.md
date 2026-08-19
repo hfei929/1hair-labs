@@ -760,10 +760,10 @@ Container Process
 
 | 文章 | 说明 |
 | --- | --- |
-| [Kubelet SyncLoop 原理](node/kubelet-syncloop.md) | 了解 kubelet 如何把 Pod 变成一系列 CRI 调用 |
-| [Kubernetes CRI gRPC 调用详解](node/cri-grpc-deep.md) | 了解 kubelet 与 containerd 之间的 gRPC 请求结构 |
-| [CRI 容器运行时接口](node/cri.md) | 理解 CRI、OCI、Docker、containerd 的整体关系 |
-| [Kubernetes Worker Node 架构原理](node/worker-node.md) | 从全局视角理解 Worker Node 的执行链路 |
+| [Kubelet SyncLoop 原理](kubelet-syncloop.md) | 了解 kubelet 如何把 Pod 变成一系列 CRI 调用 |
+| [Kubernetes CRI gRPC 调用详解](cri-grpc-deep.md) | 了解 kubelet 与 containerd 之间的 gRPC 请求结构 |
+| [CRI 容器运行时接口](cri.md) | 理解 CRI、OCI、Docker、containerd 的整体关系 |
+| [Kubernetes Worker Node 架构原理](worker-node.md) | 从全局视角理解 Worker Node 的执行链路 |
 
 ---
 

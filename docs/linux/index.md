@@ -75,7 +75,7 @@ Linux 日常运维的核心技能。
 
 | 文章 | 说明 |
 |---|---|
-| [Shell 脚本基础](shell/shell/) | Shell 语法与常用脚本实践 |
+| [Shell 脚本基础](shell/index.md) | Shell 语法与常用脚本实践 |
 
 > 后续持续补充：awk/sed、crontab、自动化运维脚本。
 

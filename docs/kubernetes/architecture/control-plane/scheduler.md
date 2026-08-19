@@ -750,7 +750,7 @@ Scheduler 是 Kubernetes 的调度中心。
 
 ## 相关阅读
 
-* [Kubernetes API Server 工作原理](control-plane/api-server.md)
-* [Kubernetes Controller Manager 工作原理](control-plane/controller-manager.md)
-* [Kubernetes Kubelet 工作原理](node/kubelet.md)
-* [Kubernetes ETCD 工作原理](control-plane/etcd.md)
+* [Kubernetes API Server 工作原理](api-server.md)
+* [Kubernetes Controller Manager 工作原理](controller-manager.md)
+* [Kubernetes Kubelet 工作原理](../node/kubelet.md)
+* [Kubernetes ETCD 工作原理](etcd.md)

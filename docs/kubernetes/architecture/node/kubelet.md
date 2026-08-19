@@ -798,8 +798,8 @@ Kubelet 决定如何真正运行起来
 
 ## 相关阅读
 
-* [Kubernetes API Server 工作原理](control-plane/api-server.md)
-* [Kubernetes Controller Manager 工作原理](control-plane/controller-manager.md)
-* [Kubernetes Scheduler 工作原理](control-plane/scheduler.md)
-* [Kubernetes CRI 工作原理](node/cri.md)
+* [Kubernetes API Server 工作原理](../control-plane/api-server.md)
+* [Kubernetes Controller Manager 工作原理](../control-plane/controller-manager.md)
+* [Kubernetes Scheduler 工作原理](../control-plane/scheduler.md)
+* [Kubernetes CRI 工作原理](cri.md)
 * [Kubernetes Pod 生命周期详解]()

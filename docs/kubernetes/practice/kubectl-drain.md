@@ -442,6 +442,6 @@ kubectl drain = 安全下线节点
 
 - [Kubernetes 升级实录：1.34 → 1.36，我踩过的多个坑](../practice/cluster-upgrade.md)
 - [Kubernetes 为什么必须先升级 Master？]()
-- [etcd 为什么是 Kubernetes 的命门？](../architecture/etcd.md)
+- [etcd 为什么是 Kubernetes 的命门？](../architecture/control-plane/etcd.md)
 - [一个废弃参数导致整个节点 NotReady]()
 - [升级完成后必须检查的 10 项指标]()

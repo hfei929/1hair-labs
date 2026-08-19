@@ -95,13 +95,13 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 目录结构说明](../base-system/linux-directory-structure/) | 理解 `/` `/etc` `/var` `/proc` 等目录的设计逻辑 |
-| [Linux 常用命令](../base-system/common-commands/) | 日常运维高频命令速查 |
-| [Linux 完整命令参考](../base-system/all-commands/) | 按功能分类的完整命令手册 |
-| [软件包管理](../base-system/package-management/) | Debian 系和 RHEL 系的包管理对比 |
-| [系统监控](../base-system/system-monitoring/) | top / htop / iostat / vmstat 实战 |
-| [日志管理](../base-system/log-management/) | journald / rsyslog / 日志轮转配置 |
-| [故障排除](../base-system/troubleshooting/) | 常见系统故障的定位思路 |
+| [Linux 目录结构说明](base-system/linux-directory-structure.md) | 理解 `/` `/etc` `/var` `/proc` 等目录的设计逻辑 |
+| [Linux 常用命令](base-system/common-commands.md) | 日常运维高频命令速查 |
+| [Linux 完整命令参考](base-system/all-commands.md) | 按功能分类的完整命令手册 |
+| [软件包管理](base-system/package-management.md) | Debian 系和 RHEL 系的包管理对比 |
+| [系统监控](base-system/system-monitoring.md) | top / htop / iostat / vmstat 实战 |
+| [日志管理](base-system/log-management.md) | journald / rsyslog / 日志轮转配置 |
+| [故障排除](base-system/troubleshooting.md) | 常见系统故障的定位思路 |
 
 **学完后你应该能够：**
 
@@ -127,7 +127,7 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [用户和权限管理](../security/user-and-permission/) | 用户/组/ACL/SELinux 基础 |
+| [用户和权限管理](security/user-and-permission.md) | 用户/组/ACL/SELinux 基础 |
 
 > 后续补充：sudo 与最小权限原则、SELinux 深入实践。
 
@@ -155,7 +155,7 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 网络基础](../network/network/) | 网络配置、接口管理、路由基础 |
+| [Linux 网络基础](network/network.md) | 网络配置、接口管理、路由基础 |
 
 > 后续补充：TCP/IP 协议栈详解、DNS 原理、iptables 与 nftables、VXLAN。
 
@@ -183,7 +183,7 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [数据删除与安全擦除](../security/data-deletion-and-secure-erasure/) | 文件真的删掉了吗？数据恢复与安全销毁原理 |
+| [数据删除与安全擦除](security/data-deletion-and-secure-erasure.md) | 文件真的删掉了吗？数据恢复与安全销毁原理 |
 
 > 后续补充：inode 深入解析、ext4 工作原理、LVM 实践、SSD 与 TRIM。
 
@@ -211,8 +211,8 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [数据删除与安全擦除](../security/data-deletion-and-secure-erasure/) | 安全删除的原理与实践 |
-| [用户和权限管理](../security/user-and-permission/) | 权限体系是安全的基石 |
+| [数据删除与安全擦除](security/data-deletion-and-secure-erasure.md) | 安全删除的原理与实践 |
+| [用户和权限管理](security/user-and-permission.md) | 权限体系是安全的基石 |
 
 > 后续补充：SSH 安全加固、Fail2Ban 实践、LUKS 全盘加密、审计日志分析。
 
@@ -240,7 +240,7 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [性能优化](../performance/performance-optimization/) | CPU / 内存 / IO / 网络调优方法 |
+| [性能优化](performance/performance-optimization.md) | CPU / 内存 / IO / 网络调优方法 |
 
 > 后续补充：CPU 使用率深度解析、Linux 内存管理原理、eBPF 性能分析。
 
@@ -267,7 +267,7 @@ Linux 的安全模型建立在 UID/GID 和文件权限之上。理解这一层�
 
 | 文章 | 说明 |
 |---|---|
-| [Shell 脚本基础](../shell/shell/) | Shell 语法与常用脚本实践 |
+| [Shell 脚本基础](shell/index.md) | Shell 语法与常用脚本实践 |
 
 > 后续补充：awk/sed 实战、crontab 进阶、自动化运维脚本集。
 
@@ -294,7 +294,7 @@ flowchart LR
     click C "../network/network/"
     click D "../security/data-deletion-and-secure-erasure/"
     click E "../base-system/troubleshooting/"
-    click F "../shell/shell/"
+    click F "shell/index.md"
 ```
 
 重点关注：日常运维、故障排查、自动化脚本。

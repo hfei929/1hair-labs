@@ -883,7 +883,7 @@ Pod ping 发出后，终端 A 的 tcpdump 会立刻打印抓到的 IPIP 封装�
 
 外层 IP 头是节点之间的物理 IP，内层 IP 头是 Pod 之间的 IP。这就是 IPIP 封装——Pod 原始的 IP 包被完整塞进了一个新的 IP 包里传输。reply 方向反过来，外层 src/dst 对调。
 
-还有个细节值得注意：ping 输出里 `ttl=62`。原始 ICMP 包的 TTL 起始值是 64（Linux 默认），经过 IPIP 封装后，外层 IP 头的 TTL 是 64，内层 IP 头的 TTL 在经过 worker01 tunl0 封装时减 1，到达 worker02 tunl0 解封装时再减 1，所以 Pod 收到时 TTL=62。可以对照 [Pod 网络创建全过程](../pod-network) 里 `caliXXX` 接口的 TTL 配置来理解。
+还有个细节值得注意：ping 输出里 `ttl=62`。原始 ICMP 包的 TTL 起始值是 64（Linux 默认），经过 IPIP 封装后，外层 IP 头的 TTL 是 64，内层 IP 头的 TTL 在经过 worker01 tunl0 封装时减 1，到达 worker02 tunl0 解封装时再减 1，所以 Pod 收到时 TTL=62。可以对照 [Pod 网络创建全过程](pod-network-creation.md) 里 `caliXXX` 接口的 TTL 配置来理解。
 
 !!! note "为什么 tcpdump 必须在源或目标节点上"
     IPIP 封装包只出现在通信两端的节点物理网卡上。如果 Pod 在 worker02、Pod 在 worker03，它们的 IPIP 流量直接走 worker02 → worker03 的物理链路，不会经过 worker01。所以想抓哪条链路的包，就得在哪个节点上跑 tcpdump。
@@ -1134,11 +1134,11 @@ flowchart TD
 
 ## 十二、相关阅读
 
-- [Pod 网络创建全过程](../pod-network)——单节点内的 Pod 网络创建：veth pair、IP 分配、路由表配置，本文从其中的跨节点路由展开
-- [Kubernetes Pod 生命周期源码解析](../pod-lifecycle)——Pod 从 Pending 到 Running 的完整链路
-- [Kubernetes kubelet SyncLoop 原理](../kubelet-syncloop)——SyncLoop 四路输入、PodWorkers 串行设计
-- [Kubernetes CRI 原理](../cri-grpc)——三个 gRPC 请求的 protobuf 定义
-- [containerd 创建容器全过程](../containerd)——containerd 内部五个模块、Snapshotter 机制
+- [Pod 网络创建全过程](pod-network-creation.md)——单节点内的 Pod 网络创建：veth pair、IP 分配、路由表配置，本文从其中的跨节点路由展开
+- [Kubernetes Pod 生命周期源码解析](../node/pod-lifecycle.md)——Pod 从 Pending 到 Running 的完整链路
+- [Kubernetes kubelet SyncLoop 原理](../node/kubelet-syncloop.md)——SyncLoop 四路输入、PodWorkers 串行设计
+- [Kubernetes CRI 原理](../node/cri-grpc-deep.md)——三个 gRPC 请求的 protobuf 定义
+- [containerd 创建容器全过程](../node/containerd-from-cri-to-runc.md)——containerd 内部五个模块、Snapshotter 机制
 - [Service + kube-proxy](../service-kube-proxy)（计划中）——iptables/ipvs 规则、Service ClusterIP 的实现原理
 
 ---

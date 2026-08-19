@@ -682,11 +682,11 @@ flowchart TD
 
 ## 十、相关阅读
 
-- [Kubernetes Pod 生命周期源码解析](../pod-lifecycle)——Pod 从 Pending 到 Running 的完整链路，本文从其中的 `RunPodSandbox` 步骤展开
-- [Kubernetes kubelet SyncLoop 原理](../kubelet-syncloop)——SyncLoop 四路输入、PodWorkers 串行设计、PLEG relist 机制详解
-- [Kubernetes CRI 原理](../cri-grpc)——三个 gRPC 请求的 protobuf 定义、参数和返回值
-- [containerd 创建容器全过程](../containerd)——containerd 内部五个模块、Snapshotter、containerd-shim 机制
-- [Calico 跨节点通信原理](../calico)（计划中）——BGP 路由、IPIP 隧道、Felix 详解
+- [Kubernetes Pod 生命周期源码解析](../node/pod-lifecycle.md)——Pod 从 Pending 到 Running 的完整链路，本文从其中的 `RunPodSandbox` 步骤展开
+- [Kubernetes kubelet SyncLoop 原理](../node/kubelet-syncloop.md)——SyncLoop 四路输入、PodWorkers 串行设计、PLEG relist 机制详解
+- [Kubernetes CRI 原理](../node/cri-grpc-deep.md)——三个 gRPC 请求的 protobuf 定义、参数和返回值
+- [containerd 创建容器全过程](../node/containerd-from-cri-to-runc.md)——containerd 内部五个模块、Snapshotter、containerd-shim 机制
+- [Calico 跨节点通信原理](calico-bgp.md)（计划中）——BGP 路由、IPIP 隧道、Felix 详解
 
 ---
 

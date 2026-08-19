@@ -2,7 +2,7 @@
 
 > 告别陈旧的 Dashboard，拥抱现代化 K8s 管理新体验
 
-在 [之前](../../news/kubernetes/dashboard.md) 的文章中，分析了 Kubernetes Dashboard 被官方归档的原因，以及 Headlamp 成为推荐替代方案的背景。那么问题来了：**Headlamp 到底怎么部署？与 Dashboard 相比体验如何？是否适合日常运维使用？**
+在之前的文章中，分析了 Kubernetes Dashboard 被官方归档的原因，以及 Headlamp 成为推荐替代方案的背景。那么问题来了：**Headlamp 到底怎么部署？与 Dashboard 相比体验如何？是否适合日常运维使用？**
 
 本文将在真实 Kubernetes 集群中完整部署 Headlamp，通过图文形式带你体验安装、访问、权限配置以及核心功能，帮助你快速判断是否值得迁移。
 

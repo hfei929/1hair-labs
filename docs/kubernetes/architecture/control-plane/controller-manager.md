@@ -701,8 +701,8 @@ Controller Manager 是 Kubernetes 自动化运维能力的核心。
 
 ## 相关阅读
 
-* [Kubernetes API Server 工作原理](control-plane/api-server.md)
-* [Kubernetes Scheduler 工作原理](control-plane/scheduler.md)
-* [Kubernetes Kubelet 工作原理](node/kubelet.md)
-* [Kubernetes ETCD 工作原理](control-plane/etcd.md)
+* [Kubernetes API Server 工作原理](api-server.md)
+* [Kubernetes Scheduler 工作原理](scheduler.md)
+* [Kubernetes Kubelet 工作原理](../node/kubelet.md)
+* [Kubernetes ETCD 工作原理](etcd.md)
 * [Kubernetes Deployment 工作原理]()

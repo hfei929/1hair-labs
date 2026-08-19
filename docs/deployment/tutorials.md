@@ -49,7 +49,7 @@ Linux 是服务器领域最常见的操作系统，也是学习 Docker、Kuberne
 
 | 教程 | 说明 |
 |---|---|
-| [Ubuntu 22.04 安装教程](linux/ubuntu-22.04/) | 从零开始部署 Ubuntu Server，适合新手入门 |
+| [Ubuntu 22.04 安装教程](linux/ubuntu-22.04.md) | 从零开始部署 Ubuntu Server，适合新手入门 |
 | [Rocky Linux 9 安装教程](linux/rocky-linux-9.md) | RHEL 系发行版，企业环境常用 |
 | [CentOS 7 安装教程](linux/centos-7.md) | 旧版 RHEL 系，存量环境维护参考 |
 | [CentOS 8 安装教程](linux/centos-8.md) | CentOS 8 部署流程 |
@@ -66,10 +66,10 @@ Linux 是服务器领域最常见的操作系统，也是学习 Docker、Kuberne
 
 | 教程 | 说明 |
 |---|---|
-| [ESXi 7.0 安装教程](vmware/esxi-7.0/) | VMware 裸金属虚拟化平台部署 |
-| [ESXi 8.0 安装教程](vmware/esxi-8.0/) | ESXi 最新版安装指南 |
-| [vCenter 7.0 安装教程](vmware/vcenter-7.0/) | 集中管理多台 ESXi 主机 |
-| [vCenter 8.0 安装教程](vmware/vcenter-8.0/) | vCenter 最新版部署 |
+| [ESXi 7.0 安装教程](vmware/esxi-7.0.md) | VMware 裸金属虚拟化平台部署 |
+| [ESXi 8.0 安装教程](vmware/esxi-8.0.md) | ESXi 最新版安装指南 |
+| [vCenter 7.0 安装教程](vmware/vcenter-7.0.md) | 集中管理多台 ESXi 主机 |
+| [vCenter 8.0 安装教程](vmware/vcenter-8.0.md) | vCenter 最新版部署 |
 
 ---
 
@@ -114,8 +114,8 @@ flowchart LR
 
 **推荐方向：**
 
-- **Grafana + Prometheus** — 监控平台 → [查看监控专题](/observability/)
-- **Kubernetes 实验集群** — 容器编排实践 → [查看 K8s 实践](/kubernetes/practice/)
+- **Grafana + Prometheus** — 监控平台 → [查看监控专题](../observability/index.md)
+- **Kubernetes 实验集群** — 容器编排实践 → [查看 K8s 实践](../kubernetes/index.md)
 - **Jellyfin** — 家庭影音平台（教程规划中）
 - **Nextcloud** — 私有云盘（教程规划中）
 - **GitLab** — 私有代码仓库（教程规划中）

@@ -211,10 +211,10 @@ src=10.244.5.12 dst=192.168.114.148 sport=80 dport=34188 [ASSURED]
 ```
 
 ORIGINAL 方向：`src=Pod, dst=ClusterIP`
-REPLY 方向：`src=Pod:80, dst=节点IP`——注意这里的 dst 是节点 IP 而不是 Pod IP，说明回包经过了 SNAT（conntrack 的 REPLY 方向记录的是 NAT 改写后的真实地址，详见 [第六节](#62-怎么从-conntrack-条目判断是否发生了-snat)的解释）。
+REPLY 方向：`src=Pod:80, dst=节点IP`——注意这里的 dst 是节点 IP 而不是 Pod IP，说明回包经过了 SNAT（conntrack 的 REPLY 方向记录的是 NAT 改写后的真实地址，详见 [第六节](#62-conntrack-snat)的解释）。
 
 !!! tip "详细实测数据"
-    hairpin NAT 的完整 strace + conntrack 实测数据见 [一行 curl 的完整旅程](./curl-full-link.md#conntrack-证据dnat--round-robin--hairpin)，这里不重复展开。
+    hairpin NAT 的完整 strace + conntrack 实测数据见 [一行 curl 的完整旅程](./curl-full-link.md#conntrack-dnat-round-robin-hairpin)，这里不重复展开。
 
 ## 四、场景二：节点访问 Service
 
@@ -354,7 +354,7 @@ Local 模式下：
 - iptables **只在本节点的后端 Pod 之间**做 DNAT
 - 如果本节点没有后端 Pod，**直接 DROP**（不是转发到其他节点）
 - 外部流量**不做 SNAT**，后端 Pod 看到的源 IP 是真实客户端 IP
-- 但节点本机进程访问 NodePort 仍然做 SNAT（用 `--src-type LOCAL` 精确匹配，详见 [5.5 节](#55-iptables-规则差异)）
+- 但节点本机进程访问 NodePort 仍然做 SNAT（用 `--src-type LOCAL` 精确匹配，详见 [5.5 节](#55-iptables)）
 
 ```bash
 # 切换 nginx-np 为 Local 模式
