@@ -1,5 +1,3 @@
-# Kubernetes SNAT 三种场景：从 hairpin 到 NodePort 的源地址改写
-
 ---
 title: SNAT 三种场景：从 hairpin 到 NodePort 的源地址改写
 description: 拆解 kube-proxy 在三类必须做 SNAT 的场景：Pod hairpin、节点本机访问 Service、以及 NodePort 外部流量。通过 iptables 规则、KUBE-MARK-MASQ 与 POSTROUTING 的工作流程，以及 conntrack 条目的实测证据，说明何时以及为什么会发生 SNAT，以及 externalTrafficPolicy 对 NodePort 的影响。
@@ -17,6 +15,8 @@ tags:
     - hairpin
     - Service
 ---
+
+# Kubernetes SNAT 三种场景：从 hairpin 到 NodePort 的源地址改写
 
 ## 文章摘要
 
