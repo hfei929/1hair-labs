@@ -217,6 +217,7 @@ nav:
             - 网络基础: linux/network/network.md
             - 隧道与覆盖网络: linux/network/vxlan-and-tunnel.md
             - iptables/nftables: linux/network/iptables-nftables-deep.md
+            - conntrack 命令详解: linux/network/conntrack-command-guide.md
 
         - 💾 存储:
             - 存储概览: linux/storage/index.md
