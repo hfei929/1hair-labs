@@ -40,13 +40,13 @@ Linux 日常运维的核心技能。
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 目录结构说明](base-system/linux-directory-structure/) | FHS 标准、各目录用途与设计逻辑 |
-| [Linux 常用命令](base-system/common-commands/) | 日常运维高频命令速查 |
-| [Linux 完整命令参考](base-system/all-commands/) | 按功能分类的完整命令列表 |
-| [软件包管理](base-system/package-management/) | apt / yum / dnf / dpkg / rpm |
-| [系统监控](base-system/system-monitoring/) | top / htop / iostat / vmstat |
-| [日志管理](base-system/log-management/) | journald / rsyslog / 日志轮转 |
-| [故障排除](base-system/troubleshooting/) | 常见系统故障的定位方法 |
+| [Linux 目录结构说明](base-system/linux-directory-structure.md) | FHS 标准、各目录用途与设计逻辑 |
+| [Linux 常用命令](base-system/common-commands.md) | 日常运维高频命令速查 |
+| [Linux 完整命令参考](base-system/all-commands.md) | 按功能分类的完整命令列表 |
+| [软件包管理](base-system/package-management.md) | apt / yum / dnf / dpkg / rpm |
+| [系统监控](base-system/system-monitoring.md) | top / htop / iostat / vmstat |
+| [日志管理](base-system/log-management.md) | journald / rsyslog / 日志轮转 |
+| [故障排除](base-system/troubleshooting.md) | 常见系统故障的定位方法 |
 
 ### 用户与安全
 
@@ -54,8 +54,8 @@ Linux 日常运维的核心技能。
 
 | 文章 | 说明 |
 |---|---|
-| [用户和权限管理](security/user-and-permission/) | 用户/组/ACL/SELinux 基础 |
-| [数据删除与安全擦除](security/data-deletion-and-secure-erasure/) | 文件真的删掉了吗？数据恢复与安全销毁 |
+| [用户和权限管理](security/user-and-permission.md) | 用户/组/ACL/SELinux 基础 |
+| [数据删除与安全擦除](security/data-deletion-and-secure-erasure.md) | 文件真的删掉了吗？数据恢复与安全销毁 |
 
 ### 网络
 
@@ -63,13 +63,13 @@ Linux 日常运维的核心技能。
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 网络基础](network/network/) | 网络配置、接口管理、路由基础 |
+| [Linux 网络基础](network/network.md) | 网络配置、接口管理、路由基础 |
 
 ### 性能优化
 
 | 文章 | 说明 |
 |---|---|
-| [性能优化](performance/performance-optimization/) | CPU / 内存 / IO / 网络调优 |
+| [性能优化](performance/performance-optimization.md) | CPU / 内存 / IO / 网络调优 |
 
 ### Shell 与自动化
 
@@ -105,7 +105,7 @@ flowchart TD
     style I fill:#f3f4f6,stroke:#64748b
 ```
 
-详细的分阶段学习路线 → [Linux 学习路线](roadmap/)
+详细的分阶段学习路线 → [Linux 学习路线](roadmap.md)
 
 ---
 

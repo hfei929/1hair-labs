@@ -39,7 +39,7 @@ flowchart TD
     style F fill:#fce7f3,stroke:#db2777
 ```
 
-在开始安装系统之前，建议先阅读 👉 [裸金属、虚拟机与容器的区别](basics/baremetal-vm-container/)，建立对计算资源运行层次的基础认知。
+在开始安装系统之前，建议先阅读 👉 [裸金属、虚拟机与容器的区别](basics/baremetal-vm-container.md)，建立对计算资源运行层次的基础认知。
 
 ---
 
@@ -50,10 +50,10 @@ Linux 是服务器领域最常见的操作系统，也是学习 Docker、Kuberne
 | 教程 | 说明 |
 |---|---|
 | [Ubuntu 22.04 安装教程](linux/ubuntu-22.04/) | 从零开始部署 Ubuntu Server，适合新手入门 |
-| [Rocky Linux 9 安装教程](linux/rocky-linux-9/) | RHEL 系发行版，企业环境常用 |
-| [CentOS 7 安装教程](linux/centos-7/) | 旧版 RHEL 系，存量环境维护参考 |
-| [CentOS 8 安装教程](linux/centos-8/) | CentOS 8 部署流程 |
-| [Debian 13 安装教程](linux/debian-13/) | Debian 最新版，轻量稳定 |
+| [Rocky Linux 9 安装教程](linux/rocky-linux-9.md) | RHEL 系发行版，企业环境常用 |
+| [CentOS 7 安装教程](linux/centos-7.md) | 旧版 RHEL 系，存量环境维护参考 |
+| [CentOS 8 安装教程](linux/centos-8.md) | CentOS 8 部署流程 |
+| [Debian 13 安装教程](linux/debian-13.md) | Debian 最新版，轻量稳定 |
 
 !!! info "发行版版本说明"
     同一发行版的各版本安装流程差异很小。比如 Debian 13 的教程同样适用于 Debian 12 / 11，需要安装其他版本时直接参考即可。
@@ -91,8 +91,8 @@ flowchart LR
 
 | 教程 | 说明 |
 |---|---|
-| [Docker 安装教程](docker&k8s/docker/) | Docker 引擎安装与基础操作 |
-| [Kubernetes 集群部署教程](docker&k8s/k8s/) | 从零搭建 K8s 集群 |
+| [Docker 安装教程](docker&k8s/docker.md) | Docker 引擎安装与基础操作 |
+| [Kubernetes 集群部署教程](docker&k8s/k8s.md) | 从零搭建 K8s 集群 |
 
 > Docker Compose 和 Helm 部署教程持续更新中。
 
@@ -102,9 +102,9 @@ flowchart LR
 
 | 教程 | 说明 |
 |---|---|
-| [Windows 10 安装教程](windows/windows-10/) | 桌面版 Windows 部署 |
-| [Windows 11 安装教程](windows/windows-11/) | Windows 11 安装指南 |
-| [Windows Server 2016 部署教程](windows/windows-server-2016/) | 服务器版 Windows 部署 |
+| [Windows 10 安装教程](windows/windows-10.md) | 桌面版 Windows 部署 |
+| [Windows 11 安装教程](windows/windows-11.md) | Windows 11 安装指南 |
+| [Windows Server 2016 部署教程](windows/windows-server-2016.md) | 服务器版 Windows 部署 |
 
 ---
 

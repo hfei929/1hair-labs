@@ -286,6 +286,7 @@ nav:
               - ClusterIP 链路拆解: kubernetes/architecture/network/clusterip-link-deep.md
               - Service 域名到 ClusterIP 链路: kubernetes/architecture/network/service-dns-to-clusterip.md
               - 一行 curl 的完整旅程: kubernetes/architecture/network/curl-full-link.md
+              - SNAT 三种场景：从 hairpin 到 NodePort: kubernetes/architecture/network/snat-three-scenarios.md
 
           - 💾 Storage:
               - 专题首页: kubernetes/architecture/storage/index.md

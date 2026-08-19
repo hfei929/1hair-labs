@@ -69,12 +69,12 @@ hide:
 
 | 专栏 | 定位 | 进入 |
 |---|---|---|
-| [环境准备](../deployment/tutorials/) | 系统安装与部署入门 | 从这里开始 |
-| [Linux](../linux/) | 系统基础与运维实践 | 地基 |
-| [Kubernetes](../kubernetes/) | 集群架构与生产实践 | 核心 |
-| [可观测性](../observability/) | 监控体系建设 | 保障 |
-| [Lab 实验室](../lab/) | 故障演练与技术验证 | 验证 |
-| [解决方案](../solutions/) | 端到端方案落地 | 整合 |
+| [环境准备](../deployment/tutorials.md) | 系统安装与部署入门 | 从这里开始 |
+| [Linux](../linux/index.md) | 系统基础与运维实践 | 地基 |
+| [Kubernetes](../kubernetes/index.md) | 集群架构与生产实践 | 核心 |
+| [可观测性](../observability/index.md) | 监控体系建设 | 保障 |
+| [Lab 实验室](../lab/index.md) | 故障演练与技术验证 | 验证 |
+| [解决方案](../solutions/index.md) | 端到端方案落地 | 整合 |
 
 ```mermaid
 flowchart LR

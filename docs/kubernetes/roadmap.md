@@ -11,7 +11,7 @@ hide:
 
 Kubernetes 的知识体系庞大，很多人学了概念不会用，能跑 Demo 不会做项目。核心原因是没有路径，只是在碎片学习。这份路线把零散的知识串成一条递进路径，每一步都有明确的验证标准。
 
-> 如果你刚接触云原生，建议先完成 [Linux 学习路线](../linux/roadmap/) 和 [Docker 安装教程](../deployment/docker&k8s/docker/)，再来这里。
+> 如果你刚接触云原生，建议先完成 [Linux 学习路线](../linux/roadmap.md) 和 [Docker 安装教程](../deployment/docker&k8s/docker.md)，再来这里。
 
 ---
 

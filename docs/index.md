@@ -25,7 +25,7 @@ Linux 是云原生技术体系的基础。
 
 本专题包括：Linux 安装部署、文件系统、用户与权限、systemd、网络基础、存储管理、Shell 基础、常用运维命令。
 
-👉 [进入 Linux 专题](linux/)
+👉 [进入 Linux 专题](linux/index.md)
 
 ---
 
@@ -35,7 +35,7 @@ Linux 是云原生技术体系的基础。
 
 包括：架构原理、Pod、Deployment、StatefulSet、Service、Ingress、ConfigMap、Secret、Scheduler、Storage、Network、Resource 管理、Troubleshooting。
 
-👉 [进入 Kubernetes 专题](kubernetes/)
+👉 [进入 Kubernetes 专题](kubernetes/index.md)
 
 ---
 
@@ -43,7 +43,7 @@ Linux 是云原生技术体系的基础。
 
 围绕 Prometheus、Grafana、Alertmanager、OpenTelemetry 构建完整的监控与告警体系。
 
-👉 [进入可观测性专题](observability/)
+👉 [进入可观测性专题](observability/index.md)
 
 ---
 
@@ -55,7 +55,7 @@ Linux 是云原生技术体系的基础。
 
 希望帮助读者不仅知道"如何解决"，更理解"为什么会发生"。
 
-👉 [进入故障实验室](lab/)
+👉 [进入故障实验室](lab/index.md)
 
 ---
 

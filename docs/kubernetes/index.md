@@ -17,7 +17,7 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 
 刚接触 Kubernetes？不确定从哪里开始？
 
-👉 [K8s 从入门到上线完整路线](K8s-beginner-to-production/) — 一篇讲清从"听说过 K8s"到"能独立上线项目"的完整路径，包含学习顺序、实战路线和避坑指南。
+👉 [K8s 从入门到上线完整路线](K8s-beginner-to-production.md) — 一篇讲清从"听说过 K8s"到"能独立上线项目"的完整路径，包含学习顺序、实战路线和避坑指南。
 
 按阶段选择阅读：
 
@@ -32,29 +32,28 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 ## 内容索引
 
 ### 控制平面
-
 理解控制平面是理解 Kubernetes 工作机制的第一层入口，核心在于“集群如何做决策和维护期望状态”。
 
 | 文章 | 说明 |
 |---|---|
-| [Control Plane 专题](architecture/control-plane/) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
+| [Control Plane 专题](architecture/control-plane/index.md) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
 | [API Server](architecture/api-server/) | 集群统一入口，所有操作经过这里 |
 | [ETCD](architecture/etcd/) | 集群状态存储，唯一有状态组件 |
 | [Scheduler](architecture/scheduler/) | Pod 调度决策 |
 | [Controller Manager](architecture/controller-manager/) | 控制循环与状态协调 |
-
-### Node 与运行时
-
-节点层是 Kubernetes 真正“执行工作负载”的地方，理解这里的链路才能把“调度”和“运行”串起来。
-
+ | [Control Plane 专题](architecture/control-plane/index.md) | API Server、Scheduler、Controller Manager、ETCD 的统一入口 |
+ | [API Server](architecture/control-plane/api-server.md) | 集群统一入口，所有操作经过这里 |
+ | [ETCD](architecture/control-plane/etcd.md) | 集群状态存储，唯一有状态组件 |
+ | [Scheduler](architecture/control-plane/scheduler.md) | Pod 调度决策 |
+ | [Controller Manager](architecture/control-plane/controller-manager.md) | 控制循环与状态协调 |
 | 文章 | 说明 |
 |---|---|
-| [Node & Runtime 专题](architecture/node/) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
+| [Node & Runtime 专题](architecture/node/index.md) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
 | [Worker Node 架构](architecture/worker-node/) | 节点层的职责与整体执行链路 |
 | [Pod 生命周期](architecture/pod-lifecycle/) | 从 Pending 到 Running 的完整生命周期 |
 | [Kubelet](architecture/kubelet/) | 节点代理，管理 Pod 生命周期 |
 | [Kubelet SyncLoop](architecture/kubelet-syncloop/) | kubelet 如何持续调谐 Pod 状态 |
-| [CRI](architecture/cri/) | 容器运行时接口 |
+ | [Node & Runtime 专题](architecture/node/index.md) | Worker Node、Pod 生命周期、kubelet 与运行时的统一入口 |
 | [CRI gRPC 调用详解](architecture/cri-grpc-deep/) | kubelet 与运行时之间的接口细节 |
 | [containerd 创建容器全过程](architecture/containerd-from-cri-to-runc/) | 从 CRI 到 runc 的完整执行路径 |
 | [Kube Proxy](architecture/kube-proxy/) | 服务发现与流量转发 |
@@ -62,11 +61,11 @@ Kubernetes 是当前云原生领域最重要的基础设施平台之一，也是
 ### 网络
 
 Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI 的基础。
-
-| 文章 | 说明 |
+ | [Network 专题](architecture/network/index.md) | 网络模型、CNI、Service 与 Ingress 的统一入口 |
+ | [Kubernetes 网络模型](architecture/network/index.md) | Pod 网络、Service 网络与节点网络 |
 |---|---|
-| [Network 专题](architecture/network/) | 网络模型、CNI、Service 与 Ingress 的统一入口 |
-| [Kubernetes 网络模型](architecture/network/) | Pod 网络、Service 网络与节点网络 |
+| [Network 专题](architecture/network/index.md) | 网络模型、CNI、Service 与 Ingress 的统一入口 |
+| [Kubernetes 网络模型](architecture/network/index.md) | Pod 网络、Service 网络与节点网络 |
 | [CNI](architecture/cni/) | 容器网络接口与主流插件 |
 | [Ingress](architecture/ingress/) | 七层流量入口与 Ingress Controller |
 
@@ -74,8 +73,8 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 
 | 文章 | 说明 |
 |---|---|
-| [Storage 专题](architecture/storage/) | PV / PVC / StorageClass / CSI 的统一入口 |
-| [存储系统](architecture/storage/) | PV / PVC / StorageClass |
+| [Storage 专题](architecture/storage/index.md) | PV / PVC / StorageClass / CSI 的统一入口 |
+| [存储系统](architecture/storage/index.md) | PV / PVC / StorageClass |
 | [CSI](architecture/csi/) | 容器存储接口与驱动 |
 
 ### 资源与安全
@@ -92,22 +91,22 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 
 | 文章 | 说明 |
 |---|---|
-| [单 Master 集群部署](practice/single-master-deployment/) | 从零搭建第一套 K8s 集群 |
-| [Docker 与 K8s](practice/docker/) | 容器运行时与 K8s 的关系 |
-| [从单 Master 到 HA](practice/single-master-to-ha/) | 单 Master 升级高可用 |
-| [HA 集群实践](practice/ha-cluster/) | HAProxy + Keepalived + 3 Master 部署 |
-| [Requests vs Limits](practice/requests-vs-limits/) | 调度信号与运行时限制的区别 |
-| [资源优化](practice/resource-optimization/) | 集群资源调优方法 |
-| [集群升级](practice/cluster-upgrade/) | K8s 版本升级流程与风险 |
-| [kubectl drain](practice/kubectl-drain/) | 节点维护操作 |
-| [10 条实战经验](practice/10-takeaways/) | 生产环境踩坑总结 |
+| [单 Master 集群部署](practice/single-master-deployment.md) | 从零搭建第一套 K8s 集群 |
+| [Docker 与 K8s](practice/docker.md) | 容器运行时与 K8s 的关系 |
+| [从单 Master 到 HA](practice/single-master-to-ha.md) | 单 Master 升级高可用 |
+| [HA 集群实践](practice/ha-cluster.md) | HAProxy + Keepalived + 3 Master 部署 |
+| [Requests vs Limits](practice/requests-vs-limits.md) | 调度信号与运行时限制的区别 |
+| [资源优化](practice/resource-optimization.md) | 集群资源调优方法 |
+| [集群升级](practice/cluster-upgrade.md) | K8s 版本升级流程与风险 |
+| [kubectl drain](practice/kubectl-drain.md) | 节点维护操作 |
+| [10 条实战经验](practice/10-takeaways.md) | 生产环境踩坑总结 |
 
 ### 工具
 
 | 文章 | 说明 |
 |---|---|
-| [K9s](tools/k9s/) | 终端 K8s 管理工具 |
-| [Headlamp](tools/headlamp/) | Web UI 集群管理工具 |
+| [K9s](tools/k9s.md) | 终端 K8s 管理工具 |
+| [Headlamp](tools/headlamp.md) | Web UI 集群管理工具 |
 | [KYAML](tools/kyaml.md) | K8s 更安全的 YAML 方言与格式化工具 |
 
 ---
@@ -134,7 +133,7 @@ flowchart TD
     style H fill:#f3f4f6,stroke:#64748b
 ```
 
-详细的分阶段学习路线 → [Kubernetes 学习路线](roadmap/)
+详细的分阶段学习路线 → [Kubernetes 学习路线](roadmap.md)
 
 ---
 

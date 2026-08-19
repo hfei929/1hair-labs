@@ -21,9 +21,9 @@ hide:
 
 | 文章 | 故障场景 | 核心验证 |
 |---|---|---|
-| [EP.1：一台 Master 宕机](failover-test-1/) | 强制关闭一台 Master 节点 | kubectl 是否中断、ETCD 多数派是否保持、业务是否受影响 |
-| [EP.2：LB 节点整机宕机](failover-test-2/) | 打挂 Keepalived + HAProxy 所在的负载均衡器 | VIP 能否自动漂移、漂移过程中 kubectl 是否中断 |
-| [EP.3：ETCD 多数派失效](failover-test-3/) | 停掉 3 个 ETCD 中的 2 个，破坏多数派 | 控制平面是否瘫痪、数据平面是否存活、能否恢复 |
+| [EP.1：一台 Master 宕机](failover-test-1.md) | 强制关闭一台 Master 节点 | kubectl 是否中断、ETCD 多数派是否保持、业务是否受影响 |
+| [EP.2：LB 节点整机宕机](failover-test-2.md) | 打挂 Keepalived + HAProxy 所在的负载均衡器 | VIP 能否自动漂移、漂移过程中 kubectl 是否中断 |
+| [EP.3：ETCD 多数派失效](failover-test-3.md) | 停掉 3 个 ETCD 中的 2 个，破坏多数派 | 控制平面是否瘫痪、数据平面是否存活、能否恢复 |
 
 > 系列结论：Master 宕机 → 集群无感知；LB 宕机 → VIP 2~3 秒漂移，kubectl 短暂卡顿后恢复；ETCD 多数派失效 → 控制平面不可写，但已运行 Pod 不受影响。
 
@@ -33,8 +33,8 @@ hide:
 
 | 文章 | 故障场景 | 核心验证 |
 |---|---|---|
-| [CPU 打满故障演练](cpu-stress-test/) | 对节点所有 CPU 核心施加满载压力 | Grafana 指标变化、Load Average 解读、Pod 是否受影响、告警是否触发 |
-| [Pod OOM 故障模拟](pod-oom-test/) | 创建持续申请内存的 Pod，触发 OOM Killer | OOMKilled 状态、Exit Code 137、CrashLoopBackOff 循环、Prometheus 提前预警 |
+| [CPU 打满故障演练](cpu-stress-test.md) | 对节点所有 CPU 核心施加满载压力 | Grafana 指标变化、Load Average 解读、Pod 是否受影响、告警是否触发 |
+| [Pod OOM 故障模拟](pod-oom-test.md) | 创建持续申请内存的 Pod，触发 OOM Killer | OOMKilled 状态、Exit Code 137、CrashLoopBackOff 循环、Prometheus 提前预警 |
 
 > 系列结论：CPU 打满 → 业务变慢但不挂；内存超限 → Pod 被内核直接杀死。资源限制不是可选项，是生产标配。
 

@@ -102,14 +102,14 @@ mindmap
 | 文章 | 说明 |
 |---|---|
 | [Linux 目录结构说明](../linux/base-system/linux-directory-structure) | 理解 FHS 标准和每个目录的用途 |
-| [Linux 常用命令](../linux/base-system/common-commands/) | 日常运维高频命令速查 |
-| [Linux 完整命令](../linux/base-system/all-commands/) | 按功能分类的完整命令参考 |
-| [Linux 软件包管理](../linux/base-system/package-management/) | apt / yum / dnf / dpkg / rpm |
-| [Linux 系统监控](../linux/base-system/system-monitoring/) | top / htop / iostat / vmstat |
-| [Linux 系统日志管理](../linux/base-system/log-management/) | journald / rsyslog / 日志轮转 |
-| [Linux 系统故障排除](../linux/base-system/troubleshooting/) | 常见系统故障的定位方法 |
-| [用户和权限管理](../linux/security/user-and-permission/) | 用户/组/ACL/SELinux 基础 |
-| [性能优化](../linux/performance/performance-optimization/) | CPU / 内存 / IO / 网络调优 |
+| [Linux 常用命令](../linux/base-system/common-commands.md) | 日常运维高频命令速查 |
+| [Linux 完整命令](../linux/base-system/all-commands.md) | 按功能分类的完整命令参考 |
+| [Linux 软件包管理](../linux/base-system/package-management.md) | apt / yum / dnf / dpkg / rpm |
+| [Linux 系统监控](../linux/base-system/system-monitoring.md) | top / htop / iostat / vmstat |
+| [Linux 系统日志管理](../linux/base-system/log-management.md) | journald / rsyslog / 日志轮转 |
+| [Linux 系统故障排除](../linux/base-system/troubleshooting.md) | 常见系统故障的定位方法 |
+| [用户和权限管理](../linux/security/user-and-permission.md) | 用户/组/ACL/SELinux 基础 |
+| [性能优化](../linux/performance/performance-optimization.md) | CPU / 内存 / IO / 网络调优 |
 | [Shell 脚本](../linux/shell/shell/) | Shell 基础语法和常用脚本 |
 
 **学完后你应该能够：**
@@ -136,7 +136,7 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Linux 网络基础](../linux/network/network/) | 网络配置、接口管理、路由基础 |
+| [Linux 网络基础](../linux/network/network.md) | 网络配置、接口管理、路由基础 |
 
 > 网络专题目前文章较少，后续会持续补充 TCP/IP、DNS、VXLAN 等专题。
 
@@ -164,9 +164,9 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [裸金属、虚拟机与容器的区别](../deployment/basics/baremetal-vm-container/) | 从底层理解容器和虚拟化的差异 |
-| [Docker 部署教程](../deployment/docker&k8s/docker/) | Docker 安装与基础操作 |
-| [Docker 实践](../kubernetes/practice/docker/) | 镜像构建、容器管理实践 |
+| [裸金属、虚拟机与容器的区别](../deployment/basics/baremetal-vm-container.md) | 从底层理解容器和虚拟化的差异 |
+| [Docker 部署教程](../deployment/docker&k8s/docker.md) | Docker 安装与基础操作 |
+| [Docker 实践](../kubernetes/practice/docker.md) | 镜像构建、容器管理实践 |
 
 **学完后你应该能够：**
 
@@ -186,7 +186,7 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Kubernetes 架构总览](../kubernetes/architecture/) | 控制平面 / 数据平面 / 组件协作 |
+| [Kubernetes 架构总览](../kubernetes/architecture/index.md) | 控制平面 / 数据平面 / 组件协作 |
 | [API Server](../kubernetes/architecture/api-server/) | 集群入口与认证授权 |
 | [Scheduler](../kubernetes/architecture/scheduler/) | 调度算法与节点选择 |
 | [Controller Manager](../kubernetes/architecture/controller-manager/) | 控制循环与声明式模型 |
@@ -200,8 +200,8 @@ mindmap
 | [API Resources](../kubernetes/architecture/api-resources/) | 资源对象总览 |
 | [Workloads](../kubernetes/architecture/workloads/) | Pod / Deployment / StatefulSet / DaemonSet |
 | [Server Resources](../kubernetes/architecture/server-resources/) | Node / Namespace / ResourceQuota |
-| [Storage](../kubernetes/architecture/storage/) | PV / PVC / StorageClass |
-| [Network](../kubernetes/architecture/network/) | Service / DNS / NetworkPolicy |
+| [Storage](../kubernetes/architecture/storage/index.md) | PV / PVC / StorageClass |
+| [Network](../kubernetes/architecture/network/index.md) | Service / DNS / NetworkPolicy |
 | [Security](../kubernetes/architecture/security/) | RBAC / ServiceAccount / PodSecurity |
 | [Other Resources](../kubernetes/architecture/other-resources/) | ConfigMap / Secret / HPAs |
 
@@ -209,27 +209,27 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [K8s 从入门到生产](../kubernetes/K8s-beginner-to-production/) | 完整学习路径概览 |
-| [单 Master 集群部署](../kubernetes/practice/single-master-deployment/) | 从零搭建单节点集群 |
-| [单 Master 到 HA 迁移](../kubernetes/practice/single-master-to-ha/) | 从单节点升级到高可用 |
-| [HA 集群部署](../kubernetes/practice/ha-cluster/) | 多 Master 高可用集群 |
-| [集群升级](../kubernetes/practice/cluster-upgrade/) | 滚动升级策略与实践 |
-| [kubectl drain 详解](../kubernetes/practice/kubectl-drain/) | 节点维护与驱逐 |
+| [K8s 从入门到生产](../kubernetes/K8s-beginner-to-production.md) | 完整学习路径概览 |
+| [单 Master 集群部署](../kubernetes/practice/single-master-deployment.md) | 从零搭建单节点集群 |
+| [单 Master 到 HA 迁移](../kubernetes/practice/single-master-to-ha.md) | 从单节点升级到高可用 |
+| [HA 集群部署](../kubernetes/practice/ha-cluster.md) | 多 Master 高可用集群 |
+| [集群升级](../kubernetes/practice/cluster-upgrade.md) | 滚动升级策略与实践 |
+| [kubectl drain 详解](../kubernetes/practice/kubectl-drain.md) | 节点维护与驱逐 |
 
 #### 最佳实践
 
 | 文章 | 说明 |
 |---|---|
-| [10 个要点](../kubernetes/practice/10-takeaways/) | K8s 生产环境关键经验 |
-| [Requests vs Limits](../kubernetes/practice/requests-vs-limits/) | 资源请求与限制的正确姿势 |
-| [资源优化](../kubernetes/practice/resource-optimization/) | 集群资源调优方法 |
+| [10 个要点](../kubernetes/practice/10-takeaways.md) | K8s 生产环境关键经验 |
+| [Requests vs Limits](../kubernetes/practice/requests-vs-limits.md) | 资源请求与限制的正确姿势 |
+| [资源优化](../kubernetes/practice/resource-optimization.md) | 集群资源调优方法 |
 
 #### 工具生态
 
 | 文章 | 说明 |
 |---|---|
-| [K9s](../kubernetes/tools/k9s/) | 终端 K8s 管理 TUI |
-| [Headlamp](../kubernetes/tools/headlamp/) | 现代 K8s Web 仪表盘 |
+| [K9s](../kubernetes/tools/k9s.md) | 终端 K8s 管理 TUI |
+| [Headlamp](../kubernetes/tools/headlamp.md) | 现代 K8s Web 仪表盘 |
 
 **学完后你应该能够：**
 
@@ -256,10 +256,10 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Prometheus](../observability/prometheus/) | 架构、配置、PromQL、服务发现 |
-| [Grafana](../observability/grafana/) | 仪表盘设计、数据源配置 |
-| [Alertmanager](../observability/alertmanager/) | 告警规则与通知路由 |
-| [K8s 集群健康检查](../observability/k8s-cluster-health-check/) | 集群健康度巡检方法 |
+| [Prometheus](../observability/prometheus.md) | 架构、配置、PromQL、服务发现 |
+| [Grafana](../observability/grafana.md) | 仪表盘设计、数据源配置 |
+| [Alertmanager](../observability/alertmanager.md) | 告警规则与通知路由 |
+| [K8s 集群健康检查](../observability/k8s-cluster-health-check.md) | 集群健康度巡检方法 |
 
 **学完后你应该能够：**
 
@@ -285,11 +285,11 @@ mindmap
 
 | 文章 | 说明 |
 |---|---|
-| [Requests vs Limits](../kubernetes/practice/requests-vs-limits/) | 资源管理的核心概念 |
-| [资源优化](../kubernetes/practice/resource-optimization/) | 生产环境资源调优 |
-| [HA 集群部署](../kubernetes/practice/ha-cluster/) | 高可用架构实践 |
-| [集群升级](../kubernetes/practice/cluster-upgrade/) | 生产环境滚动升级 |
-| [10 个要点](../kubernetes/practice/10-takeaways/) | 生产环境关键经验总结 |
+| [Requests vs Limits](../kubernetes/practice/requests-vs-limits.md) | 资源管理的核心概念 |
+| [资源优化](../kubernetes/practice/resource-optimization.md) | 生产环境资源调优 |
+| [HA 集群部署](../kubernetes/practice/ha-cluster.md) | 高可用架构实践 |
+| [集群升级](../kubernetes/practice/cluster-upgrade.md) | 生产环境滚动升级 |
+| [10 个要点](../kubernetes/practice/10-takeaways.md) | 生产环境关键经验总结 |
 
 **学完后你应该能够：**
 
@@ -437,13 +437,13 @@ click H "/solutions/"
 
 | 实验内容 | 说明 |
 |---|---|
-| [Pod OOM 测试](lab/pod-oom-test/) | 内存溢出问题的复现与分析 |
-| [CPU 压力测试](lab/cpu-stress-test/) | CPU 节流与资源限制验证 |
-| [故障转移测试 1](lab/failover-test-1/) | 节点故障场景下的 Pod 迁移 |
-| [故障转移测试 2](lab/failover-test-2/) | 控制平面故障的影响范围 |
-| [故障转移测试 3](lab/failover-test-3/) | 存储故障与数据一致性 |
+| [Pod OOM 测试](../lab/pod-oom-test.md) | 内存溢出问题的复现与分析 |
+| [CPU 压力测试](../lab/cpu-stress-test.md) | CPU 节流与资源限制验证 |
+| [故障转移测试 1](../lab/failover-test-1.md) | 节点故障场景下的 Pod 迁移 |
+| [故障转移测试 2](../lab/failover-test-2.md) | 控制平面故障的影响范围 |
+| [故障转移测试 3](../lab/failover-test-3.md) | 存储故障与数据一致性 |
 
-👉 [进入故障实验室](lab/)
+👉 [进入故障实验室](../lab/index.md)
 
 ---
 
