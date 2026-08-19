@@ -221,8 +221,9 @@ nav:
         - 💾 存储:
             - 存储概览: linux/storage/index.md
             - 存储基础: linux/storage/storage.md
+            - 磁盘挂载与 LVM 配置: linux/storage/disk-mount-lvm.md
             - 文件系统原理: linux/storage/filesystem-internals.md
-            - LVM 实战: linux/storage/lvm-practice.md
+            - LVM 进阶实战: linux/storage/lvm-practice.md
 
         - 🔐 安全:
             - 安全基础: linux/security/index.md
