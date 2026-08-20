@@ -203,9 +203,18 @@ iptables 规则的执行顺序：
 
 ### 3.3 conntrack 证据
 
-关于 `conntrack` 的命令用法、条目字段解析和大量实测输出，已集中整理在站内专页，建议阅读：[conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
+在 curl 全链路文章中已经实测过 hairpin NAT 的 conntrack 条目：
 
-此处保留场景级别的描述，具体 `conntrack -L`/`conntrack -E` 输出示例与分析请到上文链接查看。
+```
+src=10.244.5.12 dst=10.100.241.29 sport=34188 dport=80
+src=10.244.5.12 dst=192.168.114.148 sport=80 dport=34188 [ASSURED]
+```
+
+ORIGINAL 方向：`src=Pod, dst=ClusterIP`
+REPLY 方向：`src=Pod:80, dst=节点IP`——注意这里的 dst 是节点 IP 而不是 Pod IP，说明回包经过了 SNAT（conntrack 的 REPLY 方向记录的是 NAT 改写后的真实地址，详见 [第六节](#62-conntrack-snat)的解释）。
+
+!!! tip "详细实测数据"
+    hairpin NAT 的完整 strace + conntrack 实测数据见 [一行 curl 的完整旅程](./curl-full-link.md#conntrack-dnat-round-robin-hairpin)，`conntrack -L` 的条目字段与 ORIGINAL/REPLY 判读见 [conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)，这里不重复展开。
 
 ## 四、场景二：节点访问 Service
 
@@ -436,12 +445,7 @@ KUBE-EXT（Local 模式）：
 
 ### 6.2 怎么从 conntrack 条目判断是否发生了 SNAT
 
-conntrack 条目有两行：第一行是 ORIGINAL 方向（发起连接时的包），第二行是 REPLY 方向（回包）。ORIGINAL 方向记录的是 **NAT 之前**的地址（应用层看到的地址），REPLY 方向记录的是 **NAT 之后**回包在网络上实际呈现的地址。
-
-判断 SNAT 的方法：看 REPLY 方向的 **dst 字段**。
-
-- 如果没做 SNAT：回包 `src=后端PodIP, dst=发起方IP`，REPLY 的 dst 就是发起方的真实 IP
-- 如果做了 SNAT：发起方源 IP 被改成了节点 IP，回包 `src=后端PodIP, dst=节点IP`，REPLY 的 dst 是节点 IP
+conntrack 条目分 ORIGINAL（NAT 之前）与 REPLY（NAT 之后）两行，判断 SNAT 只需看 **REPLY 方向的 dst 字段**：出现节点 IP（或 tunl0 IP）就是做了 SNAT，是客户端真实 IP 就是没做 SNAT。完整的判读规则、字段含义与更多示例见 [conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
 
 **Hairpin 场景的 conntrack 条目（来自 curl 全链路实测）：**
 
@@ -453,9 +457,7 @@ tcp  6 114 TIME_WAIT src=10.244.5.12 dst=10.100.241.29 sport=34188 dport=80
 - ORIGINAL: `src=10.244.5.12, dst=10.100.241.29`（Pod → ClusterIP）
 - REPLY: `src=10.244.5.12:80, dst=192.168.114.148`（Pod:80 → 节点IP）
 
-REPLY 方向的 `dst=192.168.114.148`（节点 IP）就是 SNAT 的铁证——nginx Pod 回包时目标 IP 是节点 IP（因为 SNAT 把原始源 IP 改成了节点 IP），conntrack 反向 NAT 把回包的 src 从 Pod IP 改回 ClusterIP，把 dst 从节点 IP 改回 Pod IP。
-
-**一句话总结：REPLY 方向出现节点 IP（或 tunl0 IP）= 发生了 SNAT；REPLY 方向是客户端真实 IP = 没有 SNAT。**
+REPLY 方向的 `dst=192.168.114.148`（节点 IP）就是 SNAT 的铁证。
 
 ### 6.3 NodePort 两种模式的 conntrack 实测对比
 
@@ -593,6 +595,8 @@ sudo conntrack -L | grep '10.100.241' | head -5
 curl -s -o /dev/null http://192.168.114.148:30080 &
 sudo conntrack -L | grep '30080' | head -5
 ```
+
+`conntrack -L` 的完整选项、过滤参数与条目字段解析见 [conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
 
 ### 8.3 验证 externalTrafficPolicy 差异
 

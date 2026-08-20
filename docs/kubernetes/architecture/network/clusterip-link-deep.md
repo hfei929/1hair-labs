@@ -313,9 +313,17 @@ DNAT 把目标 IP 从 ClusterIP 改成了 Pod IP，包成功到达 Pod。但 Pod
 
 ### conntrack 连接表
 
-关于 `conntrack` 的工具用法、条目字段解析与实测示例，已统一放在站内专页：[conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。
+Linux 内核的 conntrack（Connection Tracking）模块记录每一条 NAT 过的连接。DNAT 执行时，conntrack 在连接表里创建一条记录：
 
-上文中提到的 DNAT/REPLY 判定方法与实测命令均已迁移到该指南；此处保留对 DNAT 与路由的整体链路说明，避免内容重复。
+```
+原始方向: src=10.244.X.X  dst=10.101.10.146  (ClusterIP)
+DNAT 后:  src=10.244.X.X  dst=10.244.5.11    (Pod IP)
+```
+
+当回包回来时（`src=10.244.5.11 dst=10.244.X.X`），conntrack 查到这条连接记录，执行**反向 NAT**：把源 IP 从 Pod IP 改回 ClusterIP。发起方收到的包看起来就像是从 ClusterIP 直接回的。
+
+!!! info "conntrack 工具与条目解析"
+    `conntrack` 命令的安装方法、`conntrack -L` 输出的字段含义、ORIGINAL/REPLY 判读，以及"短命 TCP 连接抓不到条目"等常见坑，已统一整理在站内专页 [conntrack 命令详解](../../../linux/network/conntrack-command-guide.md)。本节只保留与本条链路直接相关的结论，不再重复命令用法。
 
 ### 完整包流转链路
 
