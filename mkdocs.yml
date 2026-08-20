@@ -292,6 +292,7 @@ nav:
           - 💾 Storage:
               - 专题首页: kubernetes/architecture/storage/index.md
               - Kubernetes 存储资源: kubernetes/architecture/storage/storage.md
+              - PV、PVC、StorageClass 三对象: kubernetes/architecture/storage/pv-pvc-storageclass.md
               - CSI: kubernetes/architecture/storage/csi.md
 
           - 📦 API 资源:
