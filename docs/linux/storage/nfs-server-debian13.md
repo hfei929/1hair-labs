@@ -1,6 +1,6 @@
 ---
 title: Linux NFS 服务安装与配置实战：Debian 13 从零搭建 | 1Hair Labs
-description: 以 Debian 13 为例，手把手搭建 NFS 网络文件系统服务：安装 nfs-kernel-server、配置 /etc/exports 共享目录与权限选项、NFSv3/v4 与防火墙端口放行、客户端挂载与开机自启、常见问题排查，并说明其作为 Kubernetes NFS CSI 后端存储的角色。
+description: 以 Debian 13 为例，手把手搭建 NFS 网络文件系统服务：安装 nfs-kernel-server、配置 /etc/exports 共享目录与权限选项、NFSv3/v4 与防火墙端口放行、客户端 fstab 与 autofs 按需挂载、常见问题排查，并说明其作为 Kubernetes NFS CSI 后端存储的角色。
 authors:
   - hfei
 date: 2026-08-21
@@ -11,6 +11,7 @@ tags:
   - NFS
   - 网络文件系统
   - Debian
+  - autofs
   - 存储
   - Kubernetes
   - CSI
@@ -20,6 +21,7 @@ keywords:
   - nfs-kernel-server
   - /etc/exports
   - NFS 客户端挂载
+  - autofs 自动挂载
   - NFSv4
   - Kubernetes NFS CSI
 ---
@@ -296,7 +298,114 @@ fstab 里两个关键选项：
 
 ---
 
-## 八、防火墙放行
+## 八、autofs：按需自动挂载
+
+fstab 的挂载方式是「开机就挂上，一直挂着」。如果 NFS 服务端暂时不可用，客户端开机可能卡住；如果挂载点多，也会一直占用资源。
+
+autofs 解决的就是这个问题：**访问时才挂载，空闲一段时间后自动卸载**。
+
+| 对比 | fstab | autofs |
+| --- | --- | --- |
+| 挂载时机 | 开机即挂 | 首次访问时挂 |
+| 服务端宕机 | 可能阻塞开机（除非 `nofail`） | 不影响开机 |
+| 空闲处理 | 一直挂着 | `--timeout` 秒后自动卸载 |
+| 适用场景 | 常用、需要常驻的共享 | 偶尔访问、共享多、容错要求高 |
+
+### 8.1 安装 autofs
+
+```bash
+sudo apt update
+sudo apt install -y autofs
+```
+
+### 8.2 配置间接映射（推荐）
+
+autofs 用两个文件配合工作：`/etc/auto.master` 是「总表」，指向具体的「映射文件」。
+
+```bash
+# 1. 在 auto.master 追加一行：/mnt/nfs 下的挂载点由 /etc/auto.nfs 定义，空闲 60 秒卸载
+echo '/mnt/nfs  /etc/auto.nfs  --timeout=60' | sudo tee -a /etc/auto.master
+
+# 2. 创建映射文件：key 是子目录名，value 是 NFS 源
+sudo tee /etc/auto.nfs <<'EOF'
+share  -fstype=nfs,rw  192.168.114.200:/srv/nfs/share
+EOF
+```
+
+- `/mnt/nfs` 是**挂载根**，由 autofs 自动创建和管理。
+- `share` 是**键（key）**，最终挂载点是 `/mnt/nfs/share`。
+- `--timeout=60` 表示空闲 60 秒后自动卸载。
+
+### 8.3 重启并验证按需挂载
+
+```bash
+sudo systemctl restart autofs
+sudo systemctl enable autofs
+```
+
+验证「访问才挂、空闲才卸」：
+
+```bash
+# 一开始没挂载
+mount | grep nfs
+# （无输出）
+
+# 访问挂载点触发挂载
+ls /mnt/nfs/share
+
+# 再看，已经挂上了
+mount | grep nfs
+# 192.168.114.200:/srv/nfs/share on /mnt/nfs/share type nfs4 (rw,relatime,vers=4.2,...)
+```
+
+等 60 秒不访问，再看 `mount | grep nfs` 就会变空——autofs 已经自动卸载了。
+
+### 8.4 直接映射（路径写全）
+
+如果想把挂载点定死在某个绝对路径（比如和 fstab 一样的 `/mnt/nfs`），用直接映射：
+
+```bash
+# auto.master 用 /- 开头，表示「映射文件里写的是完整路径」
+echo '/-  /etc/auto.nfs  --timeout=60' | sudo tee /etc/auto.master
+
+# 映射文件里写完整路径（父目录 /mnt/nfs 需要手动存在）
+sudo mkdir -p /mnt/nfs
+sudo tee /etc/auto.nfs <<'EOF'
+/mnt/nfs/share  -fstype=nfs,rw  192.168.114.200:/srv/nfs/share
+EOF
+
+sudo systemctl restart autofs
+```
+
+### 8.5 挂载选项
+
+映射文件里 `-fstype=nfs` 后面可以跟任意 NFS 挂载选项，逗号分隔：
+
+| 选项 | 作用 |
+| --- | --- |
+| `rw` / `ro` | 读写 / 只读 |
+| `sync` / `async` | 同步 / 异步写 |
+| `hard` / `soft` | 服务端失联时无限重试 / 超时返回错误 |
+| `intr` | 允许中断挂起的 NFS 操作（配合 hard） |
+
+例如：
+
+```
+share  -fstype=nfs,rw,sync,hard,intr  192.168.114.200:/srv/nfs/share
+```
+
+!!! tip "autofs 出问题怎么排查"
+    查看 autofs 的实时日志：
+
+    ```bash
+    journalctl -u autofs -f
+    ```
+
+    常见报错「mountpoint does not exist」通常是映射文件里的路径或父目录没建好；「connection refused」则是网络/防火墙/服务端没起。
+
+---
+
+## 九、防火墙放行
 
 Debian 13 默认用 nftables。NFS 要放行的端口取决于版本：
 
@@ -338,7 +447,7 @@ sudo nft add rule inet filter input tcp dport 32765-32766 accept
 
 ---
 
-## 九、常见问题排查
+## 十、常见问题排查
 
 ### 9.1 客户端 mount 报 `mount.nfs: Connection refused`
 
@@ -394,7 +503,7 @@ iperf3 -c 192.168.114.200
 
 ---
 
-## 十、作为 Kubernetes NFS CSI 的后端存储
+## 十一、作为 Kubernetes NFS CSI 的后端存储
 
 这台 NFS 服务器就是下一步 Kubernetes 存储系列里 **NFS CSI** 实验的后端。简单说：
 
