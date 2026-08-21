@@ -149,6 +149,64 @@ sdb      8:16   0  100G  0 disk
 
 > 如果内核没有立即识别新分区，执行 `sudo partprobe /dev/sdb` 刷新一下。
 
+### 备选：用 parted 分区（非交互、支持 GPT 大盘）
+
+除了 fdisk，Linux 还有另一个常用分区工具 **parted**。它和 fdisk 的区别：
+
+| 对比 | fdisk | parted |
+| --- | --- | --- |
+| 分区表 | MBR 为主（`g` 切 GPT） | 默认即支持 GPT，MBR/GPT 都行 |
+| 交互方式 | 纯交互问答 | 交互 + `-s` 非交互一行命令 |
+| 大磁盘（>2TB） | 需手动 `g` 建 GPT | `mklabel gpt` 一步到位 |
+| 脚本化 | 较麻烦 | 友好，适合自动化 |
+
+**方式一：非交互一行命令**（推荐，适合写脚本）：
+
+```bash
+# 创建 GPT 分区表
+sudo parted -s /dev/sdb mklabel gpt
+
+# 用满整块盘建一个 primary 分区
+sudo parted -s /dev/sdb mkpart primary 0% 100%
+
+# 查看结果
+sudo parted /dev/sdb print
+```
+
+```
+Model: VMware Virtual disk (scsi)
+Disk /dev/sdb: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End    Size   File system  Name     Flags
+ 1      1049kB  107GB  107GB               primary
+```
+
+**方式二：交互模式**：
+
+```bash
+sudo parted /dev/sdb
+```
+
+```
+(parted) mklabel gpt                       ← 建 GPT 分区表
+(parted) mkpart primary 0% 100%            ← 用满整块盘
+(parted) print                             ← 查看
+(parted) quit                              ← 退出并保存
+```
+
+几个关键点：
+
+- `mklabel` 决定分区表类型：`mklabel gpt`（GPT）或 `mklabel msdos`（MBR）。
+- `mkpart` 的起止位置支持 `0%`、`100%`、`1MiB`、`50GiB` 等多种写法；parted 会自动做 I/O 对齐。
+- `-s` 表示非交互（script），命令失败会直接报错退出，不会卡在问答里，特别适合 CI/自动化脚本。
+- 分区完成后同样用 `lsblk /dev/sdb` 或 `partprobe /dev/sdb` 确认内核已识别。
+
+!!! tip "fdisk 和 parted 选哪个"
+    日常手动操作两个都能用：习惯交互问答就 fdisk，要处理 **2TB 以上的大盘**、或要在脚本里**非交互地分区**，直接 parted。
+
 ### Step 2：创建文件系统（格式化）
 
 分区只是把磁盘切出一块区域，**这块区域里还没有任何数据结构**，所以还存不了文件。创建文件系统：
