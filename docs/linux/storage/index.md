@@ -253,6 +253,7 @@ flowchart LR
 | 方向 | 教程 |
 | --- | --- |
 | **实战操作** | [Linux 存储管理](storage.md) — 分区、格式化、挂载、LVM、配额完整命令详解 |
+| **网络共享** | [NFS 服务安装（Debian 13）](nfs-server-debian13.md) — 跨主机共享存储 |
 | **性能优化** | [Linux 性能优化](../performance/index.md) — 磁盘 I/O 调优 |
 | **数据安全** | [数据安全擦除](../security/data-deletion-and-secure-erasure.md) — 安全删除与擦除 |
 | **系统基础** | [Linux 基础主页](../base-system/index.md) — 目录结构、常用命令 |

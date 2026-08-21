@@ -502,3 +502,4 @@ XFS 只支持扩容、**不支持缩容**。需要缩容的 LV，请用 ext4，�
 - [Linux 存储管理](storage.md) — 分区表详解、swap 交换空间、磁盘配额
 - [LVM 进阶实战](lvm-practice.md) — LVM 快照、缩容、磁盘替换与灾难恢复
 - [Linux 文件系统原理](filesystem-internals.md) — inode、ext4 与 XFS 内部机制
+- [NFS 服务安装（Debian 13）](nfs-server-debian13.md) — 把本地目录导出成网络文件系统，跨主机共享存储

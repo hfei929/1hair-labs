@@ -35,7 +35,7 @@ NFS（Network File System）是最古老的网络文件系统之一，也是目�
 后续的 Kubernetes 存储系列会用到这台 NFS 服务器作为 **NFS CSI** 的后端存储——所以本文最后会专门说明为 CSI 准备共享目录时需要注意的选项。
 
 !!! tip "前置阅读"
-    如果你还不熟悉 Linux 的挂载、文件系统这些基础概念，建议先读 [Linux 存储基础概览](index.md) 或 [Linux 存储管理](storage.md)。
+    如果你还不熟悉 Linux 的挂载、文件系统这些基础概念，建议先读 [Linux 存储基础概览](index.md) 或 [Linux 存储管理](storage.md)。挂载、`/etc/fstab`、LVM 的动手实操见 [Linux 磁盘挂载与 LVM 配置实战](disk-mount-lvm.md)——本文客户端的挂载操作与它高度衔接。
 
 ---
 
