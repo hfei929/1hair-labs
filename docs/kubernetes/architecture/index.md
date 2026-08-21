@@ -106,7 +106,7 @@ Load Balancer
 
 ### 扩展接口
 - [CNI](network/cni.md)：容器网络接口
-- [CSI](storage/csi.md)：容器存储接口
+- [CSI](storage/csi-nfs-components.md)：容器存储接口
 - [CRI](node/cri.md)：容器运行时接口
 
 ### Kubernetes 资源

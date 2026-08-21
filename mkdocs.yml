@@ -294,7 +294,7 @@ nav:
               - 专题首页: kubernetes/architecture/storage/index.md
               - Kubernetes 存储资源: kubernetes/architecture/storage/storage.md
               - PV、PVC、StorageClass 三对象: kubernetes/architecture/storage/pv-pvc-storageclass.md
-              - CSI: kubernetes/architecture/storage/csi.md
+              - CSI 到底拆了什么？: kubernetes/architecture/storage/csi-nfs-components.md
 
           - 📦 API 资源:
               - 工作负载资源: kubernetes/architecture/resources/workloads.md

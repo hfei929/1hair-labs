@@ -523,4 +523,4 @@ NFS CSI 的思路是：CSI 驱动把 NFS 共享挂载到节点，再把这个挂
 4. **客户端工具**：每个节点都要装 `nfs-common`（CSI 驱动挂载时依赖它）。
 
 !!! info "下一篇"
-    Kubernetes 存储系列的 [CSI 原理](../../kubernetes/architecture/storage/csi.md) 会基于这台 NFS 服务端，拆解 external-provisioner / external-attacher / node-driver 如何把 NFS 共享变成 Pod 里的 PVC。本文就是它的环境准备篇。
+    Kubernetes 存储系列的 [CSI 到底拆了什么](../../kubernetes/architecture/storage/csi-nfs-components.md) 会基于这台 NFS 服务端，拆解 external-provisioner / external-attacher / node-driver 如何把 NFS 共享变成 Pod 里的 PVC。本文就是它的环境准备篇。

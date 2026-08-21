@@ -1021,7 +1021,7 @@ flowchart TD
 - [Kubernetes CRI 原理](cri-grpc-deep.md)——三个 gRPC 请求的 protobuf 定义、参数和返回值
 - [containerd 创建容器全过程](containerd-from-cri-to-runc.md)——containerd 内部五个模块、Snapshotter、containerd-shim 机制
 - [Kubernetes CNI 网络原理](../network/cni.md)（计划中）——Pod IP 是怎么来的
-- [Kubernetes CSI 存储机制](../storage/csi.md)（计划中）——Volume 挂载和卸载流程
+- [Kubernetes CSI 存储机制](../storage/csi-nfs-components.md)（计划中）——Volume 挂载和卸载流程
 
 ---
 

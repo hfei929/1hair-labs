@@ -635,4 +635,4 @@ kubectl explain pod.spec
 * [Kubernetes Kubelet 工作原理](../node/kubelet.md)
 * [Kubernetes ETCD 工作原理](etcd.md)
 * [Kubernetes CNI 网络模型解析](../network/cni.md)
-* [Kubernetes CSI 存储架构解析](../storage/csi.md)
+* [Kubernetes CSI 存储架构解析](../storage/csi-nfs-components.md)

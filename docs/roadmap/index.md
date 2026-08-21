@@ -196,7 +196,7 @@ mindmap
 | [CNI](../kubernetes/architecture/network/cni.md) | 容器网络接口与插件 |
 | [Ingress](../kubernetes/architecture/network/ingress.md) | 七层路由与流量管理 |
 | [CRI](../kubernetes/architecture/node/cri.md) | 容器运行时接口 |
-| [CSI](../kubernetes/architecture/storage/csi.md) | 容器存储接口 |
+| [CSI](../kubernetes/architecture/storage/csi-nfs-components.md) | 容器存储接口 |
 | [API Resources](../kubernetes/architecture/resources/api-resources.md) | 资源对象总览 |
 | [Workloads](../kubernetes/architecture/resources/workloads.md) | Pod / Deployment / StatefulSet / DaemonSet |
 | [Server Resources](../kubernetes/architecture/resources/server-resources.md) | Node / Namespace / ResourceQuota |

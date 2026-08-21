@@ -210,7 +210,7 @@ Kubernetes 网络是问题的重灾区。Service 不通、Pod 间无法通信、
 | 文章 | 说明 |
 |---|---|
 | [存储系统](architecture/storage/index.md) | PV / PVC / StorageClass |
-| [CSI](architecture/storage/csi.md) | 容器存储接口 |
+| [CSI](architecture/storage/csi-nfs-components.md) | 容器存储接口 |
 
 **学完后你应该能够：**
 

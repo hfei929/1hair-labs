@@ -75,7 +75,7 @@ Kubernetes 网络是很多问题的根源，也是理解 Service、Ingress、CNI
 |---|---|
 | [Storage 专题](architecture/storage/index.md) | PV / PVC / StorageClass / CSI 的统一入口 |
 | [存储系统](architecture/storage/index.md) | PV / PVC / StorageClass |
-| [CSI](architecture/storage/csi.md) | 容器存储接口与驱动 |
+| [CSI](architecture/storage/csi-nfs-components.md) | 容器存储接口与驱动 |
 
 ### 资源与安全
 

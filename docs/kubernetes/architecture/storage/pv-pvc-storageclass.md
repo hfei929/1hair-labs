@@ -552,8 +552,8 @@ local-path-provisioner 走的是 Kubernetes 内置的 Provisioner 接口（通�
 
 这恰恰是 local-path 简单的原因——它跳过了 CSI 的所有中间步骤。但也意味着它无法演示完整的存储链路。
 
-下一篇 [CSI 原理](csi.md) 会拆 CSI 架构：external-provisioner 怎么 watch PVC、external-attacher 怎么做 attach、node-driver 怎么做 mount。为此需要搭建一个真正的 CSI driver 环境（NFS CSI）。
+下一篇 [CSI 到底拆了什么](csi-nfs-components.md) 会拆 CSI 架构：external-provisioner 怎么 watch PVC、external-attacher 怎么做 attach、node-driver 怎么做 mount。为此需要搭建一个真正的 CSI driver 环境（NFS CSI）。
 
 ---
 
-下一篇：[CSI 三大组件：provisioner、attacher、node-driver 到底各干什么](csi.md)
+下一篇：[CSI 到底拆了什么：NFS 驱动里的组件分工](csi-nfs-components.md)
