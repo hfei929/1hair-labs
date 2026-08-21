@@ -225,6 +225,7 @@ nav:
             - 磁盘挂载与 LVM 配置: linux/storage/disk-mount-lvm.md
             - 文件系统原理: linux/storage/filesystem-internals.md
             - LVM 进阶实战: linux/storage/lvm-practice.md
+            - NFS 服务安装（Debian 13）: linux/storage/nfs-server-debian13.md
 
         - 🔐 安全:
             - 安全基础: linux/security/index.md
