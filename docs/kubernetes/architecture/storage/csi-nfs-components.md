@@ -36,7 +36,7 @@ tags:
 独立虚拟机 k8s-nfs（192.168.114.155），Debian 13，50G 数据盘：
 
 ```
-xgj@k8s-nfs:~$ df -h /nfs/k8s
+xxx@k8s-nfs:~$ df -h /nfs/k8s
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/sdb1        47G  1.2G   44G   3% /nfs/k8s
 ```
@@ -284,7 +284,7 @@ pvc-nfs   Bound    pvc-1089f532-cffb-454f-91bc-ac19948dc89d   200Mi      RWX    
 NFS 服务器侧的证据（部署验证轮的输出，机制相同）：
 
 ```
-xgj@k8s-nfs:~$ ls -la /nfs/k8s/
+xxx@k8s-nfs:~$ ls -la /nfs/k8s/
 total 28
 drwxr-xr-x 4 root root  4096 Aug 21 19:19 .
 drwxr-xr-x 3 root root  4096 Aug 21 16:24 ..
@@ -432,7 +432,7 @@ Finalizers: [external-provisioner.volume.kubernetes.io/finalizer kubernetes.io/p
 NFS 服务器侧验证（部署验证轮）：
 
 ```
-xgj@k8s-nfs:~$ ls /nfs/k8s/
+xxx@k8s-nfs:~$ ls /nfs/k8s/
 lost+found
 ```
 

@@ -267,7 +267,7 @@ Kubernetes 存储体系可以浓缩成一句话：
 
 - [PV、PVC、StorageClass 三对象](pv-pvc-storageclass.md) — 动手实测动态供给、WaitForFirstConsumer、回收策略
 - [CSI 到底拆了什么？](csi-nfs-components.md) — 部署 NFS CSI，拆 controller/node 容器分工
-- [Linux NFS 服务安装（Debian 13）](../../linux/storage/nfs-server-debian13.md) — CSI 实战的 NFS 服务端环境准备
+- [Linux NFS 服务安装（Debian 13）](../../../linux/storage/nfs-server-debian13.md) — CSI 实战的 NFS 服务端环境准备
 - [Kubernetes API Server 工作原理](../control-plane/api-server.md)
 - [Kubernetes Etcd 工作原理](../control-plane/etcd.md)
 - [Kubernetes Kubelet 工作原理](../node/kubelet.md)
