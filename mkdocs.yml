@@ -296,6 +296,7 @@ nav:
               - PV、PVC、StorageClass 三对象: kubernetes/architecture/storage/pv-pvc-storageclass.md
               - CSI 到底拆了什么？: kubernetes/architecture/storage/csi-nfs-components.md
               - PVC 毫秒级时间线拆解: kubernetes/architecture/storage/pvc-timeline-ms-breakdown.md
+              - 存储静态 vs 动态供应: kubernetes/architecture/storage/static-vs-dynamic-provisioning.md
 
           - 📦 API 资源:
               - 工作负载资源: kubernetes/architecture/resources/workloads.md

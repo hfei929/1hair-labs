@@ -16,7 +16,7 @@ categories:
 
 # K8s 存储毫秒级拆解：一个 PVC 的 563 毫秒全链路时间线
 
-> 存储系列第 3 篇。第 1 篇[讲了 PV/PVC 基础概念和生命周期](pv-pvc-storageclass.md)，第 2 篇搭好了 [NFS CSI 存储层](csi-nfs-components.md)（StorageClass + csi-driver-nfs + 动态供应）。这篇用它跑一个最简单的 Pod——1Gi PVC + busybox——然后用三个数据源把从 PVC 创建到 Pod 启动到 PVC 删除的每一步拆到毫秒级。
+> 存储系列第 3 篇。第 1 篇讲了 PV/PVC 基础概念和生命周期，第 2 篇搭好了 NFS CSI 存储层（StorageClass + csi-driver-nfs + 动态供应）。这篇用它跑一个最简单的 Pod——1Gi PVC + busybox——然后用三个数据源把从 PVC 创建到 Pod 启动到 PVC 删除的每一步拆到毫秒级。
 
 ## Pod 冷启 563ms，kubectl wait 骗了你 15 秒
 
@@ -40,7 +40,9 @@ kubectl get pod pod-timeline -o jsonpath='{.status.containerStatuses[0].state.ru
 
 apply 发起是 11:25:13，容器真正启动是 11:25:14——**不到 1 秒**。那 15 秒去哪了？
 
-答案是 `kubectl wait` 自己的客户端观测延迟。它用 client-go informer cache 监听对象状态变化，cache 同步和轮询的固有开销让它比 apiserver 实际记录的时刻晚了 15 秒。K8s 本身不慢，慢的是我用来观测它的"秒表"。
+答案是 `kubectl wait` 当天的返回时刻出了问题。初版这里把那 15 秒归因于 jsonpath 模式的"定期轮询"——这个归因在存储系列第 4 篇的复测里被推翻了：同样的 `apply && wait && date` 链式命令，后续实验 1 秒返回。翻了 kubectl 源码（v1.36 wait.go）：整个 wait 命令只有 `--for=create` 是轮询（500ms，源码里还留着 TODO 自嘲"not ideal solution"），condition 和 jsonpath 两种模式都走 watch，没有 15 秒级的机制差异。那 15 秒更像当天 VIP 后面某条 apiserver 请求路径的一次性滞后。K8s 本身不慢，慢的是我用来观测它的"秒表"。
+
+做时间线只信 apiserver 记录的对象时间戳（`startedAt`、`lastPhaseTransitionTime`），不要信 kubectl 的返回时刻——它既包含 watch 事件传递延迟，也可能踩中慢路径。
 
 这篇文章就用三个数据源把这个问题拆到底，把一个 PVC 从创建到 Pod 启动到删除的每一步都精确到毫秒。结论先放这：**Pod 冷启只要 563ms，其中 NFS mount 占 72ms，真正的瓶颈是 Calico CNI（93ms）和 RunPodSandbox（247ms）。**
 
@@ -112,19 +114,12 @@ kubectl wait --for=jsonpath='{.status.phase}'=Bound pvc/pvc-timeline --timeout=1
 11:24:35  kubectl wait 返回 condition met                      ← 整整晚了 15 秒
 ```
 
-CSI provisioner 从 PVC 创建到 PV Bound、NFS mkdir、PVC 绑定——**全在 11:24:20 这一秒内完成**。但 `kubectl wait` 到 11:24:35 才返回。差的 15 秒不是 K8s 控制面慢，是 `kubectl wait` 自身的客户端观测延迟。
+CSI provisioner 从 PVC 创建到 PV Bound、NFS mkdir、PVC 绑定——**全在 11:24:20 这一秒内完成**。但 `kubectl wait` 到 11:24:35 才返回。差的 15 秒不是 K8s 控制面慢。
 
-为什么 kubectl wait 慢 15 秒？它有两种 mode：
-
-| mode | 用法 | 实现 | 延迟 |
-|---|---|---|---|
-| `--for=condition=ready` | Pod Ready condition | client-go watch（实时推送） | 几乎 0 |
-| `--for=jsonpath='{.status.phase}'=Bound` | PVC status.phase | 定期 list 轮询 + cache 同步 | ~15s |
-
-PVC 的 Bound 状态涉及多个组件协作（CSI provisioner 创建 PV → pv-controller 更新 PVC status），status 更新有循环延迟。`kubectl wait` 的 jsonpath mode 用定期 list 轮询，cache 同步开销加上 PVC status 二次更新延迟，最终比 apiserver 实际记录的时刻晚了 15 秒。
+为什么 kubectl wait 那天慢了 15 秒？初版归因于 jsonpath 模式的"定期轮询"——**这个归因是错的**。存储系列第 4 篇复测时同样的 `apply && wait && date` 链式命令 1 秒返回，翻了 kubectl 源码（v1.36 wait.go）确认：wait 命令只有 `--for=create` 是轮询（500ms，源码 TODO 自嘲），condition 和 jsonpath 两种 mode 都走 watch，没有 15 秒级的机制差异。那 15 秒更像当天 VIP 后面某条 apiserver 请求路径的一次性滞后。
 
 !!! tip "做时间线用对象时间戳，不要用 kubectl wait 返回时刻"
-    `startedAt`、`lastPhaseTransitionTime`、`creationTimestamp` 这些是 apiserver 记录的对象时间戳，精确到秒（部分到毫秒）。`kubectl wait` 返回时刻是客户端"秒表"，有 0-15s 不等的观测误差。做时间线时优先用对象时间戳。
+    `startedAt`、`lastPhaseTransitionTime`、`creationTimestamp` 这些是 apiserver 记录的对象时间戳，精确到秒（部分到毫秒）。`kubectl wait` 返回时刻是客户端"秒表"，既包含 watch 事件传递延迟，也可能踩中慢路径——0 到 15 秒的观测误差都见过。做时间线时优先用对象时间戳。
 
 PVC 的完整生命周期是这样的：
 
@@ -463,8 +458,7 @@ kubectl delete pvc pvc-timeline && date '+%H:%M:%S'
 
 ---
 
-> **下一篇预告**：存储系列第 4 篇——动态供应 vs 静态供应。第 2 篇搭 NFS CSI 时已经用了动态供应（创建 PVC 自动生成 PV），但 K8s 还有另一种模式：先手建 PV 再建 PVC 绑定。两种模式有什么区别？什么时候该用哪个？回收策略（Retain / Delete / Recycle）在两种模式下表现一样吗？
-
+> **下一篇预告**：存储系列第 4 篇——动态供应 vs 静态供应。第 2 篇搭 NFS CSI 时已经用了动态供应（创建 PVC 自动生成 PV），但 K8s 还有另一种模式：先手建 PV 再建 PVC 绑定。两种模式有什么区别？什么时候该用哪个？回收策略（Retain / Delete / Recycle）在两种模式下表现一样吗？下篇用实验说话。
 
 ---
 
