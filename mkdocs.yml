@@ -297,6 +297,7 @@ nav:
               - CSI 到底拆了什么？: kubernetes/architecture/storage/csi-nfs-components.md
               - PVC 毫秒级时间线拆解: kubernetes/architecture/storage/pvc-timeline-ms-breakdown.md
               - 存储静态 vs 动态供应: kubernetes/architecture/storage/static-vs-dynamic-provisioning.md
+              - reclaim & ondelete 两层逻辑: kubernetes/architecture/storage/ondelete-two-layer-reclaim.md
 
           - 📦 API 资源:
               - 工作负载资源: kubernetes/architecture/resources/workloads.md
