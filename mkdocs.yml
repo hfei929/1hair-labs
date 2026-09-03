@@ -299,6 +299,7 @@ nav:
               - 存储静态 vs 动态供应: kubernetes/architecture/storage/static-vs-dynamic-provisioning.md
               - reclaim & ondelete 两层逻辑: kubernetes/architecture/storage/ondelete-two-layer-reclaim.md
               - VolumeBindingMode——PVC Pending 不一定是错的: kubernetes/architecture/storage/volume-binding-mode.md
+              - allowVolumeExpansion——PVC 扩容的完整链路: kubernetes/architecture/storage/allow-volume-expansion.md
 
           - 📦 API 资源:
               - 工作负载资源: kubernetes/architecture/resources/workloads.md
