@@ -301,6 +301,7 @@ nav:
               - VolumeBindingMode——PVC Pending 不一定是错的: kubernetes/architecture/storage/volume-binding-mode.md
               - allowVolumeExpansion——PVC 扩容的完整链路: kubernetes/architecture/storage/allow-volume-expansion.md
               - VolumeSnapshot——NFS 驱动快照: kubernetes/architecture/storage/volume-snapshot-nfs.md
+              - 卷克隆: kubernetes/architecture/storage/volume-clone.md
 
           - 📦 API 资源:
               - 工作负载资源: kubernetes/architecture/resources/workloads.md
