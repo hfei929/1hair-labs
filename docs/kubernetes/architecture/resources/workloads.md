@@ -1,918 +1,314 @@
 ---
-title: Kubernetes 工作负载资源详解：Pod、Deployment、StatefulSet、DaemonSet 一次讲透
-description: 深入理解 Kubernetes 工作负载资源体系，包括 Pod、Deployment、StatefulSet、DaemonSet、Job、CronJob 的作用、区别和使用场景。
-keywords:
-  - Kubernetes工作负载
-  - Pod
-  - Deployment
-  - StatefulSet
-  - DaemonSet
-  - Job
-  - CronJob
+title: Kubernetes 工作负载：从 Pod 到 CronJob，控制器是怎么管住它们的
+description: 拆解 Kubernetes 五类工作负载资源：为什么只有 Pod 真的会跑、Deployment 隔一层 ReplicaSet 是为滚动更新、StatefulSet 的稳定身份和独立 PVC 从哪来、DaemonSet 如何做到每节点一个、Job/CronJob 怎么跑完就走。并给出选型表与站内阅读路径。
+authors:
+  - hfei
+date: 2026-09-09
+categories:
+  - Kubernetes
 tags:
   - Kubernetes
   - Workload
   - Pod
-author: HairLabs ｜ 一根头发丝的宽度
+  - Deployment
+  - StatefulSet
+  - DaemonSet
+  - 云原生
 ---
 
-# Kubernetes 工作负载资源详解：Pod、Deployment、StatefulSet、DaemonSet 一次讲透
+# Kubernetes 工作负载：从 Pod 到 CronJob，控制器是怎么管住它们的
 
-## 文章摘要
+## 只有 Pod 真的会"跑"
 
-在 Kubernetes 中，真正运行应用程序的是 Pod。
+Kubernetes 里一堆"工作负载"资源——Deployment、StatefulSet、DaemonSet、Job、CronJob——但它们自己都不会跑容器。真正被调度到节点、被 kubelet 和 CRI 拉起来的是 Pod。这些资源的工作只有一个：**决定 Pod 以什么形态存在（几个、叫什么名字、什么时候起、什么时候灭），剩下的交给 Pod**。
 
-但在实际生产环境中，我们很少直接管理 Pod，而是通过 Deployment、StatefulSet、DaemonSet、Job、CronJob 等工作负载资源来管理应用。
+所以理解工作负载要先理解 Pod，而 Pod 从创建到 Running 的完整过程，[Pod 生命周期源码解析](../node/pod-lifecycle.md) 拆到了源码级，这里只给结论：
 
-本文将从整体视角讲解 Kubernetes 工作负载体系，帮助你理解各种工作负载资源之间的关系以及适用场景。
+- Pod 是调度的最小单位，同一 Pod 的容器共享一个网络命名空间（一个 IP）和一组 volume；
+- Pod 是临时的：节点故障、Pod 被删，它不会自己复活——这正是"生产上不直接建 Pod"的原因；
+- 替 Pod 续命、管理副本的，是各种控制器。
 
----
+## Pod 的组成：不只一个容器
 
-## 学习目标
-
-阅读完本文后，你将掌握：
-
-- 什么是工作负载资源
-- Pod 的作用
-- Deployment 工作机制
-- StatefulSet 使用场景
-- DaemonSet 使用场景
-- Job 与 CronJob 区别
-- 工作负载资源选择原则
-
----
-
-## 适用人群
-
-本文适合：
-
-- Kubernetes 初学者
-- Linux 运维工程师
-- DevOps 工程师
-- 云原生学习者
-- Kubernetes 面试准备人员
-
----
-
-## 什么是工作负载资源？
-
-工作负载（Workload）可以理解为：
-
-```text
-负责运行应用程序的资源对象
-```
-
----
-
-例如：
-
-```text
-Nginx
-
-MySQL
-
-Redis
-
-Java应用
-
-Python应用
-```
-
-最终都需要运行在 Kubernetes 中。
-
----
-
-而 Kubernetes 提供了一系列资源来管理这些应用。
-
-这些资源统称：
-
-```text
-Workload
-```
-
----
-
-## Kubernetes 工作负载体系
-
-整体结构如下：
-
-```text
-Deployment
-
-↓
-
-ReplicaSet
-
-↓
-
-Pod
-
-↓
-
-Container
-```
-
----
-
-或者：
-
-```text
-StatefulSet
-
-↓
-
-Pod
-```
-
----
-
-或者：
-
-```text
-DaemonSet
-
-↓
-
-Pod
-```
-
----
-
-最终：
-
-```text
-所有工作负载都会创建 Pod
-```
-
----
-
-因此：
-
-> Pod 是运行载体，而其它工作负载资源本质上都是 Pod 管理器。
-
----
-
-## 为什么不直接使用 Pod？
-
-例如：
+一个 Pod 可以装多个容器，而且有三种角色：
 
 ```yaml
+apiVersion: v1
 kind: Pod
+metadata:
+  name: webapp
+spec:
+  initContainers:              # 1. 先跑，跑完才轮到主容器
+    - name: init-db
+      image: busybox
+      command: ["sh", "-c", "until nc -z db 3306; do sleep 1; done"]
+  containers:                  # 2. 主容器
+    - name: app
+      image: myapp:1.0
+      ports:
+        - containerPort: 8080
+      livenessProbe:           # 3. 探针：决定要不要重启容器
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+      readinessProbe:          # 4. 探针：决定要不要接流量
+        httpGet:
+          path: /ready
+          port: 8080
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 512Mi
+  restartPolicy: Always        # Always / OnFailure / Never
 ```
 
-创建：
+三个探针各管一件事：
 
-```text
-nginx-pod
+| 探针 | 回答的问题 | 失败后果 |
+|---|---|---|
+| livenessProbe | 容器还活着吗？ | 杀掉容器重启 |
+| readinessProbe | 容器能接流量吗？ | 从 Service 的 EndpointSlice 里摘掉 |
+| startupProbe | 启动完成了吗？ | 在此之前不跑另外两个探针 |
+
+很多人把 liveness 和 readiness 搞混，或者干脆只配 liveness。实际上 readiness 失败**不会重启容器**，只是短暂停流——这才是"应用还没预热好"应该用的。startupProbe 专门给启动慢的应用兜底，避免 liveness 在应用还没起来时就把它误杀了。
+
+`initContainers` 是"先序任务"：主容器启动前按顺序跑完，适合等依赖就绪、做数据初始化。sidecar 容器（1.28 起，`restartPolicy: Always` 的 initContainer）则相反，是跟着主容器一起活着的辅助进程，典型如服务网格的 Envoy。
+
+## Deployment：无状态应用的默认答案
+
+Deployment 不直接管 Pod，它管 ReplicaSet，ReplicaSet 再管 Pod：
+
+```mermaid
+flowchart LR
+    A["Deployment"] --> B["ReplicaSet v1"] --> C["Pod ×3"]
+    A --> D["ReplicaSet v2"] --> E["Pod ×3"]
 ```
 
----
-
-如果节点故障：
-
-```text
-Pod 消失
-```
-
----
-
-如果误删除：
-
-```bash
-kubectl delete pod nginx-pod
-```
-
----
-
-Pod 也会直接消失。
-
----
-
-Kubernetes 不会自动恢复。
-
----
-
-因此生产环境很少直接创建 Pod。
-
----
-
-而是使用：
-
-```text
-Deployment
-```
-
-管理 Pod。
-
----
-
-## Pod：最小运行单元
-
-Pod 是 Kubernetes 中最小的调度单位。
-
----
-
-结构：
-
-```text
-Pod
-
-├── Container A
-└── Container B
-```
-
----
-
-通常：
-
-```text
-一个 Pod
-一个容器
-```
-
-最常见。
-
----
-
-特点：
-
-- 拥有独立 IP
-- 共享网络命名空间
-- 共享存储卷
-- 被调度到单个节点
-
----
-
-适合：
-
-```text
-测试环境
-调试环境
-```
-
----
-
-生产环境通常不直接使用。
-
----
-
-## Deployment：无状态应用首选
-
-这是最常见的工作负载资源。
-
----
-
-例如：
+为什么要隔一层 ReplicaSet？为了**滚动更新**。Deployment 的 spec 一改（比如换镜像），Deployment Controller 会新建一个 ReplicaSet，按 `maxSurge` / `maxUnavailable` 的节奏逐步把流量从旧 Pod 切到新 Pod；旧 ReplicaSet 缩到 0 后保留，这就是 `kubectl rollout undo` 能秒级回滚的原因。
 
 ```yaml
+apiVersion: apps/v1
 kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # 更新期间最多多出 1 个 Pod
+      maxUnavailable: 0  # 更新期间不许有 Pod 不可用
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27
 ```
 
----
+滚动更新的完整命令链：
 
-创建：
+```bash
+kubectl set image deploy/nginx nginx=nginx:1.28   # 触发一次滚动
+kubectl rollout status deploy/nginx                 # 盯住滚动进度
+kubectl rollout history deploy/nginx                # 看历史版本
+kubectl rollout undo deploy/nginx --to-revision=2   # 回滚到某个版本
+```
+
+`rollout history` 能列版本，是因为 Deployment 保留了缩到 0 的旧 ReplicaSet——回滚就是把这些旧 RS 重新扩起来，所以秒级完成。
+
+三个容易踩的点：
+
+1. **selector 必须和 template.labels 对上**，否则 apply 直接报错；
+2. **template 是 Pod 模板**，改 template 里任何字段都会触发一次滚动；改 `replicas` 只伸缩、不换版本；
+3. **requests/limits 写在 template.spec.containers 里**，不是 Deployment 顶层。关于它们的语义（调度保证 vs 内核限制），见 [Requests vs Limits](../../practice/requests-vs-limits.md)。
+
+想一次改多个字段却只滚一次，用 `kubectl rollout pause` 暂停、改完再 `resume`。
+
+Deployment 适合无状态应用：Nginx、API 服务、Web 应用。判断标准就一条——**这个 Pod 挂了换个新的，业务能不能无差别接手**。
+
+## StatefulSet：名字和数据都不能丢
+
+有些服务换个 Pod 就出事：MySQL、Kafka、ZooKeeper。它们需要三样东西：
+
+- **稳定的网络身份**：`mysql-0`、`mysql-1` 这种有序名字，重建后不变；
+- **独立的存储**：每个 Pod 一块自己的 PVC，重建后还挂原来那块；
+- **有序的启停**：0 号起来再起 1 号。
+
+StatefulSet 就是为这三件事设计的：
 
 ```yaml
-replicas: 3
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: mysql        # 必须指向一个 headless Service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:      # 每个 Pod 自动生成独立 PVC
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: nfs-client
+        resources:
+          requests:
+            storage: 10Gi
 ```
 
----
+`volumeClaimTemplates` 是 StatefulSet 独有：它为每个 Pod 自动建一个 PVC（`data-mysql-0`、`data-mysql-1`...），Pod 被删重建后同名 PVC 还在，数据不丢。StatefulSet 的存储与 PVC/SC 强相关，细节在 [存储资源专题](../storage/storage.md)。
 
-效果：
+`serviceName` 指向一个 headless Service（`clusterIP: None`），配合 StatefulSet 才能给每个 Pod 稳定的 DNS 名（`mysql-0.mysql.default.svc.cluster.local`）。普通 Service 给所有 Pod 共享一个 ClusterIP，headless 则直接返回每个 Pod 的 IP，让每个 Pod 都有自己的 DNS 记录——这就是"稳定身份"的底层来源。
 
-```text
-Pod-1
+StatefulSet 还有两个 Deployment 没有的保证：
 
-Pod-2
+- **有序**：0 号不 Ready，1 号不会起来；缩容从最大号开始，扩容从最小号开始；
+- **更新策略**：`OnDelete`（手删一个才更新一个）或 `RollingUpdate`（从最大号往前滚，`partition` 可以做金丝雀——只更新序号 ≥ partition 的）。
 
-Pod-3
-```
+## DaemonSet：每个节点恰好一个
 
----
-
-如果：
-
-```text
-Pod-2
-```
-
-异常退出。
-
----
-
-Deployment 自动创建：
-
-```text
-Pod-4
-```
-
-补齐副本。
-
----
-
-### Deployment 特点
-
-支持：
-
-- 副本管理
-- 自动恢复
-- 滚动更新
-- 回滚
-- 扩缩容
-
----
-
-### 适用场景
-
-例如：
-
-```text
-Nginx
-
-Java API
-
-Python API
-
-Web应用
-```
-
----
-
-简单记忆：
-
-> 无状态应用优先选择 Deployment。
-
----
-
-## StatefulSet：有状态应用首选
-
-很多服务不能随意更换身份。
-
-例如：
-
-```text
-MySQL
-
-Redis
-
-Kafka
-
-ZooKeeper
-```
-
----
-
-这些服务需要：
-
-```text
-固定名称
-
-固定存储
-
-固定顺序
-```
-
----
-
-Deployment 无法保证。
-
----
-
-因此 Kubernetes 提供：
-
-```text
-StatefulSet
-```
-
----
-
-### StatefulSet 特点
-
-每个 Pod 拥有：
-
-```text
-mysql-0
-
-mysql-1
-
-mysql-2
-```
-
-固定名称。
-
----
-
-同时拥有：
-
-```text
-独立PVC
-```
-
-独立存储。
-
----
-
-重建后：
-
-```text
-名称不变
-
-数据不变
-```
-
----
-
-### 适用场景
-
-```text
-MySQL
-
-Redis
-
-MongoDB
-
-Kafka
-
-Elasticsearch
-```
-
----
-
-简单记忆：
-
-> 有状态应用优先选择 StatefulSet。
-
----
-
-## DaemonSet：每个节点运行一个 Pod
-
-DaemonSet 的特点非常特殊。
-
----
-
-创建：
+日志采集、节点监控、网络插件这类组件，诉求是"**每个节点恰好跑一个**"，而不是"跑 N 个副本"。DaemonSet 直接绕过副本数：
 
 ```yaml
+apiVersion: apps/v1
 kind: DaemonSet
+metadata:
+  name: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter
 ```
 
----
+节点加入集群，DaemonSet 自动补一个；节点下线，对应 Pod 跟着走。Calico、Flannel、Node Exporter、Fluent Bit 都这么部署——[CNI 详解](../network/cni.md) 里每个节点上的 CNI 插件，就是 DaemonSet 拉起来的。
 
-效果：
-
-```text
-Node01 → Pod
-
-Node02 → Pod
-
-Node03 → Pod
-```
-
----
-
-每个节点自动运行一个实例。
-
----
-
-新增节点：
-
-```text
-Node04
-```
-
----
-
-自动创建：
-
-```text
-Pod
-```
-
----
-
-### 典型场景
-
-日志采集：
-
-```text
-Fluent Bit
-
-Filebeat
-```
-
----
-
-监控采集：
-
-```text
-Node Exporter
-```
-
----
-
-网络插件：
-
-```text
-Calico
-
-Flannel
-```
-
----
-
-简单记忆：
-
-> 每个节点运行一个实例时使用 DaemonSet。
-
----
-
-## Job：一次性任务
-
-有些任务不需要长期运行。
-
-例如：
-
-```text
-数据库初始化
-
-数据导入
-
-批量处理
-```
-
----
-
-执行完成即可退出。
-
----
-
-使用：
+DaemonSet 默认调度到所有节点，但可以收窄范围。只想跑在有 GPU 的节点上，用 nodeSelector 或 nodeAffinity；反过来，控制面节点默认有 taint，DaemonSet 想上去要加 toleration：
 
 ```yaml
+spec:
+  template:
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+```
+
+## Job 和 CronJob：跑完就走的任务
+
+不是所有负载都要常驻。数据库迁移、批量计算、一次性初始化，跑完就该退出。Job 管的是"**跑满 N 个成功的 Pod 就收工**"：
+
+```yaml
+apiVersion: batch/v1
 kind: Job
+metadata:
+  name: migrate
+spec:
+  completions: 1          # 需要成功完成几次
+  parallelism: 1          # 同时跑几个
+  backoffLimit: 4         # 失败重试几次才放弃
+  template:
+    spec:
+      restartPolicy: Never   # Job 的 Pod 通常 Never 或 OnFailure
+      containers:
+        - name: migrate
+          image: migrate-tool
 ```
 
----
-
-特点：
-
-```text
-成功即结束
-```
-
----
-
-### 适用场景
-
-```text
-数据迁移
-
-批量计算
-
-初始化脚本
-```
-
----
-
-## CronJob：定时任务
-
-类似 Linux：
-
-```bash
-crontab
-```
-
----
-
-例如：
-
-每天凌晨：
-
-```text
-备份数据库
-```
-
----
-
-每小时：
-
-```text
-同步数据
-```
-
----
-
-使用：
+批处理型的 Job 会用上另外几个字段：
 
 ```yaml
+spec:
+  completions: 100             # 总共成功 100 次才算完成
+  parallelism: 5               # 每次并行跑 5 个
+  activeDeadlineSeconds: 300   # Job 总超时，到了强制结束
+  ttlSecondsAfterFinished: 60  # 完成后 60 秒自动删除 Job 对象
+```
+
+CronJob 再包一层，加个 cron 表达式定时创建 Job：
+
+```yaml
+apiVersion: batch/v1
 kind: CronJob
+metadata:
+  name: backup
+spec:
+  schedule: "0 2 * * *"        # 每天凌晨 2 点
+  concurrencyPolicy: Forbid    # Allow/Forbid/Replace：上一轮没跑完怎么办
+  startingDeadlineSeconds: 200 # 错过窗口多久内还补跑
+  successfulJobsHistoryLimit: 3 # 保留几个成功历史（默认 3）
+  failedJobsHistoryLimit: 1    # 保留几个失败历史
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: backup-tool
 ```
 
----
+cron 表达式是 5 段：分 时 日 月 周。`*/5 * * * *` 是每 5 分钟，`0 2 * * *` 是每天凌晨 2 点。**写错了不会报错，只会在错误的时间跑、或者永远不跑**——这是定时任务最常见的坑。另外 `concurrencyPolicy` 没设成 Forbid 时，任务跑得慢于调度周期就会堆积并发实例。
 
-例如：
-
-```yaml
-schedule: "0 2 * * *"
-```
-
----
-
-表示：
-
-```text
-每天凌晨2点执行
-```
-
----
-
-### 适用场景
-
-```text
-自动备份
-
-日志清理
-
-报表生成
-```
-
----
-
-## 工作负载资源关系图
-
-最常见链路：
-
-```text
-Deployment
-
-↓
-
-ReplicaSet
-
-↓
-
-Pod
-
-↓
-
-Container
-```
-
----
-
-StatefulSet：
-
-```text
-StatefulSet
-
-↓
-
-Pod
-
-↓
-
-PVC
-
-↓
-
-Storage
-```
-
----
-
-DaemonSet：
-
-```text
-DaemonSet
-
-↓
-
-每个Node一个Pod
-```
-
----
-
-Job：
-
-```text
-Job
-
-↓
-
-Pod
-
-↓
-
-完成后退出
-```
-
----
-
-CronJob：
-
-```text
-CronJob
-
-↓
-
-Job
-
-↓
-
-Pod
-```
-
----
-
-## 工作负载资源如何选择？
-
-| 场景 | 推荐资源 |
-|--------|--------|
-| Web应用 | Deployment |
-| API服务 | Deployment |
-| MySQL | StatefulSet |
-| Redis集群 | StatefulSet |
-| Kafka | StatefulSet |
-| 日志采集 | DaemonSet |
-| 节点监控 | DaemonSet |
-| 数据导入 | Job |
-| 自动备份 | CronJob |
-
----
-
-## 生产环境最佳实践
-
-### 不直接管理 Pod
-
-推荐：
-
-```text
-Deployment
-```
-
----
-
-### 数据库使用 StatefulSet
-
-避免：
-
-```text
-Deployment + MySQL
-```
-
----
-
-### 节点组件使用 DaemonSet
-
-例如：
-
-```text
-Calico
-
-Node Exporter
-
-Fluent Bit
-```
-
----
-
-### 定时任务使用 CronJob
-
-避免：
-
-```text
-长期运行脚本
-```
-
----
-
-## 常见故障排查
-
-查看工作负载：
+## 排错：工作负载不正常的三个起点
 
 ```bash
-kubectl get deploy
+kubectl get deploy,rs,pod -o wide     # 一层层看下去
+kubectl describe pod <pod>            # 看 Events：调度失败/拉镜像失败/OOM
+kubectl logs <pod> --previous         # 容器崩了，看上一个实例的日志
 ```
 
----
+- Pod 一直 Pending → 看 Events 是资源不足还是调度不上（[Scheduler 详解](../control-plane/scheduler.md)）；
+- Pod 一直 CrashLoopBackOff → `logs --previous` 看它临死前说了什么；
+- Pod Running 但服务不通 → 查 readinessProbe 有没有把 Pod 从 EndpointSlice 里摘掉（[服务资源](server-resources.md)）。
 
-查看 StatefulSet：
+## 一张表选型
 
-```bash
-kubectl get sts
-```
+| 场景 | 选型 | 判断依据 |
+|---|---|---|
+| 无状态 Web / API | Deployment | 副本可替换，身份无所谓 |
+| 数据库 / 消息队列 | StatefulSet | 需要稳定身份 + 独立存储 |
+| 节点级组件 | DaemonSet | 每节点恰好一个 |
+| 一次性任务 | Job | 跑完即止 |
+| 定时任务 | CronJob | 按时间表触发 |
 
----
+## 推荐阅读
 
-查看 DaemonSet：
-
-```bash
-kubectl get ds
-```
-
----
-
-查看 Job：
-
-```bash
-kubectl get jobs
-```
-
----
-
-查看 CronJob：
-
-```bash
-kubectl get cronjobs
-```
-
----
-
-查看 Pod：
-
-```bash
-kubectl get pods
-```
-
----
-
-## 面试常见问题
-
-### Pod 和 Deployment 的区别？
-
-Deployment 管理 Pod。
-
----
-
-### StatefulSet 解决什么问题？
-
-有状态应用管理。
-
----
-
-### DaemonSet 适合什么场景？
-
-每节点运行一个实例。
-
----
-
-### Job 与 CronJob 的区别？
-
-CronJob 定时创建 Job。
-
----
-
-### MySQL 应该使用什么资源？
-
-StatefulSet。
-
----
-
-## FAQ
-
-### Pod 能直接用于生产吗？
-
-可以，但不推荐。
-
----
-
-### Deployment 能部署 MySQL 吗？
-
-技术上可以。
-
-生产环境不推荐。
-
----
-
-### DaemonSet 会自动覆盖新节点吗？
-
-会。
-
----
-
-## 总结
-
-工作负载资源负责管理 Kubernetes 中运行的应用程序。
-
-其中：
-
-- Pod 负责运行容器
-- Deployment 管理无状态应用
-- StatefulSet 管理有状态应用
-- DaemonSet 管理节点级服务
-- Job 执行一次性任务
-- CronJob 执行定时任务
-
-可以记住一句话：
-
-> Pod 是运行载体，而 Deployment、StatefulSet、DaemonSet 等资源则是 Pod 的管理者。
-
----
-
-## 相关阅读
-
-- [Kubernetes Pod 生命周期详解]
-- [Kubernetes Deployment 工作原理]
-- [Kubernetes StatefulSet 工作原理]
-- [Kubernetes Service 工作原理]
-- [Kubernetes 存储资源详解]
+- [Pod 生命周期源码解析](../node/pod-lifecycle.md) — 从 Pending 到 Running 的完整链路
+- [Kubelet SyncLoop](../node/kubelet-syncloop.md) — kubelet 如何 watch 到 Pod 并拉起容器
+- [Controller Manager 详解](../control-plane/controller-manager.md) — Deployment/ReplicaSet 控制器背后的 reconcile 循环
+- [Scheduler 详解](../control-plane/scheduler.md) — Pod 如何被选到节点上
+- [Requests vs Limits](../../practice/requests-vs-limits.md) — 副本调度的保证与 cgroup 的限制
+- [CNI 详解](../network/cni.md) — DaemonSet 部署的节点网络插件

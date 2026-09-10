@@ -1,807 +1,247 @@
 ---
-title: Kubernetes 服务资源详解：Service、Ingress、Gateway API 一文读懂
-description: 深入理解 Kubernetes 服务资源体系，包括 Service、EndpointSlice、Ingress、IngressClass、Gateway API 的作用、关系以及最佳实践。
-keywords:
-  - Kubernetes Service
-  - Kubernetes Ingress
-  - Gateway API
-  - EndpointSlice
-  - Kubernetes服务发现
-  - Kubernetes网络
+title: Kubernetes 服务资源：Service 到底虚拟出了什么，Ingress 和 Gateway API 差在哪
+description: 拆解 Kubernetes 服务资源：ClusterIP 只是 iptables 规则里的一个记号、真正转发流量的是 kube-proxy、记录后端地址的是 EndpointSlice、Ingress 是 L7 的流量入口、Gateway API 把入口拆成 GatewayClass/Gateway/HTTPRoute 三个角色。并串起一条从 DNS 到 Pod 的完整流量链路。
+authors:
+  - hfei
+date: 2026-09-09
+categories:
+  - Kubernetes
 tags:
   - Kubernetes
   - Service
-  - Networking
-author: HairLabs | 一根头发丝的宽度
+  - Ingress
+  - EndpointSlice
+  - Gateway API
+  - kube-proxy
+  - 云原生
 ---
 
-# Kubernetes 服务资源详解：Service、Ingress、Gateway API 一文读懂
+# Kubernetes 服务资源：Service 到底虚拟出了什么，Ingress 和 Gateway API 差在哪
 
-## 文章摘要
+## Service 不是负载均衡器，是一个"稳定的名字"
 
-在 Kubernetes 中，Pod 是应用运行的载体，但 Pod IP 并不固定。
+Pod 的 IP 会变：重建、扩容、迁移，IP 都可能换。Service 解决的是"**用一个稳定的地址找到一群会变的 Pod**"。
 
-当 Pod 重建、扩容或迁移节点时，其 IP 地址可能发生变化。
+关键要先想通一件事：ClusterIP 那个 IP 本身不承载任何流量，它只是 iptables/IPVS 规则里的一个"记号"，真正把流量送到 Pod 的是 kube-proxy。[Kube-Proxy 详解](../network/kube-proxy.md) 和 [ClusterIP 为什么 ping 不通](../network/clusterip-link-deep.md) 把这条转发链路拆到了规则级别，这里只给结论：
 
-为了让应用能够被稳定访问，Kubernetes 提供了一套完整的服务资源体系。
+- Service 的 selector 选出后端 Pod；
+- kube-proxy watch Service 和 Pod 变化，在每台节点上维护转发规则；
+- 请求打到 ClusterIP，被规则 DNAT 到某个后端 Pod。
 
-本文将从资源对象的角度，系统讲解 Service、EndpointSlice、Ingress、IngressClass 以及 Gateway API 的作用与关系。
+所以"Service 挂了"通常是"kube-proxy 没同步规则"或"selector 没选中任何 Pod"，而不是 Service 对象本身出了事。
 
----
-
-## 学习目标
-
-阅读完本文后，你将掌握：
-
-- Kubernetes 服务资源体系
-- Service 的作用
-- EndpointSlice 的作用
-- Ingress 的作用
-- IngressClass 的作用
-- Gateway API 的定位
-- 服务发现流程
-- 对外访问流程
-
----
-
-## 适用人群
-
-本文适合：
-
-- Kubernetes 初学者
-- Linux 运维工程师
-- DevOps 工程师
-- 云原生学习者
-- Kubernetes 面试准备人员
-
----
-
-## 什么是服务资源？
-
-服务资源（Service Resources）主要解决两个问题：
-
-### 服务发现（Service Discovery）
-
-找到目标 Pod。
-
----
-
-### 流量访问（Traffic Access）
-
-让用户能够访问应用。
-
----
-
-例如：
-
-```text
-Browser
-
-↓
-
-Ingress
-
-↓
-
-Service
-
-↓
-
-Pod
-```
-
----
-
-或者：
-
-```text
-Pod-A
-
-↓
-
-Service
-
-↓
-
-Pod-B
-```
-
----
-
-服务资源就是实现这些能力的核心对象。
-
----
-
-## Kubernetes 服务资源体系
-
-整体结构如下：
-
-```text
-Ingress
-
-↓
-
-Service
-
-↓
-
-EndpointSlice
-
-↓
-
-Pod
-```
-
----
-
-在较新的架构中：
-
-```text
-Gateway
-
-↓
-
-HTTPRoute
-
-↓
-
-Service
-
-↓
-
-EndpointSlice
-
-↓
-
-Pod
-```
-
----
-
-## Service
-
-Service 是 Kubernetes 最基础的服务资源。
-
----
-
-作用：
-
-```text
-提供稳定访问入口
-```
-
----
-
-例如：
-
-```text
-Pod-A
-10.244.1.10
-
-Pod-B
-10.244.2.15
-
-Pod-C
-10.244.3.20
-```
-
----
-
-Service：
-
-```text
-10.96.0.100
-```
-
----
-
-客户端只访问：
-
-```text
-10.96.0.100
-```
-
-即可。
-
----
-
-### Service 类型
-
-常见类型：
-
-| 类型 | 作用 |
-|--------|--------|
-| ClusterIP | 集群内部访问 |
-| NodePort | 节点端口访问 |
-| LoadBalancer | 云负载均衡 |
-| ExternalName | 外部服务映射 |
-
----
-
-生产环境最常见：
-
-```text
-ClusterIP
-```
-
----
-
-## EndpointSlice
-
-很多人知道 Service。
-
-却不知道真正记录 Pod 地址的是：
-
-```text
-EndpointSlice
-```
-
----
-
-查看：
-
-```bash
-kubectl get endpointslice
-```
-
----
-
-例如：
-
-```text
-10.244.1.10
-
-10.244.2.15
-
-10.244.3.20
-```
-
----
-
-这些才是真正的后端地址。
-
----
-
-### 为什么需要 EndpointSlice？
-
-早期 Kubernetes 使用：
-
-```text
-Endpoints
-```
-
-对象。
-
----
-
-当集群规模变大：
-
-```text
-数百
-
-数千
-
-数万 Pod
-```
-
-时。
-
----
-
-Endpoints 对象会变得非常庞大。
-
----
-
-因此引入：
-
-```text
-EndpointSlice
-```
-
-进行拆分管理。
-
----
-
-### EndpointSlice 优势
-
-- 更高扩展性
-- 更低 API 压力
-- 更适合大规模集群
-
----
-
-## Ingress
-
-Ingress 是 Kubernetes 最常见的南北向流量入口资源。
-
----
-
-作用：
-
-```text
-HTTP
-
-HTTPS
-
-域名访问
-```
-
-管理。
-
----
-
-例如：
-
-```text
-www.example.com
-```
-
----
-
-转发：
-
-```text
-web-service
-```
-
----
-
-或者：
-
-```text
-api.example.com
-```
-
----
-
-转发：
-
-```text
-api-service
-```
-
----
-
-## Ingress 能做什么？
-
-支持：
-
-### 域名路由
-
-```text
-user.example.com
-
-order.example.com
-```
-
----
-
-### 路径路由
-
-```text
-/api
-
-/admin
-
-/web
-```
-
----
-
-### HTTPS
-
-TLS 证书管理。
-
----
-
-### 负载均衡
-
-请求分发。
-
----
-
-## IngressClass
-
-很多人忽略这个资源。
-
----
-
-作用：
-
-```text
-指定Ingress由谁处理
-```
-
----
-
-例如：
-
-```text
-nginx
-```
-
----
-
-或者：
-
-```text
-traefik
-```
-
----
-
-或者：
-
-```text
-apisix
-```
-
----
-
-IngressClass 类似：
-
-```text
-驱动选择器
-```
-
----
-
-例如：
+## Service 四种类型
 
 ```yaml
-ingressClassName: nginx
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  type: ClusterIP          # 默认
+  selector:
+    app: nginx
+  ports:
+    - port: 80             # Service 端口
+      targetPort: 8080     # Pod 端口
 ```
 
----
+| type | 作用 | 典型场景 |
+|---|---|---|
+| ClusterIP | 集群内稳定 IP | 集群内互访（默认） |
+| NodePort | 在每节点开一个固定端口 | 调试、少量对外 |
+| LoadBalancer | 调云厂商 LB | 云上生产对外 |
+| ExternalName | CNAME 到外部域名 | 对接集群外服务 |
 
-表示：
+四种类型的 YAML 差别很小，但行为差异很大：
 
-```text
-由 Nginx Ingress Controller 处理
+```yaml
+# NodePort：在每节点开一个固定端口（30000-32767）
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-np
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080   # 不写则自动分配
 ```
 
----
-
-## Gateway API
-
-这是 Kubernetes 未来重点发展的方向。
-
----
-
-可以理解为：
-
-```text
-Ingress 下一代标准
+```yaml
+# LoadBalancer：调云厂商 LB 分配一个外部 IP
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 8080
 ```
 
----
-
-相比 Ingress：
-
-支持更复杂流量治理。
-
----
-
-主要资源：
-
-### GatewayClass
-
-定义实现。
-
----
-
-### Gateway
-
-定义入口。
-
----
-
-### HTTPRoute
-
-定义路由规则。
-
----
-
-关系：
-
-```text
-GatewayClass
-
-↓
-
-Gateway
-
-↓
-
-HTTPRoute
-
-↓
-
-Service
+```yaml
+# ExternalName：没有 selector，直接把名字 CNAME 到外部
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-db
+spec:
+  type: ExternalName
+  externalName: db.example.com
 ```
 
----
+LoadBalancer 在裸金属上没云厂商支持时会一直 `Pending`，这时候用 MetalLB 这类方案补齐。NodePort 的流量路径里有个著名的 SNAT 问题——外部流量经过 NodePort 时源 IP 会被改写，[SNAT 三种场景](../network/snat-three-scenarios.md) 里有完整实测。
 
-## Service 与 Ingress 的区别
+### headless Service 与 externalTrafficPolicy
 
-很多面试都会问。
+两个容易被忽略的配置：
 
-| 项目 | Service | Ingress |
-|--------|--------|--------|
-| 作用 | 服务发现 | 流量入口 |
-| 工作层级 | L4 | L7 |
-| 访问对象 | Pod | Service |
-| HTTPS | 不负责 | 支持 |
-
----
-
-简单记忆：
-
-```text
-Service 找到 Pod
-
-Ingress 找到 Service
+```yaml
+spec:
+  clusterIP: None               # headless：不给 ClusterIP，直接暴露 Pod IP
+  externalTrafficPolicy: Local  # 外部流量只发给本节点的 Pod，保留源 IP
 ```
 
----
+- **headless**（`clusterIP: None`）：DNS 查询直接返回所有 Pod IP，配合 StatefulSet 给每个 Pod 稳定 DNS 名（[工作负载资源](workloads.md)）；
+- **externalTrafficPolicy: Local**：NodePort/LoadBalancer 场景下，流量只路由到同节点的 Pod，避免跨节点二次转发，也保留了客户端源 IP（代价是流量不均）。
 
-## Gateway API 与 Ingress 的区别
+## kube-proxy：iptables 还是 IPVS
 
-| 项目 | Ingress | Gateway API |
-|--------|--------|--------|
-| 功能 | 基础 | 强大 |
-| 扩展性 | 一般 | 很强 |
-| 路由能力 | 有限 | 丰富 |
-| 多团队管理 | 较弱 | 优秀 |
+Service 规则最终由 kube-proxy 落地，它有两种模式：
 
----
-
-未来趋势：
-
-```text
-Gateway API
-```
-
-逐步替代部分 Ingress 场景。
-
----
-
-## 服务发现流程
-
-Pod 访问：
-
-```text
-mysql.default.svc.cluster.local
-```
-
----
-
-流程：
-
-```text
-Pod
-
-↓
-
-CoreDNS
-
-↓
-
-Service
-
-↓
-
-EndpointSlice
-
-↓
-
-Pod
-```
-
----
-
-整个过程无需关心 Pod IP。
-
----
-
-## 用户访问流程
-
-访问：
-
-```text
-https://www.example.com
-```
-
----
-
-流程：
-
-```text
-Browser
-
-↓
-
-DNS
-
-↓
-
-Ingress
-
-↓
-
-Service
-
-↓
-
-EndpointSlice
-
-↓
-
-Pod
-```
-
----
-
-这是生产环境最常见流量路径。
-
----
-
-## 生产环境最佳实践
-
-### 内部访问使用 ClusterIP
-
-默认推荐。
-
----
-
-### 对外访问统一走 Ingress
-
-避免大量 NodePort。
-
----
-
-### 使用 EndpointSlice
-
-不要依赖旧 Endpoints。
-
----
-
-### 新项目关注 Gateway API
-
-未来发展方向。
-
----
-
-## 常见故障排查
-
-查看 Service：
+| 模式 | 实现 | 特点 |
+|---|---|---|
+| iptables | 逐条 DNAT 规则 | 成熟稳定，规则多了性能下降 |
+| IPVS | 内核 LVS | 大规模 Service 性能更好，支持更多负载均衡算法 |
 
 ```bash
-kubectl get svc
+kubectl -n kube-system get ds kube-proxy -o yaml | grep -i mode
+# mode: iptables  或  mode: ipvs
 ```
 
----
+iptables 模式下规则是链式匹配，几千个 Service 后转发延迟会明显上升；IPVS 用哈希表，规模上去后优势明显。这条转发链路的细节在 [Kube-Proxy 详解](../network/kube-proxy.md)。
 
-查看 EndpointSlice：
+## EndpointSlice：真正记录后端地址的
+
+Service 自己不存 Pod 地址。真正记录"这个 Service 背后有哪些 Pod IP"的是 EndpointSlice（早期叫 Endpoints）：
 
 ```bash
 kubectl get endpointslice
+NAME          ADDRESSTYPE   PORTS   ENDPOINTS                 AGE
+nginx-abc12   IPv4          8080    10.244.1.5,10.244.2.9     3d
 ```
 
----
+kube-proxy 实际消费的就是 EndpointSlice 里的这些 IP。为什么从 Endpoints 拆成 EndpointSlice？单个 Endpoints 对象在超大规模 Service（几万 Pod）下会膨胀到几 MB，watch 一次成本很高；切成多个 Slice（默认每个 100 个地址）后按需增量同步，这也是大规模集群控制 API Server 压力的一部分。
 
-查看 Ingress：
+Pod 没就绪时会被从 EndpointSlice 里摘掉（就绪探针）。所以"Service 不通"要查的就三样：selector 对不对、EndpointSlice 里有没有就绪地址、kube-proxy 规则有没有同步。
+
+## Ingress：南北向的 L7 入口
+
+Service 是 L4 的，Ingress 是 L7 的（HTTP/HTTPS）：
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - www.example.com
+      secretName: example-tls       # TLS 证书
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+```
+
+`pathType` 有三种：`Prefix`（前缀匹配，最常用）、`Exact`（精确匹配）、`ImplementationSpecific`（交给 controller 自己定义）。多个 path 命中时，**最长前缀优先**，所以 `/api` 写在 `/` 前面。
+
+Ingress 只是"路由声明"，真正干活的是 Ingress Controller（nginx-ingress、traefik 等），证书终止也发生在这一层。链路细节在 [Ingress 详解](../network/ingress.md)。
+
+`ingressClassName` 指向 IngressClass，用来指定"这条规则由哪个 controller 处理"——集群里装了多个 ingress controller 时，这个字段就是分拣器。
+
+## Gateway API：Ingress 的下一代，但还没完全接班
+
+Gateway API 把"入口"拆成三个角色：
+
+- **GatewayClass**：实现（谁提供能力）；
+- **Gateway**：部署（入口实例）；
+- **HTTPRoute**：路由（怎么转发）。
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web
+spec:
+  parentRefs:
+    - name: web-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: web
+          port: 80
+```
+
+相比 Ingress 的优势：更细的流量治理（按 header 路由、权重分流、跨命名空间引用），并且把"基础设施团队管 Gateway、业务团队管 Route"的职责边界画清楚了。代价是生态还在追赶，很多 controller 支持不完整。短期不必急着迁移，新项目值得关注。
+
+## 排错：流量不通的三段式排查
 
 ```bash
-kubectl get ingress
+kubectl get svc,endpointslice,ingress       # 看对象在不在、就绪没有
+kubectl describe svc <svc>                  # 看 Events 和 Endpoints
+kubectl -n kube-system logs <kube-proxy>    # 看转发规则有没有同步
 ```
 
----
+- DNS 解析不到 → 查 CoreDNS（[Service 域名解析](../network/service-dns-to-clusterip.md)）；
+- 解析到了但连不通 → 查 EndpointSlice 有没有就绪地址、kube-proxy 规则；
+- 通了但源 IP 不对 → 查 `externalTrafficPolicy` 和 [SNAT](../network/snat-three-scenarios.md)。
 
-查看 IngressClass：
+## 一条完整流量路径串起来
 
-```bash
-kubectl get ingressclass
+```mermaid
+flowchart LR
+    A["用户请求<br/>www.example.com"] --> B["DNS 解析"]
+    B --> C["Ingress Controller"]
+    C --> D["Service<br/>ClusterIP"]
+    D --> E["kube-proxy<br/>iptables/IPVS"]
+    E --> F["EndpointSlice<br/>就绪 Pod"]
+    F --> G["Pod"]
 ```
 
----
+这条链路上每一段本站都有对应拆解：[DNS → ClusterIP](../network/service-dns-to-clusterip.md)、[ClusterIP 链路](../network/clusterip-link-deep.md)、[一行 curl 的完整旅程](../network/curl-full-link.md)。
 
-查看 Gateway：
+## 推荐阅读
 
-```bash
-kubectl get gateway
-```
-
----
-
-查看 HTTPRoute：
-
-```bash
-kubectl get httproute
-```
-
----
-
-## 面试常见问题
-
-### Service 的作用是什么？
-
-提供稳定访问入口。
-
----
-
-### EndpointSlice 的作用是什么？
-
-维护后端 Pod 地址。
-
----
-
-### Ingress 的作用是什么？
-
-管理 HTTP/HTTPS 流量入口。
-
----
-
-### IngressClass 是什么？
-
-指定 Ingress Controller。
-
----
-
-### Gateway API 是什么？
-
-下一代 Kubernetes 流量管理标准。
-
----
-
-## FAQ
-
-### 没有 Service 可以访问 Pod 吗？
-
-可以。
-
-但不推荐。
-
----
-
-### Ingress 可以直接访问 Pod 吗？
-
-不能。
-
-通常通过 Service。
-
----
-
-### Gateway API 会取代 Ingress 吗？
-
-短期不会。
-
-长期可能逐步替代部分场景。
-
----
-
-## 总结
-
-Kubernetes 服务资源体系负责实现服务发现与流量访问。
-
-其中：
-
-- Service 提供稳定访问入口
-- EndpointSlice 管理后端地址
-- Ingress 管理 HTTP/HTTPS 流量
-- IngressClass 指定控制器
-- Gateway API 提供下一代流量治理能力
-
-可以记住一句话：
-
-> Service 连接 Pod，Ingress 连接用户，而 Gateway API 正在定义 Kubernetes 流量管理的未来。
-
----
-
-## 相关阅读
-
-- [Kubernetes Service 工作原理]()
-- [Kubernetes Ingress 工作原理]()
-- [Kubernetes Kube-Proxy 工作原理]()
-- [Kubernetes CNI 工作原理]()
-- [Kubernetes Gateway API 实战]()
+- [Kube-Proxy 详解](../network/kube-proxy.md) — Service 流量转发的核心组件
+- [ClusterIP 为什么 ping 不通](../network/clusterip-link-deep.md) — iptables 链路级拆解
+- [CoreDNS：Service 域名怎么解析成 ClusterIP](../network/service-dns-to-clusterip.md) — 服务发现的第一步
+- [Ingress 详解](../network/ingress.md) — 域名、HTTPS 与流量入口
+- [SNAT 三种场景](../network/snat-three-scenarios.md) — NodePort 的源地址改写
+- [一行 curl 的完整旅程](../network/curl-full-link.md) — 从 DNS 到 conntrack 的全链路
