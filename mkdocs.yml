@@ -390,9 +390,11 @@ nav:
     - 故障实验室:
 
         - 概览: lab/index.md
+
+        - K8s 测试集群生产改造:
+          - ETCD Backup & Restore: lab/etcd-backup-restore.md
         
-        - 故障演练:
-  
+        - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
           - Kubernetes Cluster HA 故障演练 EP.2: lab/failover-test-2.md
           - Kubernetes Cluster HA 故障演练 EP.3: lab/failover-test-3.md
