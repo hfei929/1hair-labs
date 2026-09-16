@@ -393,6 +393,7 @@ nav:
 
         - K8s 测试集群生产改造:
           - ETCD Backup & Restore: lab/etcd-backup-restore.md
+          - K8s 监控装了 98 从第一天开始就是红的: lab/k8s-monitoring-red-from-day-one.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
