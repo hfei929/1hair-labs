@@ -139,9 +139,11 @@ extra:
 
 extra_css:
   - stylesheets/mermaid.css
+  - stylesheets/mermaid-zoom.css
 
 extra_javascript:
   - javascripts/mermaid.js
+  - javascripts/mermaid-zoom.js
 
 # 以下为站点导航内容
 # ------------------------------------------------------------------------

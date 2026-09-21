@@ -1,0 +1,18 @@
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.88);
+  overflow: auto;
+  padding: 2rem;
+  cursor: zoom-out;
+}
+.mermaid-zoom-holder {
+  margin: 0 auto;
+  background: var(--md-default-bg-color, #fff);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+.mermaid-zoom-holder svg {
+  display: block;
+}

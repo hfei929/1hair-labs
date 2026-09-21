@@ -28,6 +28,8 @@ tags:
 >
 > 系列上一篇：[K8s 监控装了 98 天，9 个 target 从第一天就是红的](/lab/k8s-monitoring-red-from-day-one/)。本篇是第三篇（上），只讲飞书通道；邮箱双通道和源码深读在（下）。
 
+![K9s展示配置图](k8s-alerts-ignored-for-25-days.assets/154250.png)
+
 承接上一篇：Alertmanager 的 receivers 里躺着一个字面意义的 `"null"`，98 天里所有告警只活在一个没人看的网页里。
 
 飞书 webhook，从零到手机收到第一条推送，预计半小时。
