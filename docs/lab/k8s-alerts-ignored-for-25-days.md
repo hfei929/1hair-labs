@@ -1,7 +1,7 @@
 ---
 
-title: Alertmanager 告警通知实战：从 null receiver 到飞书推送
-description: 记录 Kubernetes 告警从 Alertmanager 到飞书的完整排障过程：解决 webhook 协议不兼容、PrometheusAlert 参数错误与 HTTP 200 假成功，并用指标、日志和消息回执验证通知链路。
+title: Alertmanager 告警 25 天没人收到：从 null receiver 到飞书推送
+description: 实测 Kubernetes Alertmanager 到飞书的 webhook 通知链路，排查 null receiver、协议不兼容与 HTTP 200 假成功，并用指标和回执验收。
 series: 测试集群生产化改造
 series_order: 3
 tags:
@@ -14,7 +14,7 @@ tags:
 
 ---
 
-# Alertmanager 告警通知实战：从 null receiver 到飞书推送
+# Alertmanager 告警 25 天没人收到：从 null receiver 到飞书推送
 
 这是一篇从故障现场出发的告警通知实战：Alertmanager 已经持续接收告警，却因为 `null` receiver 让它们 25 天没有到达任何人手中。文章记录从直连飞书失败，到接入 PrometheusAlert 转换消息格式，再到用日志、指标和飞书消息完成闭环验收的全过程。
 

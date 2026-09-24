@@ -1,6 +1,6 @@
 ---
 title: K8s 存储毫秒级拆解：一个 PVC 的 563 毫秒全链路时间线
-description: 用 kubelet journal、containerd journal、csi-nfs-node gRPC 日志三个数据源，把一个 PVC 从创建到 Pod 启动到删除的每一步拆到毫秒级。Pod 冷启只要 563ms，NFS mount 72ms，瓶颈是 Calico CNI。kubectl wait 的 15 秒延迟是客户端观测误差，不是 K8s 慢。
+description: 通过 kubelet、containerd 和 CSI gRPC 日志，拆解 PVC 从创建、绑定、挂载到 Pod 启动和删除的全链路，定位 NFS mount 与 CNI 的实际耗时。
 tags:
   - k8s
   - storage
@@ -458,7 +458,7 @@ kubectl delete pvc pvc-timeline && date '+%H:%M:%S'
 
 ---
 
-> **下一篇预告**：存储系列第 4 篇——动态供应 vs 静态供应。第 2 篇搭 NFS CSI 时已经用了动态供应（创建 PVC 自动生成 PV），但 K8s 还有另一种模式：先手建 PV 再建 PVC 绑定。两种模式有什么区别？什么时候该用哪个？回收策略（Retain / Delete / Recycle）在两种模式下表现一样吗？下篇用实验说话。
+> **下一篇预告**：存储系列第 4 篇——[动态供应 vs 静态供应](static-vs-dynamic-provisioning.md)。第 2 篇[搭 NFS CSI](csi-nfs-components.md)时已经用了动态供应（创建 PVC 自动生成 PV），但 K8s 还有另一种模式：先手建 PV 再建 PVC 绑定。两种模式有什么区别？什么时候该用哪个？回收策略（Retain / Delete / Recycle）在两种模式下表现一样吗？下篇用实验说话。
 
 ---
 

@@ -1,6 +1,6 @@
 ---
-title: K8s 1.36 监控告警实录：kube-prometheus-stack 装了 98 天，9 个 target 从第一天就是红的
-description: 3 master + 3 worker 集群实测 kube-prometheus-stack（chart 86.2.0 / Prometheus v0.91.0）：控制面 9 个 target 部署第一天就全红、修 etcd 监控翻车半小时、停 kubelet 消防演习测出"故障到告警 15 分 53 秒"、receiver 是 "null"，全程真实终端输出。
+title: K8s 1.36 监控告警实录：9 个 Prometheus target 从第一天就是红的
+description: 实测 kube-prometheus-stack 控制面 target down、kube-etcd 监控故障与 Alertmanager null receiver，验证从故障到告警的真实延迟。
 tags:
   - Prometheus
   - 监控告警
@@ -8,7 +8,7 @@ tags:
   - 排错
   - 生产化改造
 ---
-# K8s 监控装了 98 天，9 个 target 从第一天就是红的
+# K8s 监控装了 98 天：9 个 Prometheus target 从第一天就是红的
 
 > **实测声明**：3 master + 3 worker，kubeadm 1.36.1，Debian 13。kube-prometheus-stack（chart 86.2.0 / Prometheus v0.91.0）2026-06-08 部署，至实验日运行 98 天。全部命令 2026-09-13 ~ 09-14 在该集群实测，代码块为终端输出逐字节摘录（仅裁剪行数，未改一字）。
 >

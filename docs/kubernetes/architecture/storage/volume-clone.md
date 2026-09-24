@@ -1,6 +1,6 @@
 ---
 title: K8s 存储第 9 篇：卷克隆 dataSource——kind 写了个缩写，静默 Bound 出一个空卷
-description: 两个几乎一模一样的 PVC 清单，只差 dataSource 的 kind 写 PVC 还是 PersistentVolumeClaim：缩写能通过所有校验、秒级 Bound，却静默给你一个空卷。翻 csi-driver-nfs 的 copyFromVolume 源码对行号，实测 300M 数据 1.34 秒搬完、mtime 原样保留，还顺带说清为什么 200Mi 内存限额打不爆克隆路径，却能把快照恢复那条路炸掉。
+description: 实测 Kubernetes PVC 克隆与 dataSource 配置，拆解 csi-driver-nfs 的 copyFromVolume 路径，验证数据复制、写隔离和错误 kind 带来的空卷风险。
 tags:
   - k8s
   - storage
@@ -39,7 +39,7 @@ dataSource:
 
 ## 克隆是怎么触发的
 
-上一篇文章（快照恢复）讲过 csi-driver-nfs 的数据搬运内幕：驱动容器内部挂 NFS 导出，把数据抄到目标目录。克隆走的是同一个容器、同一套挂载，只是搬运方式不同。
+上一篇文章（[NFS 快照与恢复](volume-snapshot-nfs.md)）讲过 csi-driver-nfs 的数据搬运内幕：驱动容器内部挂 NFS 导出，把数据抄到目标目录。克隆走的是同一个容器、同一套挂载，只是搬运方式不同。
 
 外部链路：K8s 看 PVC 带 dataSource，让 external-provisioner 处理，provisioner 把源 PV 的 volumeHandle 塞进 CSI 的 CreateVolume 请求：
 

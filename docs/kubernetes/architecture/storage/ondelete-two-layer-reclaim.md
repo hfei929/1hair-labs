@@ -1,6 +1,6 @@
 ---
 title: K8s 存储第 5 篇：reclaimPolicy 和 onDelete，两层回收逻辑谁说了算
-description: 拆开 volumeHandle 末尾那两个井号——第五段是 onDelete 策略位，而且 delete 根本不写进去。reclaimPolicy 决定要不要调 DeleteVolume，onDelete 决定子目录删、留还是改名。retain 分支 0.108ms 演完全部动作，archive 用 rename 改名只要 2.2ms。逃生舱实验翻车：volumeHandle 创建后不可改，onDelete 没有事后后悔药。
+description: 拆解 Kubernetes reclaimPolicy 与 csi-driver-nfs onDelete 的两层回收逻辑，实测 retain、delete、archive 对 PVC、PV 和 NFS 子目录的影响。
 tags:
   - k8s
   - storage
@@ -597,7 +597,7 @@ sudo rm -rf /nfs/k8s/pvc-* /nfs/k8s/archived-*
 
 ---
 
-> **下一篇预告**：存储系列第 6 篇——volumeBindingMode。SC 里还有一个和 reclaimPolicy 同级、[第 2 篇](csi-nfs-components.md)搭环境时一笔带过的参数：`volumeBindingMode: Immediate`。它还有个孪生兄弟 `WaitForFirstConsumer`——PVC 创建后一直 Pending，不是出错，是在等第一个 Pod 被调度。两种绑定模式的时机差异、为什么 NFS 感知不到但拓扑型存储必须用 WFFC，下篇用实验说话。
+> **下一篇预告**：存储系列第 6 篇——[volumeBindingMode](volume-binding-mode.md)。SC 里还有一个和 reclaimPolicy 同级、[第 2 篇](csi-nfs-components.md)搭环境时一笔带过的参数：`volumeBindingMode: Immediate`。它还有个孪生兄弟 `WaitForFirstConsumer`——PVC 创建后一直 Pending，不是出错，是在等第一个 Pod 被调度。两种绑定模式的时机差异、为什么 NFS 感知不到但拓扑型存储必须用 WFFC，下篇用实验说话。
 
 ---
 

@@ -397,6 +397,7 @@ nav:
           - ETCD Backup & Restore: lab/etcd-backup-restore.md
           - K8s 监控装了 98 从第一天开始就是红的: lab/k8s-monitoring-red-from-day-one.md
           - K8s 告警响了 25 天都没人理: lab/k8s-alerts-ignored-for-25-days.md
+          - K8s 告警邮件通道实测: lab/k8s-alerts-email-channel-test.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md

@@ -1,6 +1,6 @@
 ---
 title: K8s 存储第 8 篇：VolumeSnapshot——NFS 驱动把快照做成了一个 tar.gz
-description: 块存储快照是写时复制，NFS 这个没有块设备的"盘"凭什么支持快照？把 csi-driver-nfs 的 CreateSnapshot 源码拉出来对行号：它把整个卷子目录打成 tar.gz 存在快照自己的子目录里，SizeBytes 是归档的实际字节数，ReadyToUse 同步返回。装上 snapshot-controller 实测快照、恢复、删除全流程，扒开 tar.gz 验证里面的文件——然后恢复直接把驱动的 200Mi 内存限额打爆，38 次重启的崩溃循环、page cache 假装完成的 1.5 秒、一次差点误判成"恢复泄漏"的时序坑，全在这篇里。
+description: 实测 csi-driver-nfs 的 VolumeSnapshot、恢复与删除流程，拆解 tar.gz 快照实现，并分析恢复时的内存限制与 OOM 风险。
 tags:
   - k8s
   - storage
@@ -734,7 +734,7 @@ PV_RESTORE2=$(kubectl get pvc pvc-restore2 -o jsonpath='{.spec.volumeName}') && 
 ls /nfs/k8s/
 ```
 
-> **下一篇预告**：存储系列第 9 篇——卷克隆。这次翻源码的时候在 CreateVolume 里撞见了 `copyFromVolume`（L598）：NFS 驱动不光支持从快照恢复，还支持 PVC 直接克隆 PVC，连 tar 都不打，cp 完事。两个 PVC 之间能"复制粘贴"，共享存储的多副本环境里这是个不太好用的功能还是个好东西？实测见。
+> **下一篇预告**：存储系列第 9 篇——[卷克隆](volume-clone.md)。这次翻源码的时候在 CreateVolume 里撞见了 `copyFromVolume`（L598）：NFS 驱动不光支持从快照恢复，还支持 PVC 直接克隆 PVC，连 tar 都不打，cp 完事。两个 PVC 之间能"复制粘贴"，共享存储的多副本环境里这是个不太好用的功能还是个好东西？实测见。
 
 ---
 

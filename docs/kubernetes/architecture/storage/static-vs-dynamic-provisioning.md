@@ -1,6 +1,6 @@
 ---
 title: K8s 存储第 4 篇：动态供应 vs 静态供应，谁在删你的数据
-description: 静态 PV 的 volumeHandle 随便写，挂载没问题，但删除时它成了 CSI 的寻址信息——写错格式，PV 对象删了，NFS 数据反而活下来。六个实验 + 源码拆解 + 第 3 篇 15 秒悬案结案。
+description: 对比 Kubernetes 静态 PV 与动态供应，实测 volumeHandle、reclaimPolicy、NFS 数据回收和 PVC 绑定流程，解释写错寻址信息后的风险。
 tags:
   - k8s
   - storage
@@ -648,7 +648,7 @@ time kubectl delete pvc pvc-noattach
 
 ---
 
-> **下一篇预告**：存储系列第 5 篇——CSI driver 的 onDelete 参数。第 2 篇搭 SC 时没提这个参数，但 csi-driver-nfs 的 volumeHandle 第五段（`server#share#subdir#uuid#onDelete`）能嵌入 `retain`/`delete`/`archive` 三种策略。SC 的 reclaimPolicy 和 CSI driver 的 onDelete 是两层不同的回收逻辑——它们怎么叠加？onDelete: archive 时删 PVC 会发生什么？下篇用实验说话。
+> **下一篇预告**：存储系列第 5 篇——CSI driver 的 [onDelete 参数](ondelete-two-layer-reclaim.md)。第 2 篇搭 SC 时没提这个参数，但 csi-driver-nfs 的 volumeHandle 第五段（`server#share#subdir#uuid#onDelete`）能嵌入 `retain`/`delete`/`archive` 三种策略。SC 的 reclaimPolicy 和 CSI driver 的 onDelete 是两层不同的回收逻辑——它们怎么叠加？onDelete: archive 时删 PVC 会发生什么？下篇用实验说话。
 
 ---
 

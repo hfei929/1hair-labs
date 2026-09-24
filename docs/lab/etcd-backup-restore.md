@@ -1,6 +1,6 @@
 ---
-title: K8s 1.36 etcd 备份与恢复实录：删掉一台 master 的 etcd 数据之后
-description: 120 天零备份的 3 master 集群实测 etcd 3.6.8：快照、恢复、member 换血；两次翻车、一个野集群、1 小时 40 分脑裂，全程真实输出。
+title: K8s 1.36 etcd 备份与恢复实录：快照、恢复与成员换血
+description: 在 kubeadm 三控制面集群中实测 etcd 快照备份、数据恢复与 member 换血，记录脑裂故障、证书检查和可复用的恢复流程。
 tags:
   - etcd
   - 备份恢复
@@ -8,7 +8,7 @@ tags:
   - 排错
   - 生产化改造
 ---
-# 删掉一台 master 的 etcd 数据，我花 2 小时 41 分救回了集群
+# K8s 1.36 etcd 备份与恢复：删掉一台 master 的数据后如何救回集群
 
 > **实测声明**：本文所有命令与输出实测于 2026-09-10 ~ 09-11，3 master + 3 worker 集群（K8s 1.36.1 / kubeadm / etcd 静态 Pod，运行 120 天）。终端输出有裁剪，内容未修改——时间戳、ID、字节大小均保持原样。
 

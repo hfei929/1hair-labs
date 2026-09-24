@@ -1,6 +1,6 @@
 ---
 title: CSI 到底拆了什么：部署一个 NFS 驱动，数数里面有几个容器
-description: 在 kubeadm 集群上从零部署 csi-driver-nfs v4.13.4，拆解 CSI 的组件分工：controller 5 容器 + node 3 容器、sidecar 翻译官模式、attachRequired false 如何让 external-attacher 声明式缺席。实测四个关键证据——PVC Immediate 8 秒 Bound（对照上篇 WaitForFirstConsumer 的 Pending）、NFS 服务器上子目录自动出现/消失（finalizer 反向链路）、节点 mount 表里 clientaddr 是节点 IP 而非 Pod IP（挂载发生在节点层）、volumeattachment 为空。踩坑实录：镜像漏改一处导致的对照实验（4 个 daocloud 容器成功 vs 1 个 registry.k8s.io 容器重试 11 次超时）、k9s 改 live 对象恢复、以及 master01 kubelet 静默死亡 4 周被 DaemonSet Pending 意外暴露的完整破案过程。
+description: 从 kubeadm 集群部署 csi-driver-nfs，拆解 controller、node 与 sidecar 的职责，解释 attachRequired false、PVC 动态供应和节点挂载链路。
 authors:
   - hfei
 date: 2026-08-22
@@ -491,4 +491,10 @@ autofs 的触发条件是"路径被访问"，它不知道 Pod 是什么；CSI �
 
 ---
 
-下一篇：**PVC 创建全链路：从 apply 到挂载成功的时间线**
+下一篇：**[PVC 创建全链路：从 apply 到挂载成功的时间线](pvc-timeline-ms-breakdown.md)**
+
+## 推荐阅读
+
+- [PV、PVC、StorageClass 三对象](pv-pvc-storageclass.md) —— 先理解 Kubernetes 存储对象与生命周期
+- [PVC 创建全链路：从 apply 到挂载成功的时间线](pvc-timeline-ms-breakdown.md) —— 追踪 CSI 组件的实际调用顺序
+- [Linux NFS 服务安装（Debian 13）](../../../linux/storage/nfs-server-debian13.md) —— 准备本文使用的 NFS 服务端

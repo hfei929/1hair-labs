@@ -1,6 +1,6 @@
 ---
 title: K8s 存储第 6 篇：volumeBindingMode——PVC Pending 不一定是错的
-description: Immediate 是 PVC 一落地就绑卷，WaitForFirstConsumer 是等第一个 Pod 被调度才动手——同一个 NFS 上，目录创建时刻差了整整一个阶段。顺手回收两个钩子：第 2 篇一笔带过的 volumeBindingMode，和 v1.37 转 Beta 的 StorageCapacityScoring。实测发现容量过滤是 1.36 就有的存量能力，伪造 CSIStorageCapacity 就能把 Pod 逼进指定节点；而打分功能对 NFS 是空转——驱动压根没实现 GetCapacity。
+description: 解释 Kubernetes StorageClass 的 Immediate 与 WaitForFirstConsumer，实测 PVC 绑定时机、Pod 调度和 NFS CSI 的 StorageCapacity 行为。
 tags:
   - k8s
   - storage
@@ -940,7 +940,7 @@ sudo sed -i '/StorageCapacityScoring/d' /etc/kubernetes/manifests/kube-scheduler
 sudo rm -rf /nfs/k8s/pvc-*
 ```
 
-> **下一篇预告**：存储系列第 7 篇——`allowVolumeExpansion`。PVC 建小了想扩容，第一关是 SC 的这个开关，第二关是文件系统的在线扩展，第三关是 NFS 驱动那个"扩容 = 假装扩容"的真相（`ControllerExpandVolume` 直接把请求的字节数原样返回，`controllerserver.go` L475-482 我在写这篇时顺路撞见了）。1Gi 的 PVC 申请 10Gi 到底会发生什么，下篇实测。
+> **下一篇预告**：存储系列第 7 篇——[`allowVolumeExpansion`](allow-volume-expansion.md)。PVC 建小了想扩容，第一关是 SC 的这个开关，第二关是文件系统的在线扩展，第三关是 NFS 驱动那个"扩容 = 假装扩容"的真相（`ControllerExpandVolume` 直接把请求的字节数原样返回，`controllerserver.go` L475-482 我在写这篇时顺路撞见了）。1Gi 的 PVC 申请 10Gi 到底会发生什么，下篇实测。
 
 
 
