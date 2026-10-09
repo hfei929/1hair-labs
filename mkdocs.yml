@@ -400,6 +400,7 @@ nav:
           - K8s 告警邮件通道实测: lab/k8s-alerts-email-channel-test.md
           - K8s bind-address 修复实录: lab/k8s-bind-address-fix.md
           - Pod 的 startTime 为什么停在一个月前: lab/pod-starttime-stuck-for-a-month.md
+          - P99 实测：apiserver 延迟 60 秒整的背后: lab/p99-apiserver-latency-60s.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
