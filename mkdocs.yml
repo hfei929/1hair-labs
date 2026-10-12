@@ -402,6 +402,7 @@ nav:
           - Pod 的 startTime 为什么停在一个月前: lab/pod-starttime-stuck-for-a-month.md
           - P99 实测：apiserver 延迟 60 秒整的背后: lab/p99-apiserver-latency-60s.md
           - apiserver 盲区：三台 master，Prometheus 只看得见一台: lab/apiserver-blind-spot.md
+          - Grafana 第一次认真打开：盲区期间照样绿的 28 个仪表盘: lab/grafana-first-open-blind-spot.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
