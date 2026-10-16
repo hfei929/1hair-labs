@@ -205,6 +205,8 @@ LOG_LEVEL=INFO  WATCH_SERVER_TIMEOUT=60  WATCH_CLIENT_TIMEOUT=60
 
 日志成对出现，对内差 1-3 毫秒（两个线程：RESOURCE=both，ConfigMap 和 Secret 各一个 watcher），对间 60.01-60.02 秒（WATCH_SERVER_TIMEOUT=60，服务器到点礼貌断开）。10 分钟整 20 条，精确等于 2 条/分钟。
 
+![左边的沟是昨天的 ring 事故，右边的尖峰是这次查询自己](loki-from-zero.assets/152105.png)
+
 同一个数字，两种推导：[Grafana 实测篇](grafana-first-open-blind-spot.md)从日志现象推到源码，这篇从源码预测到日志实测。跨版本（2.5.0 vs 2.7.3）、跨组件（Grafana vs Loki）、同一机制、同一数字。这种闭环比任何“教程一致性声明”都有说服力。
 
 ## detected_level：看起来像标签的标签
@@ -234,6 +236,8 @@ labels: {'app': 'loki', 'container': 'loki-sc-rules', 'detected_level': 'info', 
 第二条不是"没有 error 日志"，是**这个语法根本查不到它**——不是索引标签，不能当选择器。安静的零结果，比报错更危险：你会以为自己集群很干净。
 
 顺带一个有意思的观察：alloy 在 master03 上的 stderr 流，detected_level=error——按行检测，同一个文件里混级别的行会被拆进多条流。grafana 主容器的近 1 小时里也有 1 条 error 流（和 info 流并存）。要把"看起来像标签"的东西当真过滤器用，管线语法是唯一的正道。
+
+![curl 骗了你，标签浏览器没有](loki-from-zero.assets/151901.png)
 
 ## 同一把刀，三种拧法
 
