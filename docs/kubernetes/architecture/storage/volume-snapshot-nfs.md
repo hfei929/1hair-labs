@@ -109,7 +109,7 @@ func (snap nfsSnapshot) archiveName(enableCompression bool) string {
 2. **`ReadyToUse: true` 是同步返回的**——tar 打完才返回。块存储的快照经常是异步的（ReadyToUse 要轮询等），NFS 这里创建请求本身就是秒表。
 3. **删除就是删目录**。DeleteSnapshot（L434-464）核心一行 `os.RemoveAll(internalVolumePath)`——把快照子目录整个 remove 掉，顺带返回成功是幂等的（目录不存在也返回成功）。ListSnapshots（L466-468）直接 Unimplemented——快照的元数据全在 K8s 对象里，驱动不维护清单。
 
-📸 **[截图位置：GitHub 源码 controllerserver.go（v4.13.4 tag）L393-429——tar 打包 + SizeBytes + ReadyToUse 同步返回]**
+ **
 
 恢复的源码（`copyFromSnapshot`，L537 起）留到 C 组对照——先看实测的数字对不对得上。
 
@@ -255,7 +255,7 @@ snapshot-controller-74978c97fd-rck8p   1/1     Running   0          68s
 
 第一次的输出是标准的 rolling update 中间态：旧 ReplicaSet（`58b6fc7b8f`，还挂在 v8.5.0 镜像上）一个 Pod 在拉镜像、另一个在 Terminating，新 ReplicaSet（`74978c97fd`）的 Pod 刚起 9 秒。稳定后是 `74978c97fd` 的两个副本 Running——双副本（leader election）没变，变的只是镜像。
 
-📸 **[截图点：snapshot-controller 双副本 Running——74978c97fd 两个 Pod]**
+ **
 
 ### 建 VolumeSnapshotClass，然后快照
 
@@ -314,7 +314,7 @@ snapcontent-9c0fd39e-ac5e-4257-88cd-002ee5bb17d5   true         305984        De
 
 预测命中：**RESTORESIZE = 305984**——一个和 1Gi（1073741824）差了四个数量级的数字，正是 tar.gz 的实际字节数。`DELETIONPOLICY: Delete` 也记下了，C 组末尾它会变成 NFS 服务器上消失的目录。从 apply 到 ReadyToUse 总共 10 秒，其中 RPC 和打包大约 1.5 秒（B 组的驱动日志会给出精确值），剩下的时间被 controller 的 reconcile 轮询吃掉。
 
-📸 **[截图点：get volumesnapshot 输出——重点露出 READYTOUSE true 和 RESTORESIZE 305984 不是 1Gi]**
+ **
 
 ## B 组：扒开看快照到底是什么
 
@@ -407,9 +407,9 @@ du -sh /nfs/k8s/pvc-1d7b5396-* /nfs/k8s/pvc-d958025b-* /nfs/k8s/snapshot-8056dd7
 
 300M 的 `/dev/zero` 压到 304K，压缩比 99.9%——比预测的 95% 还狠。但别高兴太早：这是全零数据送的礼物，换个真实数据集这个比例会瞬间回归平凡。压缩比不重要，**"每个快照都是全量归档"这个性质才重要**——它决定了后面 C 组的翻车。
 
-📸 **[截图点：NFS 服务器上 find + tar -tzf 输出——露出 299K 的包和三个文件条目]**
+ **
 
-📸 **[截图点：驱动日志里的 L398/L414 两行——tar 开始和 complete 的毫秒差]**
+ **
 
 ## C 组：从快照恢复，然后删掉它
 
@@ -568,7 +568,7 @@ nfs              {"limits":{"memory":"200Mi"},"requests":{"cpu":"10m","memory":"
 
 打包为什么没死？同一个 tar、同一个 300M、同一个 200Mi——因为打包是**读** 300M，读产生的是 clean page cache，随时可回收，cgroup 无感。**读写方向不同，生死不同。**
 
-📸 **[截图点：describe pod 的 Last State——OOMKilled/Exit 137 和 provisioner 的 Lost connection 同框]**
+ **
 
 ### 修复：把 limit 抬到 1Gi
 
@@ -652,7 +652,7 @@ OK: snapshot-time semantics confirmed                                  # 快照�
 
 一正一反，钉死：**恢复卷 = 快照时刻源卷的完整复制**。快照前的文件在（连 32 分钟前的小文件都忠实带回，mtime 都是源卷的），快照后的写入不出现。
 
-📸 **[截图点：pod-restore2 的判定输出——after-snap.txt 在、OK: snapshot-time semantics confirmed]**
+ **
 
 ### RTO 的真相：1.5 秒完成的是 page cache
 
@@ -686,7 +686,7 @@ lost+found  pvc-1d7b5396-016f-4d8c-ae04-97047b6fc36e  pvc-6fb804bc-fc23-469b-97e
 
 `snapshot-<uuid>` 目录整个消失——DELETIONPOLICY 是 Delete（A 组的表格里记过），snapshot-controller 调 DeleteSnapshot，驱动物理删目录树。这一幕第一次上演时（第一轮快照）我还没意识到发生了什么，回 NFS 服务器找 tar 包找不到，一度以为出了妖；后来对时间线才反应过来是自己十分钟前删了 VolumeSnapshot。[第 5 篇](ondelete-two-layer-reclaim.md)的 onDelete 是把卷目录**改名**成 archive 留尸检现场，快照的 Delete 是真删——两种 deletionPolicy，两种物理形态。
 
-📸 **[截图点：NFS 上删除前后的 ls 对比——snapshot 目录从有到无]**
+ **
 
 ## 源码预读没写到的两个局限
 

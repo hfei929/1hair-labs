@@ -33,7 +33,6 @@ tags:
 先看 Pod 眼里的 DNS 世界是什么样的。上一篇创建的 nginx-test Service 还在（如果删了，重新创建即可）：
 
 ```bash
-# 📸 确认测试 Service 存在
 kubectl get svc nginx-test
 ```
 
@@ -45,7 +44,6 @@ nginx-test   ClusterIP   10.100.241.29   <none>        80/TCP    25m
 随便进一个 Pod，看它的 `/etc/resolv.conf`：
 
 ```bash
-# 📸 查看 Pod 的 DNS 配置
 kubectl exec -it nginx-test -- cat /etc/resolv.conf
 ```
 
@@ -78,7 +76,6 @@ options ndots:5
 `10.96.0.10` 是 kube-dns Service 的 ClusterIP。这个 Service 背后是什么？
 
 ```bash
-# 📸 查看 kube-dns Service
 kubectl get svc -n kube-system kube-dns
 ```
 
@@ -96,7 +93,6 @@ kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   93d
 | 9153 | TCP | Prometheus metrics |
 
 ```bash
-# 📸 查看 CoreDNS Pod
 kubectl get pods -n kube-system -l k8s-app=kube-dns -o wide
 ```
 
@@ -109,7 +105,6 @@ coredns-6b5f954497-xt4vw   1/1     Running   0          50d   10.244.30.116   wo
 CoreDNS 以 Deployment 方式运行，默认 2 个副本，分布在不同节点上。跟普通 Pod 一样有真实 IP——DNS 查询最终到达这些 Pod。
 
 ```bash
-# 📸 查看 kube-dns 的 EndpointSlice
 kubectl get endpointslice -n kube-system -l kubernetes.io/service-name=kube-dns
 ```
 
@@ -129,7 +124,6 @@ kube-dns-qpdpk   IPv4          53,53,9153   10.244.30.116,10.244.19.127   93d
 CoreDNS 的配置不在命令行参数里，在一个叫 Corefile 的配置文件里，通过 ConfigMap 挂载进容器：
 
 ```bash
-# 📸 查看 CoreDNS ConfigMap
 kubectl get configmap -n kube-system coredns -o yaml
 ```
 
@@ -251,7 +245,6 @@ Service 在 DNS 里的记录格式：
 用 nslookup 验证：
 
 ```bash
-# 📸 查询 Service 的 A 记录
 kubectl exec -it nginx-test -- nslookup nginx-test.default.svc.cluster.local
 ```
 
@@ -268,7 +261,6 @@ Address: 10.100.241.29
 试一下短域名：
 
 ```bash
-# 📸 用短域名查询（同一个命名空间）
 kubectl exec -it nginx-test -- nslookup nginx-test
 ```
 
@@ -296,7 +288,6 @@ command terminated with exit code 1
 跨命名空间查询：
 
 ```bash
-# 📸 查询 kube-dns 服务（不同命名空间）
 kubectl exec -it nginx-test -- nslookup kube-dns.kube-system.svc.cluster.local
 ```
 
@@ -368,7 +359,6 @@ DNS 查询走的是跟 HTTP 请求完全一样的 iptables 链路——KUBE-SERV
 可以在 iptables 规则里验证：
 
 ```bash
-# 📸 查看 kube-dns 的 iptables 规则
 sudo iptables-save -t nat | grep '10.96.0.10'
 ```
 
@@ -381,7 +371,6 @@ sudo iptables-save -t nat | grep '10.96.0.10'
 三条规则分别匹配 UDP 53、TCP 53、TCP 9153。大部分 DNS 查询走 UDP，所以第一条规则是流量最大的。
 
 ```bash
-# 📸 查看 kube-dns 的 KUBE-SVC 链（负载均衡）
 sudo iptables-save -t nat | grep 'KUBE-SVC-TCOU7JCQXEZGVUNU'
 ```
 
@@ -430,7 +419,6 @@ sudo iptables-save -t nat | grep 'KUBE-SVC-TCOU7JCQXEZGVUNU'
 用 `dig` 验证：
 
 ```bash
-# 📸 用 dig 验证 ndots 行为
 # dig 不在 nginx:alpine 镜像里，用 dnstools 镜像
 kubectl run -it --rm --image=m.daocloud.io/docker.io/infoblox/dnstools dnstools
 ```
@@ -533,7 +521,6 @@ cache 30 {
 这意味着 **cluster.local 域的 DNS 响应不走缓存**。所有 Service 域名查询每次都直接打到 kubernetes 插件。这个配置的实际影响有多大？看 metrics。
 
 ```bash
-# 📸 查看 CoreDNS metrics
 # 在节点上直接访问 CoreDNS Pod IP 的 9153 端口
 COREDNS_IP=$(kubectl get pods -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[0].status.podIP}')
 curl -s http://${COREDNS_IP}:9153/metrics | grep -E '^coredns_(dns|cache|forward)_' | head -30
@@ -594,7 +581,6 @@ coredns_cache_requests_total{server="dns://:53"} 31316
 2. **cache TTL 太短**——如果外部域名查询量大，可以把 cache TTL 从 30 调到 60 或 120。但不要对 cluster.local 开启缓存——Service 变化可能产生脏数据
 
 ```bash
-# 📸 查看 forward 转发指标
 curl -s http://${COREDNS_IP}:9153/metrics | grep '^coredns_forward_'
 ```
 
@@ -605,11 +591,8 @@ forward 指标可以看上游 DNS 的响应延迟和错误率。如果 `coredns_
 ### nslookup：最基本的验证
 
 ```bash
-# 📸 查 A 记录
 kubectl exec -it nginx-test -- nslookup nginx-test.default.svc.cluster.local
-# 📸 查 SRV 记录
 kubectl exec -it nginx-test -- nslookup -type=srv _http._tcp.nginx-test.default.svc.cluster.local
-# 📸 反向解析
 kubectl exec -it nginx-test -- nslookup 10.100.241.29
 ```
 
@@ -631,7 +614,6 @@ dig @10.96.0.10 nginx-test.default.svc.cluster.local
 ### CoreDNS 日志
 
 ```bash
-# 📸 查看 CoreDNS 日志
 kubectl -n kube-system logs <coredns-pod> --tail=50
 ```
 

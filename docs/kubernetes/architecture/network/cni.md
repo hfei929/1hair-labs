@@ -59,7 +59,6 @@ flowchart LR
 在生产节点上：
 
 ```bash
-# 📸 Worker Node 上的 CNI 插件目录
 ls /opt/cni/bin/
 ```
 
@@ -75,7 +74,6 @@ bridge     calico-ipam  dummy  flannel   host-local   LICENSE  macvlan   ptp    
 插件列表和调用顺序定义在 `/etc/cni/net.d/` 下的配置文件中：
 
 ```bash
-# 📸 CNI 配置目录
 sudo ls -la /etc/cni/net.d/
 ```
 
@@ -171,7 +169,6 @@ flowchart LR
 在节点上可以直接看到：
 
 ```bash
-# 📸 查看本节点的 veth 设备
 ip link | grep cali
 ```
 
@@ -255,7 +252,6 @@ Calico 是目前生产环境使用最多的 CNI 插件之一。它的核心设�
 Calico 为每个节点分配一个 Pod CIDR 子网（如 `10.244.5.0/26`），该节点上的所有 Pod 从这个子网内分配 IP。这种方式天然支持路由聚合——路由器只需要知道网段到节点的映射，不需要为每个 Pod IP 维护单独路由条目。
 
 ```bash
-# 📸 查看节点的 Pod CIDR
 kubectl get nodes -o custom-columns="NAME:.metadata.name,POD-CIDR:.spec.podCIDR"
 ```
 
@@ -281,7 +277,6 @@ worker02 通告: "10.244.19.0/26 在我这里，下一跳是 192.168.114.150"
 纯 BGP 模式要求物理网络支持 Pod 网段路由，在生产环境中不总是可行的。Calico 的 IPIP 模式将 BGP 和隧道结合起来：
 
 ```bash
-# 📸 查看 BIRD 下发的跨节点路由
 ip route | grep bird
 ```
 
@@ -363,7 +358,6 @@ NetworkPolicy 是在这个默认允许之上做拒绝规则——你可以定义
 Calico 和 Cilium 都完整支持 NetworkPolicy，且都扩展了更丰富的策略表达能力（如 Calico 的 GlobalNetworkPolicy、Cilium 的 CiliumNetworkPolicy）。
 
 ```bash
-# 📸 查看集群中的 NetworkPolicy
 kubectl get networkpolicy -A
 ```
 
@@ -390,7 +384,6 @@ kubectl get networkpolicy -A
 从最底层查起——路由表：
 
 ```bash
-# 📸 在 Node 上检查是否有目标 Pod 网段的路由
 ip route | grep 10.244
 ```
 

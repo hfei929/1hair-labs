@@ -155,7 +155,6 @@ CRD 对象不存在。这说明 Calico 连 BGPConfiguration 资源都没创建�
 那默认值到底是多少？直接看 confd 渲染出来的 bird.cfg：
 
 ```bash
-# 📸 查看 BIRD 配置里渲染出来的 AS 号
 kubectl exec -n kube-system <calico-node-pod> -- cat /etc/calico/confd/config/bird.cfg | grep -i "as "
 ```
 
@@ -235,7 +234,6 @@ confd 监听 Calico 的数据模型（存在 K8s CRD 里），当数据变化时
 在 calico-node Pod 里，BIRD 配置文件在 `/etc/calico/confd/config/` 目录下：
 
 ```bash
-# 📸 在 worker01 的 calico-node Pod 里执行
 kubectl exec -n kube-system <calico-node-pod> -- ls /etc/calico/confd/config/
 ```
 
@@ -459,7 +457,6 @@ flowchart TD
 BIRD 有个命令行工具 `birdcl`，可以在 calico-node Pod 里直接查 BIRD 的运行状态。以下命令在 worker03 的 calico-node Pod 里执行：
 
 ```bash
-# 📸 查看 BIRD 的 BGP Peer 状态
 kubectl exec -n kube-system <calico-node-pod> -- birdcl show protocols
 ```
 
@@ -496,7 +493,6 @@ Mesh_192_168_114_149 BGP      master   up     2026-05-24  Established
 ### 查看 BIRD 路由表
 
 ```bash
-# 📸 查看 BIRD 学到的所有路由
 kubectl exec -n kube-system <calico-node-pod> -- birdcl show route
 ```
 
@@ -647,7 +643,6 @@ Calico 选择 IPIP 是因为它开销小（20 字节 vs VXLAN 的 50 字节）�
 在 worker01 上看 `tunl0` 的状态：
 
 ```bash
-# 📸 查看 IPIP 隧道接口
 ip addr show tunl0
 ```
 
@@ -670,7 +665,6 @@ ip addr show tunl0
 `ip tunnel show` 看隧道配置：
 
 ```bash
-# 📸 查看隧道配置
 ip tunnel show
 ```
 
@@ -821,7 +815,6 @@ nettest-w2   1/1     Running   0          20m   10.244.30.118  worker02   <none>
 SSH 到 worker01，抓 `proto 4`（IPIP 协议号）的包：
 
 ```bash
-# 📸 在 worker01 上抓 IPIP 封装包
 sudo tcpdump -i ens192 -n proto 4 -c 10
 ```
 
@@ -958,7 +951,6 @@ flowchart TD
 在 master01 上查看到 worker02 上某个 Pod IP 的路由决策：
 
 ```bash
-# 📸 查看到 worker02 上 Pod IP 的路由
 ip route get 10.244.30.118
 ```
 
@@ -977,7 +969,6 @@ ip route get 10.244.30.118
 IPIP 模式是通过 IPPool 资源配置的：
 
 ```bash
-# 📸 查看 IPPool 配置
 kubectl get ippool default-ipv4-ippool -o yaml
 ```
 

@@ -253,7 +253,7 @@ kubectl get pv $PV -o jsonpath='{.spec.csi.volumeHandle}'; echo
 #                                                              ^^retain！
 ```
 
-📸  **[截图位置：kubectl get pv 的 volumeHandle 输出——以**  **`##retain`** **结尾，和第 3 篇的**  **`##`**  **空段对比]**
+ **
 
 ![volumeHandle 输出](../../../assets/images/kubernetes/ondelete-two-layer-reclaim/volumeHandle%20输出.png)
 

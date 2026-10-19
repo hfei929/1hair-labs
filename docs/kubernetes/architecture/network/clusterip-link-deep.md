@@ -36,7 +36,6 @@ tags:
 先做一个实验。创建一个 Service：
 
 ```bash
-# 📸 创建测试 Service 和 Deployment
 kubectl create deployment nginx-test --image=m.daocloud.io/docker.io/nginx:alpine --replicas=3
 kubectl expose deployment nginx-test --port=80 --target-port=80
 ```
@@ -47,7 +46,6 @@ service/nginx-test exposed
 ```
 
 ```bash
-# 📸 查看 Service
 kubectl get svc nginx-test
 ```
 
@@ -59,7 +57,6 @@ nginx-test   ClusterIP   10.101.10.146   <none>        80/TCP    12s
 ClusterIP 是 `10.101.10.146`。现在从 Pod 里 ping 它：
 
 ```bash
-# 📸 ping ClusterIP（预期失败）
 kubectl exec -it nginx-test -- ping 10.101.10.146
 ```
 
@@ -73,7 +70,6 @@ PING 10.101.10.146 (10.101.10.146): 56 data bytes
 100% 丢包。但 curl 可以访问：
 
 ```bash
-# 📸 curl ClusterIP（预期成功）
 kubectl exec -it nginx-test -- curl -s 10.101.10.146 | head -5
 ```
 
@@ -98,7 +94,6 @@ ClusterIP 这个 IP 地址没有任何网卡接口在监听——它只存在于
 Service 对象本身不"转发"流量，它只是个声明：告诉集群"这个虚拟 IP 对应哪些 Pod"。真正干活的控制面是 EndpointSlice。
 
 ```bash
-# 📸 查看 EndpointSlice
 kubectl get endpointslice -l kubernetes.io/service-name=nginx-test -o yaml
 ```
 
@@ -200,7 +195,6 @@ flowchart TD
 KUBE-SERVICES 挂在 PREROUTING 和 OUTPUT 链上，拦截所有进来的和本地产生的流量：
 
 ```bash
-# 📸 查看 KUBE-SERVICES 入口规则
 sudo iptables-save -t nat | grep KUBE-SERVICES | head -20
 ```
 
@@ -233,7 +227,6 @@ sudo iptables-save -t nat | grep KUBE-SERVICES | head -20
 ### 第二级：KUBE-SVC-xxx（负载均衡链）
 
 ```bash
-# 📸 查看 KUBE-SVC 链（负载均衡规则）
 sudo iptables-save -t nat | grep KUBE-SVC-W67AXLFK7VEUVN6G
 ```
 
@@ -266,7 +259,6 @@ sudo iptables-save -t nat | grep KUBE-SVC-W67AXLFK7VEUVN6G
 ### 第三级：KUBE-SEP-xxx（端点链，DNAT）
 
 ```bash
-# 📸 查看 KUBE-SEP 链（DNAT 规则）
 sudo iptables-save -t nat | grep -E 'KUBE-SEP-(DO6QA7ZVQRWZAIKD|R5PJBIQ5T5DX2M5P|YXMOPWTCNIUHVS2J)'
 ```
 
@@ -292,7 +284,6 @@ DNAT 做完之后，包的目标 IP 已经从 `10.101.10.146` 变成了 `10.244.
 ### 看流量统计
 
 ```bash
-# 📸 查看 iptables 链的流量统计
 sudo iptables -t nat -L -n -v | grep KUBE | head -30
 ```
 
@@ -385,7 +376,6 @@ flowchart TD
 kube-proxy 有三种数据面模式：iptables、ipvs、nftables。先看你自己的集群用的是哪种：
 
 ```bash
-# 📸 查看 kube-proxy 模式
 kubectl -n kube-system get configmap kube-proxy -o jsonpath='{.data.config\.conf}' | grep 'mode:'
 ```
 
@@ -396,7 +386,6 @@ mode: ""
 `mode: ""` 表示未显式指定，kube-proxy 默认走 iptables 模式。确认一下：
 
 ```bash
-# 📸 确认 kube-proxy 模式
 kubectl -n kube-system logs $(kubectl get pods -n kube-system -l k8s-app=kube-proxy -o jsonpath='{.items[0].metadata.name}') | grep -i proxier
 ```
 
@@ -416,7 +405,6 @@ I0810 15:12:43.749698       1 server.go:394] "Using iptables Proxier"
 kube-proxy 不是每次有流量才去查 iptables，而是 Watch Service 和 EndpointSlice 变化后主动更新规则。
 
 ```bash
-# 📸 查看 kube-proxy 同步性能指标
 # kube-proxy 容器是 distroless 镜像，没有 curl/wget，但 metrics 端口暴露在宿主机上
 curl -s http://localhost:10249/metrics | grep kubeproxy_sync
 ```
@@ -486,7 +474,6 @@ kube-proxy 的更新逻辑是：
 默认情况下每次请求都随机选 Pod，同一个客户端的多次请求可能到不同 Pod。有些应用需要会话粘性（比如有状态的 session）：
 
 ```bash
-# 📸 修改 sessionAffinity
 kubectl patch svc nginx-test -p '{"spec":{"sessionAffinity":"ClientIP","sessionAffinityConfig":{"clientIP":{"timeoutSeconds":10800}}}}'
 ```
 
@@ -499,7 +486,6 @@ patch 后，kube-proxy 会在 KUBE-SVC 链最前面加一条规则：用 `recent
 ### externalTrafficPolicy：外部流量策略
 
 ```bash
-# 📸 查看 externalTrafficPolicy（从 Service YAML 看）
 kubectl get svc nginx-test -o yaml | grep trafficPolicy
 ```
 
@@ -519,7 +505,6 @@ spec:
 - `Local`：只转发到本节点的 Pod，不做 SNAT，保留客户端真实 IP，但如果本节点没有 Pod 就直接拒绝
 
 ```bash
-# 📸 确认 externalTrafficPolicy 行为——查 KUBE-SEP 的 MASQ 规则
 sudo iptables-save -t nat | grep KUBE-SEP | grep -i masq | grep nginx-test
 ```
 

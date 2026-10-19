@@ -223,7 +223,6 @@ flowchart LR
 ### 5.3 在生产节点上查看
 
 ```bash
-# 📸 在 Worker Node 上执行
 iptables -t nat -L KUBE-SERVICES -n | head -20
 ```
 
@@ -298,7 +297,6 @@ IPVS 支持多种负载均衡算法：
 ### 6.4 在生产节点上查看
 
 ```bash
-# 📸 在 Worker Node 上执行
 ipvsadm -Ln
 ```
 
@@ -415,7 +413,6 @@ kubectl logs -n kube-system kube-proxy-xxxxx
 ### 9.4 iptables 规则异常
 
 ```bash
-# 📸 在 Node 上检查
 iptables -t nat -L KUBE-SERVICES -n | grep <ClusterIP>
 ```
 
