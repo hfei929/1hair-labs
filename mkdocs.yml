@@ -389,7 +389,7 @@ nav:
 
 # ------------------------------------------------------------------------
 
-    - 故障实验室:
+    - 实验室:
 
         - 概览: lab/index.md
 
@@ -405,6 +405,7 @@ nav:
           - Grafana 第一次认真打开：盲区期间照样绿的 28 个仪表盘: lab/grafana-first-open-blind-spot.md
           - Loki 从零装机：日志的三层记忆，和一把熟悉的新刀: lab/loki-from-zero.md
           - Mimir 从零装机：114 天的 Prometheus 从来没有过硬盘: lab/mimir-from-zero.md
+          - Gateway API 装机实录: lab/gateway-api-installation.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
