@@ -223,7 +223,7 @@ flowchart TD
     style OK3 fill:#6a1b9a,color:#fff
 ```
 
-修这个问题的正路不是跟 digest 较劲，而是 EG 自己留的扩展点：**EnvoyProxy CR**。数据面 deployment 是 EG 的"私有财产"——你直接 kubectl edit 它的镜像，下次 reconcile 就被静默还原，可能还是三天后，比不修更阴险。正确姿势是告诉 EG："数据面镜像用这个"：
+修这个问题的正路不是跟 digest 较劲，而是 EG 自己留的扩展点：**EnvoyProxy CR**（自定义资源——这两天建的 Gateway、HTTPRoute 全是这个家族，类型定义就装在那 21 个 CRD 里）。数据面 deployment 是 EG 的"私有财产"——你直接 kubectl edit 它的镜像，下次 reconcile 就被静默还原，可能还是三天后，比不修更阴险。正确姿势是告诉 EG："数据面镜像用这个"：
 
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1

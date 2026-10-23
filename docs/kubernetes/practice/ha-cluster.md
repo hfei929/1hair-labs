@@ -1,6 +1,19 @@
-# 从单 Master 到企业级 HA：我用 HAProxy + Keepalived 手动扛起 VIP，脚本化拉起 3 Master Kubernetes 集群
+---
+title: Kubernetes HA 集群实践：HAProxy、Keepalived 与 3 Master | 1Hair Labs
+description: 结合实验环境说明 Kubernetes 高可用控制平面的访问链路，拆解 Keepalived VIP 漂移、HAProxy TCP 转发、kubectl 到 API Server 的数据流、etcd 多数派和 Worker 故障边界。
+keywords:
+  - Kubernetes 高可用
+  - Kubernetes HA
+  - HAProxy
+  - Keepalived
+  - kubeadm
+  - etcd 多数派
+  - 控制平面
+---
 
-![image](../assets/images/kubernetes/ha-cluster.png)
+# Kubernetes HA 集群实践：HAProxy、Keepalived 与 3 Master
+
+![HA集群部署](ha-cluster.assets/145426.png)
 
 > 本文约2000字，阅读约10分钟。
 >
@@ -12,9 +25,11 @@
 > - VIP 在整个架构里究竟是什么角色？
 > - 3 Master 解决了什么问题，又留下了什么坑？
 
+文中的部分图示和截图目前尚未完善，相关示意将在未来的更新中补足；现阶段请以文字说明、地址表和实际配置为准。本文是实验环境记录，不代表生产级 HA 的完整设计或 SLA。
+
 ---
 
-## 一、为什么我必须重搭一套 3 Master 集群
+## 一、为什么我重搭一套 3 Master 集群
 
 之前的实验环境，我已经一步步搭完了：
 
@@ -32,21 +47,21 @@
 
 **单 Master 是整个集群唯一的命门**
 
-| 故障场景     | 直接后果                     |
-| -------------- | ------------------------------ |
-| Master 宕机  | `kubectl`彻底不可用                   |
-| `kube-apiserver`挂掉         | 控制平面瘫痪                 |
-| 节点意外重启 | 集群变成“无人驾驶”         |
-| `etcd`损坏         | 集群状态高风险，甚至不可恢复 |
+| 故障场景 | 可能影响 |
+| --- | --- |
+| 唯一 Master 宕机 | 通常无法通过控制面执行新的管理操作；已运行的工作负载不一定立即停止 |
+| `kube-apiserver` 不可用 | Kubernetes API 请求失败，调度和控制器无法正常协调 |
+| 节点意外重启 | 该节点上的组件或工作负载中断，恢复情况取决于控制面、工作负载控制器和存储 |
+| `etcd` 数据损坏或失去多数派 | 控制面状态可能无法正常读写；必须依赖经过验证的备份和恢复流程 |
 
-虽然：
+即使：
 
 - Pod 可能还在跑
 - 业务短时间可能不受影响
 
-但 Kubernetes 已经失去了：**控制能力**
+但若控制面不可用，Kubernetes 会失去正常的：**管理与协调能力**
 
-你无法：
+此时通常无法通过 API 正常：
 
 - 调度
 - 变更
@@ -55,35 +70,37 @@
 
 ---
 
-所以这次，我正式进入：**Kubernetes 控制平面高可用（HA）**
+单 Master 的适用边界和 HA 设计动机，可延伸阅读[从单 Master 到高可用：架构演进思考](single-master-to-ha.md)。基于本次实验的目标，我搭建了以下**控制平面高可用**架构：
 
-最终架构：
+实验目标架构：
 
 ```text
 3 Master + 3 Worker + HAProxy + Keepalived
 ```
 
-通过 VIP 统一 API Server 入口，让控制平面真正扛住单点故障。
+通过 VIP 为 API Server 提供统一入口。此方案覆盖了部分节点故障场景，但实际可用性还取决于 LB、网络、etcd、多数派、Worker 容量和恢复流程，不能仅凭“3 Master”断言没有单点。
 
 ---
 
 ## 二、实验环境一览
 
-| 角色                   | IP              |
-| ------------------------ | ----------------- |
-| VIP（Keepalived 漂移） | 192.168.114.134 |
-| Master01               | 192.168.114.145 |
-| Master02               | 192.168.114.146 |
-| Master03               | 192.168.114.147 |
-| Worker01               | 192.168.114.148 |
-| Worker02               | 192.168.114.149 |
-| Worker03               | 192.168.114.150 |
+| 角色 | IP | 说明 |
+| --- | --- | --- |
+| VIP | `192.168.114.134` | Keepalived 管理的 API 入口地址 |
+| LB01 | `192.168.114.135` | HAProxy + Keepalived，当前主节点示例 |
+| LB02 | `192.168.114.136` | HAProxy + Keepalived，备用节点示例 |
+| Master01 | `192.168.114.145` | 控制平面节点 |
+| Master02 | `192.168.114.146` | 控制平面节点 |
+| Master03 | `192.168.114.147` | 控制平面节点 |
+| Worker01 | `192.168.114.148` | 工作节点 |
+| Worker02 | `192.168.114.149` | 工作节点 |
+| Worker03 | `192.168.114.150` | 工作节点 |
 
-> 注意：VIP 并不属于任何一台 Master，它是“漂浮”在负载均衡器上的。
+这里的 VIP 不配置为 Master 的管理地址，而是由负载均衡节点上的 Keepalived 按 VRRP 状态接管。客户端把它作为 Kubernetes API 的稳定访问地址。
 
 ---
 
-![HA集群部署完成](../assets/images/kubernetes/deployed-ha-cluster.png)
+![HA集群部署完成](ha-cluster.assets/145621.png)
 
 ---
 
@@ -97,7 +114,7 @@
 
 VIP：
 
-> 只负责 Kubernetes API
+> 本实验中只作为 Kubernetes API 的入口地址。
 
 它不是：
 
@@ -142,14 +159,13 @@ https://192.168.114.134:6443
 apt install haproxy
 ```
 
-但不会告诉你：
-**为什么一定要有它?**
+但不会告诉你：**负载均衡和 VIP 分别解决什么问题？**
 
 ---
 
 ### 4.1 架构总览
 
-![k8s架构高可用架构总览](../assets/images/kubernetes/overview-k8s-ha-arch.png)
+![k8s架构高可用架构总览](ha-cluster.assets/145835.png)
 
 ---
 
@@ -163,20 +179,20 @@ Keepalived 解决的是：**负载均衡器自身高可用**
 Keepalived
 ```
 
-通过：
+通过配置：
 
 ```text
 VRRP
 ```
 
-让 VIP 永远只在一台 LB 上激活。
+让 VIP 在正常情况下由一台 LB 持有；具体接管行为取决于 VRRP、接口、优先级和健康检查配置。
 
 例如：
 
 | 场景      | VIP 所在        |
 | ----------- | ----------------- |
-| LB01 正常 | VIP 在 LB01     |
-| LB01 宕机 | VIP 漂移到 LB02 |
+| LB01 正常且优先级较高 | VIP 通常由 LB01 持有 |
+| LB01 故障且 LB02 健康 | LB02 按 VRRP 状态接管 VIP |
 
 因此：
 
@@ -186,7 +202,7 @@ VRRP
 192.168.114.134
 ```
 
-完全无感知。
+配置正确时，客户端通常不需要更换 API 地址；主备切换期间仍可能出现短暂连接中断或重试，不能保证完全无感知。
 
 ---
 
@@ -196,7 +212,7 @@ HAProxy 工作在：`TCP 四层`
 
 它根本不理解 `Kubernetes`。
 
-它只做一件事：
+本实验中它主要负责 TCP 层转发：
 
 ```text
 收到 6443 请求
@@ -213,23 +229,21 @@ HAProxy 工作在：`TCP 四层`
 147:6443
 ```
 
-HAProxy 的核心：
-
-其实就是一组：
+HAProxy 配置中的后端通常类似：
 
 ```cfg
 server master01 192.168.114.145:6443 check
 ```
 
-![ha配置文件核心](../assets/images/kubernetes/ha-core.png)
+![ha配置文件核心](ha-cluster.assets/145928.png)
+
+示例中的 `check` 通常只能说明后端 TCP 端口可连接，不等于已经验证 API Server 的 `/readyz` 状态或整个控制面健康。若需更强的健康判断，应根据部署方式配置受支持的 TLS/HTTP 检查，并验证证书和检查语义。若使用 TCP 透传，TLS 通常由 API Server 终止；若在 LB 终止 TLS，则还需正确处理证书、SAN、信任链和后端加密。
 
 ---
 
 ## 五、`kubectl` 到底连接的是谁？完整数据流拆解
 
-这一部分。
-
-是我这次实验里最大的收获。
+这一部分是我这次实验里最大的收获。
 
 以前虽然会：
 
@@ -243,30 +257,19 @@ kubectl get nodes
 
 直到做完 HA。
 
-整个 Kubernetes 的访问链路才真正清晰。
+整个 Kubernetes 的访问链路才真正清晰。这里的关键是 kubeconfig 中的 `server` 地址指向统一 API endpoint，而不是固定连到某一台 Master。
 
 ---
 
-## 六、以我的 Windows 8.1 管理端为例
+## 六、以 Windows 管理端为例
 
-是的。
+本次实验使用 Windows 8.1 作为 Kubernetes 管理终端，用它来说明客户端不必与控制平面运行在同一台主机。`kubectl` 本质上是 API Client。
 
-我甚至专门用了：
-
-Windows 8.1
-
-作为 Kubernetes 管理终端。
-
-原因很简单：
-
-> kubectl 本质只是 API Client。
-
-和系统老不老关系并不大。
+不过，`kubectl` 仍需与 API Server 版本保持在官方支持的版本偏差范围内。Windows 8.1 已停止支持，不建议用于日常或生产管理；优先使用仍受支持的系统，并妥善保护 kubeconfig 中的凭据。
 
 ---
 
-![windows8-k9s](../assets/images/kubernetes/win8-k9s.png)
-
+![windows8-k9s](ha-cluster.assets/150027.png)
 ---
 
 ## 七、完整数据流拆解（本文核心）
@@ -291,7 +294,9 @@ kubectl get pods
 
 真正的数据流如下：
 
-![image](../assets/images/kubernetes/k8s-数据流.png)
+![k8s-数据流](ha-cluster.assets/150104.png)
+
+图示中 Master02 的后端地址标注与实验地址表不一致；正确地址为 `192.168.114.146:6443`，请以本文地址表和实际 HAProxy 配置为准，图示将在后续更新中校正。
 
 ---
 
@@ -307,18 +312,18 @@ kubectl 本质是： **Kubernetes API Client**
 kubectl get pods
 ```
 
-底层其实是：
+例如，查询当前命名空间 Pod 时，请求路径类似：
 
 ```http
-GET /api/v1/pods
+GET /api/v1/namespaces/<namespace>/pods
 ```
 
-它并不关心：
+它并不需要知道：
 
 - 单 Master
 - 还是 3 Master
 
-只要：
+在认证、授权、TLS 和网络检查都通过的前提下，只要：
 
 ```text
 有 API Server 响应即可
@@ -328,7 +333,7 @@ GET /api/v1/pods
 
 ### 2、VIP（Keepalived）
 
-VIP 保证： **负载均衡入口永远可用**
+VIP 提供： **固定的负载均衡入口地址**
 
 即使：
 
@@ -338,7 +343,7 @@ LB01 宕机
 
 VIP 也会自动漂移。
 
-客户端完全无感知。
+主备切换可维持同一个目标地址，但已有连接可能断开；客户端或工具需要按实际错误行为重试。
 
 ---
 
@@ -346,16 +351,16 @@ VIP 也会自动漂移。
 
 HAProxy 负责： `请求转发`
 
-并检测：
+配置了后端检查时，也会检测后端的：
 
 ```text
 后端 kube-apiserver 是否健康
 ```
 
-只把请求发给：
+并将新请求转发给：
 
 ```text
-健康节点
+通过相应检查的后端
 ```
 
 ---
@@ -364,140 +369,66 @@ HAProxy 负责： `请求转发`
 
 真正的： **Kubernetes 控制入口**
 
-整个 Kubernetes：
+控制平面组件和节点代理会通过各自的连接与 API Server 协作，例如：
 
 - kubectl
 - scheduler
 - controller
 - kubelet
 
-本质上： `都在和 kube-apiserver 通信`
+但并不是所有组件都通过同一种路径或每次操作都直接请求 API Server。关于 API Server 的职责和请求处理链路，可参阅 [Kubernetes API Server 原理](../architecture/api-server.md)。
 
 ---
 
 ### 5、etcd
 
-etcd 是： **Kubernetes 的数据库**
-
-所有：
+etcd 是 Kubernetes 集群状态的持久化存储。API Server 接受需要持久化的状态变更后，会将其写入 etcd，例如：
 
 ```bash
-kubectl create deployment
+kubectl create deployment web --image=nginx
 ```
 
-最终都会写入：
-
-```text
-etcd
-```
+这并不表示 `kubectl` 直接连接 etcd：客户端请求先到 API Server，由 API Server 完成认证、授权、准入等处理。更多原理见 [etcd 在 Kubernetes 中的作用](../architecture/etcd.md)。
 
 ---
 
-## 九、为什么高可用必须是 3 Master？
+## 九、为什么实验采用 3 个控制平面节点？
 
-因为： **etcd 必须保证多数派（Quorum）**
+当 kubeadm 使用 stacked etcd（etcd 与控制面组件共置）时，多个控制平面节点通常也承载 etcd 成员。etcd 通过多数派（Quorum）决定是否可提交写入：
 
 所以：
 
-| Master 数量 | 容错能力      |
-| ------------- | --------------- |
-| 1           | 0             |
-| 2           | 不推荐        |
-| 3           | 容忍 1 台故障 |
-| 5           | 容忍 2 台故障 |
+| etcd 成员数 | 形成多数派所需成员数 | 可容忍的成员故障数 |
+| ---: | ---: | ---: |
+| 1 | 1 | 0 |
+| 2 | 2 | 0 |
+| 3 | 2 | 1 |
+| 5 | 3 | 2 |
 
-因此：
+多数派仅说明 etcd 的投票成员数量条件。只有在采用 stacked etcd 且 Master/etcd 成员拓扑对应时，表中数字才可直接映射为 Master 故障数；etcd 写入可用还取决于网络、磁盘延迟和成员健康。更多多数派和备份背景可参阅 [etcd 架构与运维说明](../architecture/etcd.md)。
 
-`企业最经典就是 3 Master`
+3 成员 etcd 在失去 1 个成员后仍可维持多数派，失去 2 个则不能正常提交写入。增加成员会增加资源与运维成本，节点数不是越多越好。
 
-这并不是巧合。
+`3 个控制平面节点是常见的小型 HA 起点`
 
----
-
-## 十、为什么 Worker 不需要高可用？
-
-因为 Worker：
-
-`本身就是无状态资源节点`
-
-即使：
-
-```text
-worker01 宕机
-```
-
-Pod 也会：
-
-- 被重新调度
-- 漂移到其他 Worker
-
-这是 Kubernetes 天生具备的：
-
-`自愈能力`
+但这不自动代表整个集群没有单点故障：还需保障 API 接入层、网络、存储、证书和备份。
 
 ---
 
-不过这里有一个容易被误解的点：
+## 十、Worker 故障与工作负载恢复
 
-> “无状态”并不代表 Worker 上不能运行有状态应用。
+Worker 节点不是“天然无状态资源”。节点宕机后，控制面会观察节点状态；只有由 Deployment、StatefulSet 等控制器管理、且满足调度条件的工作负载，才可能在其他节点重新创建或调度。
 
-例如：
+恢复还依赖：
 
-- MySQL
-- PostgreSQL
-- Redis
-- Elasticsearch
+- 集群剩余节点是否有足够 CPU、内存和 Pod 容量；
+- Pod 是否受 PodDisruptionBudget、亲和性、污点/容忍等约束；
+- 持久卷能否在目标节点挂载，存储系统是否健康；
+- 应用是否实现数据复制、选主和故障恢复。
 
-这些都属于：
+StatefulSet、PVC 和 StorageClass 提供工作负载身份及存储声明机制，但不会自动保证数据库数据一致、存储跨节点可用或备份可恢复。MySQL、PostgreSQL、Redis、Elasticsearch 等有状态服务仍需单独设计其 HA 和备份方案。
 
-**有状态服务（Stateful Application）**
-
-它们：
-
-- 有持久化数据
-- 有固定身份
-- 有数据一致性要求
-
-因此：
-
-Kubernetes 会通过：
-
-- StatefulSet
-- PVC（持久卷）
-- StorageClass
-
-来解决：
-
-```text
-Pod 漂移后数据如何保留
-```
-
-的问题。
-
-也就是说：
-
-`Worker 可以挂`
-
-**但数据不能丢**
-
-真正不能挂的是：
-
-**Control Plane**
-
-因为：
-
-一旦控制平面失效：
-
-- 无法调度
-- 无法创建 Pod
-- 无法更新状态
-- 无法管理整个集群
-
-即使 Worker 还活着：
-
-```text
-整个 Kubernetes 也已经“失控”
-```
+控制面不可用时，已经运行的容器可能继续运行一段时间，但集群无法正常接受新的管理请求，调度和控制器协调也会受影响。Worker 故障恢复能力与控制面 HA 是相关但不同的问题。
 
 ---
 
@@ -548,14 +479,15 @@ HAProxy + Keepalived
 >
 > 需要参考的同学：
 >
->  **关注文末的公众号，后台回复：**
+> 脚本目前仅在 Debian 13 环境测试；Debian 12 和 11 尚未验证，不应假定可直接使用。
+>
+> **关注文末的公众号，后台回复：**
 >
 > ```text
 > K8SHA
 > ```
 >
-> 即可获取。
-> 目前仅支持debian 13系列，12、11应该也支持，但是并未做测试。
+> 即可获取。使用前先检查脚本内容、变量和目标主机列表，在隔离环境验证后再用于自己的集群。
 
 ---
 
@@ -590,30 +522,24 @@ kubectl
 
 **一个 API Client**
 
-当你真正看到：
+当你在受控演练中验证：
 
 - Keepalived 漂移
 - HAProxy 转发
 - Master 宕机
-- kubectl 无感知
+- API 请求在故障切换时是否需要重试
 
 之后。
 
-你才会真正理解：
+才能评估：
 
-`什么叫高可用控制平面`
+`这个控制平面在特定故障下是否达到预期可用性`
 
 ---
 
 ## 十三、下一篇：故意打挂一台 Master
 
-这一篇主要解决：
-
-`HA 架构到底是什么`
-
-下一篇开始：
-
-`真正的故障演练`
+下一步应在隔离环境进行有计划的故障演练，而不是只根据架构图推断可用性。演练前确认数据备份、维护窗口、恢复步骤和影响范围，再逐项验证：
 
 包括：
 
@@ -625,14 +551,19 @@ kubectl
 - 哪些服务真正高可用
 - 哪些“HA”只是看起来像 HA
 
-这部分会真正进入：
-
-`企业级 Kubernetes 故障演练阶段`
-
-也是整个私有云实验里：
-
-`最核心的一部分`
+这些结果应与预期故障边界、告警和恢复目标一并记录。
 
 ---
 
-![微信公众号二维码](../assets/images/wechat-public/扫码_搜索联合传播样式-标准色版.png)
+## 推荐阅读
+
+| 主题 | 文章 |
+| --- | --- |
+| **单 Master 到 HA 的架构演进** | [从单 Master 到高可用：架构演进思考](single-master-to-ha.md)——了解控制平面高可用的设计取舍。 |
+| **API 请求处理** | [Kubernetes API Server 原理](../architecture/api-server.md)——深入理解 kubectl 请求的认证、授权和处理链路。 |
+| **etcd 与多数派** | [etcd 架构与运维说明](../architecture/etcd.md)——了解集群状态存储、Quorum 和备份恢复。 |
+| **集群升级与维护** | [Kubernetes 集群升级实战](cluster-upgrade.md)——了解 HA 集群的升级检查与节点维护流程。 |
+
+---
+
+![微信公众号二维码](../../assets/images/wechat-public/扫码_搜索联合传播样式-标准色版.png)

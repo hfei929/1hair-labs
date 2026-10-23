@@ -132,7 +132,7 @@ kubectl get pods -A -o wide
 
 所有业务 Pod 依旧 `Running`，没有任何重启。Worker 节点上的容器完全不依赖 LB，它们直接与本地 kubelet 通信，不受 VIP 漂移影响。
 
-![pod负载稳定](../assets/images/lab/ha故障演练-pod负载稳定.pngg)
+![pod负载稳定](../assets/images/lab/ha故障演练-pod负载稳定.png)
 
 更直观地，我打开浏览器直接访问：
 

@@ -406,6 +406,7 @@ nav:
           - Loki 从零装机：日志的三层记忆，和一把熟悉的新刀: lab/loki-from-zero.md
           - Mimir 从零装机：114 天的 Prometheus 从来没有过硬盘: lab/mimir-from-zero.md
           - Gateway API 装机实录: lab/gateway-api-installation.md
+          - NetworkPolicy 上锁实录: lab/networkpolicy-lockdown.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md

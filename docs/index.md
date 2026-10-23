@@ -59,18 +59,6 @@ Linux 是云原生技术体系的基础。
 
 ---
 
-## 最新文章
-
-### [一行 curl 的完整旅程：DNS → iptables → conntrack → Calico 全链路拆解](kubernetes/architecture/network/curl-full-link.md)
-
-从 Pod 内一行 `curl nginx-test` 开始，用 strace + conntrack + curl -w 拆解 K8s 网络的完整包流转。实测冷启动 192ms vs 热缓存 3ms，DNS 解析 189ms 的根因是 glibc 连发 5 次查询、最后一次裸域名被 CoreDNS forward 到上游 DNS。
-
-这是 Worker Node 深度系列的收束篇——把 kubelet SyncLoop、CRI gRPC、containerd、CNI、Calico BGP、kube-proxy iptables、CoreDNS 串成一条完整链路。
-
-👉 [阅读全文](kubernetes/architecture/network/curl-full-link.md)
-
----
-
 ## 关于 1HairLabs
 
 互联网从来不缺教程，真正稀缺的是：

@@ -19,8 +19,11 @@ Windows Server 2016 是微软面向企业数据中心的核心服务器操作系
 
 本教程面向新手，详细说明 Windows Server 2016 的安装与初始化配置。本文以虚拟机环境演示，物理机安装流程一致。
 
+!!! note "关于操作示意图"
+    本文部分安装界面的真实截图暂缺，现阶段先以文字步骤和关键选项说明操作。真实示意图将在后续更新中逐步补足。
+
 !!! tip "Windows Server 各版本部署流程通用"
-    **Windows Server 2016 / 2019 / 2022 / 2025 的安装部署流程完全一致。** 它们在安装界面、分区步骤、初始配置、角色添加等方面几乎没有区别——差异仅在于版本号、UI 细节和新功能。因此本站不再为每个 Server 版本单独撰写部署教程，学好这一篇即可通用于所有主流 Windows Server 版本。
+    **Windows Server 2016 / 2019 / 2022 / 2025 的安装部署流程完全一致。** 它们在安装界面、分区步骤、初始配置、角色添加等方面几乎没有区别——差异仅在于版本号、UI 细节和新功能。因此本站不再为每个 Server 版本单独撰写部署教程，学好这一篇即可通用于所有主流 Windows Server 版本。若要部署桌面版 Windows，可参考 [Windows 10 安装与系统配置教程](windows-10.md) 或 [Windows 11 部署教程](windows-11.md)。
 
 !!! info "为什么学 2016 而不是最新版？"
     企业中「稳定压倒一切」。Windows Server 2016 的存量市场极大，面试和实际工作中遇到 2016 的概率远高于 2025。学好 2016 后，迁移到 2019/2022/2025 几乎没有障碍。
@@ -95,7 +98,7 @@ CPU：2 Core
 
 挂载 ISO → 开启虚拟机 → 看到引导提示按任意键 → 进入安装程序。
 
-![启动安装](../../assets/images/deployment/windows/winServer2016-启动安装.png)
+进入安装程序前，如果出现“Press any key to boot from CD or DVD”，按任意键从挂载的 ISO 启动。若虚拟机直接进入已有系统，检查虚拟机的 CD/DVD 是否已连接并指向正确的 ISO，再重启虚拟机。
 
 ---
 
@@ -112,7 +115,7 @@ CPU：2 Core
 !!! warning "务必选择 Desktop Experience"
     如果选 `Windows Server 2016 Standard`（不带 Desktop Experience），装完后只有命令行界面。新手务必选择带 **Desktop Experience** 的版本。
 
-![选择版本](../../assets/images/deployment/windows/winServer2016-选择版本.png)
+安装程序会列出 Standard、Datacenter 等版本，并区分是否带 Desktop Experience。请按授权和学习需求选择版本；本教程选择 **Windows Server 2016 Standard (Desktop Experience)**。确认选项名称中包含“Desktop Experience”后再继续。
 
 ---
 
@@ -132,7 +135,7 @@ CPU：2 Core
 
 选择目标磁盘（60 GB）→ 直接 **「下一步」**，安装程序自动创建系统分区。
 
-![磁盘分区](../../assets/images/deployment/windows/winServer2016-磁盘分区.png)
+安装程序可能会自动创建多个系统分区，这是正常现象。继续前核对磁盘容量和目标磁盘；如果虚拟机连接了多块磁盘，确认选中的是预留给系统的那块。点击“下一步”会在目标磁盘上安装系统，请勿误选含有需要保留数据的磁盘。
 
 安装过程约：
 
@@ -151,7 +154,7 @@ CPU：2 Core
 !!! danger "Administrator 密码是最高权限"
     这是服务器最重要的密码，建议包含大小写字母、数字和特殊字符。
 
-![设置密码](../../assets/images/deployment/windows/winServer2016-设置密码.png)
+按提示设置并确认本地 `Administrator` 密码。安装程序会检查密码是否符合复杂度要求；如果不接受，按提示调整后重新输入。请在继续之前妥善保存密码。
 
 ---
 
@@ -159,7 +162,7 @@ CPU：2 Core
 
 按 `Ctrl + Alt + Del`（虚拟机中按 `Ctrl + Alt + Insert`）→ 输入 Administrator 密码 → 登录。
 
-![登录界面](../../assets/images/deployment/windows/winServer2016-登录界面.png)
+登录成功后应进入 Windows Server 桌面，并自动打开 Server Manager。若认证失败，确认用户名为本机的 `Administrator`，并检查输入法、键盘布局及密码。
 
 ---
 
@@ -169,7 +172,7 @@ CPU：2 Core
 
 登录后自动打开 **Server Manager（服务器管理器）**，这是 Windows Server 管理控制台：
 
-![服务器管理器](../../assets/images/deployment/windows/winServer2016-服务器管理器.png)
+在 Server Manager 中可以查看本地服务器状态，并进入角色与功能、网络配置等管理入口。如果窗口没有自动打开，可从开始菜单搜索并启动“Server Manager”。
 
 ---
 
@@ -200,6 +203,8 @@ Windows Server 应使用固定 IP：
 3.  双击 **「Internet 协议版本 4 (TCP/IPv4)」**
 4.  填入静态 IP：
 
+静态 IP、DNS 和 Windows 防火墙的基本概念及常见用途，可参考 [Windows 网络配置与防火墙说明](windows-10.md#network-configuration)。
+
 | 字段 | 示例值 |
 | --- | --- |
 | IP 地址 | `192.168.1.50` |
@@ -207,7 +212,7 @@ Windows Server 应使用固定 IP：
 | 默认网关 | `192.168.1.1` |
 | DNS | `192.168.1.1` 或 `114.114.114.114` |
 
-![配置IP](../../assets/images/deployment/windows/winServer2016-配置IP.png)
+保存前核对 IP 地址、子网掩码、网关和 DNS 是否属于实际网络规划，避免与现有设备地址冲突。配置后可在命令提示符运行 `ipconfig /all` 检查地址和 DNS，并用 `ping <默认网关>` 测试基本连通性。
 
 ---
 
@@ -215,7 +220,7 @@ Windows Server 应使用固定 IP：
 
 Server Manager → 左侧 **「本地服务器」** → 点击 **「远程桌面」** 旁的 **「已禁用」** → 选择 **「允许远程连接到此计算机」**。
 
-![远程桌面](../../assets/images/deployment/windows/winServer2016-远程桌面.png)
+确认远程桌面状态显示为已启用，并确保 Windows 防火墙允许远程桌面连接。然后从同一网络中的另一台设备连接服务器 IP，验证可以到达登录界面；仅启用设置并不代表网络路径和防火墙均已验证。
 
 现在可以从局域网其他设备通过远程桌面连接管理服务器。
 
@@ -327,3 +332,9 @@ Windows Server 2016 是企业 IT 基础设施的重要组成，掌握它的安�
 
 Windows Server 的世界远不止安装系统——AD 域控、组策略、PowerShell 自动化才是它的真正威力所在。先把基础环境搭好，后续逐步深入。 🚀
 
+## 推荐阅读
+
+- [Windows 10 安装与系统配置教程](windows-10.md)——补充 Windows 网络配置、防火墙和远程桌面等通用客户端操作。
+- [Windows 11 部署教程](windows-11.md)——对比新版本 Windows 的虚拟机要求与安装流程，了解 TPM 等版本差异。
+- [Ubuntu 22.04 部署教程](../linux/ubuntu-22.04.md#创建虚拟机)——参考 VMware Workstation 创建虚拟机、配置硬件和挂载安装介质的通用步骤。
+- [ESXi 7.0 部署教程](../vmware/esxi-7.0.md)——继续了解虚拟化平台部署，以及在虚拟机中运行服务器系统的基础环境。
