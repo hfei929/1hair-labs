@@ -408,6 +408,7 @@ nav:
           - Gateway API 装机实录: lab/gateway-api-installation.md
           - NetworkPolicy 上锁实录: lab/networkpolicy-lockdown.md
           - K8s DNS 记录着容器的生与死: lab/k8s-dns-records.md
+          - MetalLB L2 拆机记: lab/metallb-l2-teardown.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
