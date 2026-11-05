@@ -394,6 +394,9 @@ flowchart LR
 
 headlamp 的 31152 还在全节点裸着——它没过三道筛的"值得现在锁"线（单租户、无凭据暴露），但它是名单上的下一个。收编它的路径不是再来一把 GNP，而是先回答"管理面 UI 到底该以什么姿势暴露"——Ingress 收编、port-forward 临时通道，还是干脆撤掉 NodePort。Headlamp 的部署背景可从[Headlamp 使用说明](../kubernetes/tools/headlamp.md)了解；具体访问面如何收敛仍需结合实际环境评估。
 
+!!! note "发布次日补记：锁的第一笔账"
+    这节发出去不到 24 小时，锁开出了第一笔真实的维护账。首轮每周巡检的第一发命令——走 service proxy 查 Prometheus 指标——`i/o timeout`。机制：svc proxy 的最后一段是 apiserver pod 发起的 pod-to-pod 连接，源 IP 是 apiserver 的 pod IP（kube-system 段）——不匹配 rule 1（非 monitoring）、不匹配 rule 2（非节点段、非染色单点），落到 rule 3 Deny。当时以为它和 exec 同属免疫路径，实测证伪：exec 免疫是 kubelet 节点本地发起（节点无籍），svc proxy 不在同一个免疫族里——验收四单漏盘了这条诊断路径。修法：锁不动（最小面原则），诊断改走 port-forward（kubelet 本地发起，真免疫）。锁不动，人绕路。
+
 ## 带走三件事
 
 两天的判断篇，浓缩成三个可以今天就在自己集群上做的动作：
