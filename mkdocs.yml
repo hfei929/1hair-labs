@@ -410,6 +410,7 @@ nav:
           - K8s DNS 记录着容器的生与死: lab/k8s-dns-records.md
           - MetalLB L2 拆机记: lab/metallb-l2-teardown.md
           - NetworkPolicy 判断实录: lab/networkpolicy-judgement.md
+          - Ceph OSD：600 秒静坐、1 分钟搬家、0 字节回迁: lab/ceph-osd-600s-sit-1min-move-0bytes-back.md
         
         - 故障演练: 
           - Kubernetes Cluster HA 故障演练 EP.1: lab/failover-test-1.md
