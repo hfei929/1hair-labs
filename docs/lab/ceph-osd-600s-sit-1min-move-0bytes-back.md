@@ -1,13 +1,22 @@
 ---
-title: Ceph OSD 故障恢复实测：600 秒 auto-out 与零回迁
-description: 在 Kubernetes 1.36.1、Rook 1.18.1 与 Ceph 19.2.3 环境实测单个 OSD 下线和恢复，解析 600 秒 auto-out、PG backfill、OSD 自动恢复权重，以及 RBD 数据为何无需回迁；并记录 Prometheus 指标序列消失与告警设计要点。
+title: Rook Ceph OSD 故障恢复实测：600 秒 auto-out、1 分钟回填与零回迁
+description: Kubernetes 1.36.1 + Rook 1.18.1 + Ceph 19.2.3 的 9 OSD 集群实测单盘故障注入：mon 静坐 600 秒（mon_osd_down_out_interval）后 auto-out，backfill 不足 1 分钟补齐 33 个 PG；复活时 AUTOOUT 位与 old_weight 备份让 OSD 25 秒回 in、零回迁；并解析 ceph_osd_in 序列消失（absent≠0）的告警盲区。
 keywords:
   - Ceph OSD 故障恢复
   - Rook Ceph
   - Ceph auto-out
+  - mon_osd_down_out_interval
   - PG backfill
-  - RBD
-  - Prometheus 告警
+  - Ceph OSD reweight
+  - ceph_osd_in 序列消失
+  - Prometheus 告警规则
+tags:
+  - Ceph
+  - Rook
+  - Kubernetes
+  - Prometheus
+  - 存储
+  - 故障排查
 ---
 
 !!! abstract "实测声明"
@@ -19,27 +28,29 @@ keywords:
     - **存储栈**：rook v1.18.1 + ceph v19.2.3 + cephcsi v3.14.0，manifest 直装
     - **Ceph 拓扑**：9 OSD（每 worker 3×50G），3 mon 钉在 master，size=3，33 PG
     - **数据规模**：RBD 池 1.31k objects / 5.0 GiB（L2 实验灌入）
-    - 标注 `📥 回填` 的输出为写作时待补的原始记录，其余数据块均逐字复制自终端落盘文件（`~/ceph-l0/`）
+    - 数据块均逐字复制自终端落盘文件（`~/ceph-l0/`）
 
 ---
 
-# Ceph OSD 故障恢复实测：600 秒静待、快速回填与零字节回迁
+# 杀一块 Ceph OSD：600 秒静坐、1 分钟搬家、0 字节回迁
 
-先看这次实验的三个结果：
+## 三个数字开头
 
-1. **约 600 秒**：OSD 下线后，集群等待 auto-out 定时器到期，再开始重新布局。这段等待不是卡住，而是在给短暂故障留出恢复时间。
-2. **不到 1 分钟**：auto-out 触发后，约 1.9 GiB 副本完成回填，33 个 PG 恢复为 `active+clean`。
-3. **0 字节回迁**：约 4 小时后重新启动 OSD，25 秒内它恢复 `up/in`、reweight 回到 1.0；实验中没有观察到第二轮 backfill。
+先说结论，三个数字：
 
-第三个结果最出乎预料。我原以为 OSD 恢复后会再触发一轮 backfill，把副本搬回去；实际观察到的是：**原盘上的数据仍在，OSD 重新加入后可以继续使用这些副本**。
+1. **600 秒**——杀掉一块 OSD 后，集群安静地等了整整 600 秒才开始干活。不是卡住了，是在等一个定时器。
+2. **不到 1 分钟**——定时器到点后，1.9G 副本全部搬家完毕，33 个 PG 全部回到 clean。静坐 9 分半，干活半分钟。
+3. **0 字节**——4 小时后把这块盘插回来，集群 25 秒内把它重新纳入编制，reweight 恢复 1.0，而数据搬运量是零。
 
-这是"生产化改造"存储篇的收官实验：在运行真实应用的 Rook/Ceph 集群里，观察 OSD 下线与恢复，并通过 [Prometheus 历史指标](../observability/prometheus.md)记录状态变化。实验顺序很重要：**先确认指标已采集，再注入故障**。
+第三个数字是这次实验最大的意外。我原本以为复活会触发第二轮 backfill（数据回流至少要再搬一遍），实际是：**数据从未离开那块盘，回家不用搬家**。
+
+这是"生产化改造"第三战役（存储）的收官实验：在跑着真实应用的 Rook/Ceph 集群里，完整走一遍 OSD 的死亡与复活，全程有 [Prometheus](../observability/prometheus.md) 历史曲线兜底——**先接线，再杀盘**。
 
 ## 动刀之前先接线
 
-实验顺序是这次最重要的决定之一。故障和恢复过程只有十几分钟，如果中间状态没有被采集，事后就难以还原；Prometheus 历史曲线能帮助复盘，前提是相关指标已提前进入时序库。
+实验顺序是这次最值的决策。杀盘过程只有十几分钟，如果中间态没抓到，事后想复盘就只能重来；而 Prometheus 的历史曲线不会漏——前提是杀盘之前指标已经在进库。
 
-而"指标进库"这件事本身，折腾了一个晚上。起点是我想确认 Grafana 能不能看 Ceph，结果从 CRD 开关一路拆到 ServiceMonitor 抓取链，共四把锁、四次翻车：
+而"指标进库"这件事本身，折腾了一个晚上。起点是我想确认 [Grafana](grafana-first-open-blind-spot.md) 能不能看 Ceph，结果从 CRD 开关一路拆到 ServiceMonitor 抓取链，共四把锁、四次翻车：
 
 ```mermaid
 flowchart TD
@@ -74,7 +85,7 @@ flowchart TD
 
     最终抓取链：`rook-ceph-mgr`（instance `192.168.114.148:9283`）+ 全节点 ceph-exporter DaemonSet，`ceph_health_status` 等指标 15s 进一次 Prometheus。顺带被数据打脸的一课：**`ceph_health_status` 里 0 才是 HEALTH_OK**——我预注册时写的是"1=OK"，Ceph 的枚举是 `HEALTH_OK=0 / WARN=1 / ERR=2`，跟 Linux 惯例正好相反。
 
-还有一个当时差点误判的细节：打完 ServiceMonitor 标签后 28 秒去查 targets，空的——**不是没接上，是查得太早**。operator 重载配置、Prometheus 发现并开始抓取，整条链要几十秒。9 分钟后再查全绿。慢故障实验的第一课在动手前就来了：**时序敏感的检查要留出足够等待时间，也要能回放历史数据**。
+还有一个当时差点误判的细节：打完 ServiceMonitor 标签后 28 秒去查 targets，空的——**不是没接上，是查得太早**。operator 重载配置、Prometheus 发现并开始抓取，整条链要几十秒。9 分钟后再查全绿。顺带一提，[监控首日那 9 个红 target](k8s-monitoring-red-from-day-one.md) 是同一道题的另一面：那边是真没接上，这边是接上了、抓取还没跑起来。慢故障实验的第一课在杀盘之前就来了：**时序敏感的检查，要么等够时间，要么事后回放历史**。
 
 ## 杀掉 osd.2
 
@@ -96,12 +107,33 @@ CRUSH 不是完美均匀 → 12 份，正常散布
 kubectl -n rook-ceph scale deploy rook-ceph-osd-2 --replicas=0
 ```
 
-25 秒后（首个采样点）：
+25 秒后（定点采样，`l3c-kill-osd2.txt` 逐字）：
 
 ```text
-📥 回填点 1：l3c-kill-osd2.txt 首轮 ceph -s
-（判读记录：HEALTH_WARN / 1 osds down / 12 pgs degraded / active+undersized+degraded）
+2026-11-09T01:22:17Z
+  cluster:
+    id:     a9a364ff-9398-48e2-9b92-b6afd368616f
+    health: HEALTH_WARN
+            1 osds down
+            Degraded data redundancy: 493/3918 objects degraded (12.583%), 12 pgs degraded
+
+  services:
+    mon: 3 daemons, quorum b,a,c (age 2d)
+    mgr: a(active, since 34h)
+    osd: 9 osds: 8 up (since 25s), 9 in (since 34h)
+
+  data:
+    pools:   2 pools, 33 pgs
+    objects: 1.31k objects, 5.0 GiB
+    usage:   15 GiB used, 435 GiB / 450 GiB avail
+    pgs:     493/3918 objects degraded (12.583%)
+             21 active+clean
+             12 active+undersized+degraded
 ```
+
+这 25 秒读出三层信息：**down 已经检出**（`8 up`）；**但还在编制里**（`9 in`——注意是 9 不是 8，说明 CRUSH 拓扑没动）；**12 个 PG 立刻降级**（`active+undersized+degraded`——PG 还活着，只是少了一份副本）。预注册的 10-12 命中上沿。
+
+一个值得注意的细节：down 检出这么快（秒级），是因为 scale-0 走的是 SIGTERM 干净退出，OSD 关停时会主动跟 mon 告别；如果是拔电/断网类的硬故障，就得等 peer 心跳超时（grace 约 20 秒）才轮得到 mon 标 down。两条路殊途同归，只是 down 的消息来得快慢不同。
 
 ## 九分半的静坐
 
@@ -140,9 +172,13 @@ kubectl -n rook-ceph scale deploy rook-ceph-osd-2 --replicas=0
 - `ceph osd stat` 显示 `8 in (since 2m)`，采样时刻 01:34:36，反推 out ≈ 01:32:36
 - `ceph_osd_in{osd="2"}` 指标序列的终止点在 01:32:00-01:33:00 采样之间
 
-kill 在 01:22:17，600 秒定时器到期是 01:32:17，实测 out ≈ 01:32:36——**误差 19 秒**，来自 down 的检出时刻（peer 心跳失联需要十几秒）加上 mon tick 的扫描周期。
+kill 在 01:22:17，down 在 25 秒内已检出（干净退出，OSD 主动上报），600 秒定时器从 down 时刻起算，到期约 01:32:20-40，实测 out 落在 01:32:36——**定时器如期而至**（`since 2m` 的读数分辨率是 ±1 分钟，out 的真实时刻落在分辨率带内，与定时器完全相容）。
+
+顺带一个容易漏掉的容量侧证据：基线 `ceph -s` 显示 `435 GiB / 450 GiB avail`（9 盘口径），终局变成 `385 GiB / 400 GiB avail`——osd.2 被 out 后，集群总容量当场从 450 掉到 400。REWEIGHT 0 不只是"不再写入"，是这块盘的 50G 从账上整个划掉了。
 
 拉 v19.2.3 源码看这 600 秒里 mon 到底做了什么（`src/mon/OSDMonitor.cc`，tick 内 `down_pending_out` 扫描）：
+
+![六百秒整：auto-out 的源码](ceph-osd-600s-sit-1min-move-0bytes-back.assets/210417.png)
 
 ```cpp
 // OSDMonitor.cc L5204-5226（节选，v19.2.3）
@@ -186,7 +222,7 @@ auto-out 落地的瞬间，静坐结束，backfill 开始。493 份副本（12 �
 01:33:30   degraded 0，33 个 PG 全部 active+clean，HEALTH_OK
 ```
 
-我实验前预期需要"小时级"。这次明显更快，主要因为需要搬运的数据只有约 1.9 GiB，且环境是本地虚拟盘。生产环境的恢复时间还取决于数据量、集群吞吐、并发与恢复限速；例如单盘 4 TiB、使用率 80% 时，潜在搬运量远大于本次实验，不能直接套用这里的分钟级结果。
+我实验前预期"小时级"。翻车原因很简单，也很重要：**heal 时间与数据量成正比**。1.9G 副本在本地虚拟盘上搬完只要几十秒；生产集群单盘 4T、数据 80% 满，同样的流程要搬 3T+，时间放大三个数量级。"小时级"是 TB 盘的口径，我的 5G 家底把这道除法算成了分钟级。
 
 对实验设计本身还有一个教训：01:23:00 到 01:33:30 之间我们只有 30 秒粒度的 Prometheus 曲线，backfill 的中间态（`active+remapped+backfilling`）在终端上一眼都没见过——**关键时刻窗内要用 15-30 秒间隔轮询**。好在曲线数据一分不丢，这就是先接线的回报。
 
@@ -224,8 +260,8 @@ timeline
     section 动刀
         T+0 : scale-0 杀掉 osd.2
     section 检出
-        T+43秒内 : peer 心跳失联上报 mon
-        T+43秒 : WARN + 12 个 PG degraded
+        T+25秒内 : OSD 干净退出上报 mon
+        T+25秒 : WARN + 12 个 PG degraded
     section 静坐
         静坐 9 分半 : down 但 in 集群按兵不动
         : degraded 曲线走平台
@@ -250,17 +286,27 @@ timeline
 复盘时我想画 `ceph_osd_in` 的曲线，验证 in 状态翻转的时刻。第一次查询用了我猜的 label（`osd="2"`）——空的。换成 `ceph_daemon="osd.2"` 再查，曲线出来了，但形态出乎意料：
 
 ```text
-📥 回填点 2：l3d-osd2curve.txt（up/in 双曲线完整 JSON）
-（判读记录：
-  ceph_osd_up{osd="2"}   01:22 采样=1 → 01:23:00 翻 0，此后保持 0
-  ceph_osd_in{osd="2"}   全 1 直至 01:32:00 采样 → 01:33:00 起序列不存在）
+// l3d-osd2curve.txt，raw JSON 时间点换算成 UTC（30s step，区间 01:15:00-01:45:00）
+ceph_osd_up{ceph_daemon="osd.2"}:
+  01:15:00  1
+  01:22:00  1        ← 最后一个健康样本
+  01:23:00  0        ← kill 后首个采样点，up 线翻 0
+    ...     0        ← 此后保持 0
+  01:32:00  0        ← 序列最后一个样本，01:33:00 起（auto-out 后）序列终止
+
+ceph_osd_in{ceph_daemon="osd.2"}:
+  01:15:00  1
+    ...     1        ← 全区间为 1，静坐 9 分半里 in 状态纹丝不动
+  01:32:00  1        ← 序列最后一个样本；01:33:00 起序列不存在
 ```
+
+up 线和 in 线的**终止是同一个时刻**——auto-out 之后，两条序列一起从指标宇宙里退场了。
 
 in 线不是 1→0，是**整条序列消失了**。被 out 的 OSD 从 mgr 的指标输出里除名——查询侧看到的是"没有这个序列"，而不是"这个序列值为 0"。
 
 这在 Prometheus 里是个经典陷阱：`absent` 和 `0` 是两回事。`sum(ceph_osd_in) == 8` 不代表集群只该有 8 块 in 的盘——它代表"当前存在于指标里的 in 盘恰好 8 块"，被除名的序列不参与任何聚合。如果告警规则写成 `ceph_osd_in{osd="2"} == 0`，**永远不会触发**，因为根本没有这条序列。
 
-同一类现象也出现在 [Mimir 长期存储实战](mimir-from-zero.md)：Pod 被删除后，`up{job="..."}` 整组序列消失，`count(up)` 从 53 降到 48——不是某个 target 变成 down，而是相关序列退出了当前指标集合。Ceph OSD 是同一类问题在存储指标中的表现。
+同一族的前科：[Mimir 迁移那次](mimir-from-zero.md)，pod 被删后 `up{job="..."}` 整组序列消失，`count(up)` 从 53 掉到 48——不是哪个 target 挂了，是它们从指标宇宙里退场了。Ceph 的 OSD 只是同一个故事的存储版。
 
 而这条序列还有下半场——4 小时后 osd.2 复活，序列在 05:30:20 重新出现，首点即 1。一条序列，两段生命，中间 4 小时是空白。对监控的意义：**判断"东西还在不在"要警惕序列粒度**，用 `absent()` 函数或 `count()` 基线对比，不要对一条可能不存在的序列做等值断言。
 
@@ -272,23 +318,42 @@ in 线不是 1→0，是**整条序列消失了**。被 out 的 OSD 从 mgr 的�
 
 疑点随之而来：如果 1.9G 副本真的在复活后从其他盘搬回 osd.2，按上一轮的速度也要几十秒的 backfill 过程态；一点没看到，那数据到底回没回来？两条证据合围：
 
-**证据一**，`ceph osd df`——osd.2 当前持有约 1.9G 数据、12 个 PG，与杀盘前完全一致（📥 回填点 3：l3f-backflow.txt 的 `ceph osd df` 九行明细）。数据在盘上。
+**证据一**，`ceph osd df`（复活次日 15:55 采集——距复活 34 小时后的稳态，逐字）：
+
+```text
+ID  CLASS  WEIGHT   REWEIGHT  SIZE     RAW USE  DATA     OMAP    META     AVAIL    %USE  VAR   PGS  STATUS
+ 1    hdd  0.04880   1.00000   50 GiB  1.7 GiB  1.7 GiB   5 KiB   49 MiB   48 GiB  3.44  1.00   10      up
+ 4    hdd  0.04880   1.00000   50 GiB  2.0 GiB  1.9 GiB   5 KiB   49 MiB   48 GiB  3.91  1.14   13      up
+ 6    hdd  0.04880   1.00000   50 GiB  1.5 GiB  1.4 GiB   5 KiB   49 MiB   49 GiB  2.98  0.87   10      up
+ 0    hdd  0.04880   1.00000   50 GiB  1.6 GiB  1.5 GiB   7 KiB   32 MiB   48 GiB  3.10  0.90   10      up
+ 3    hdd  0.04880   1.00000   50 GiB  2.4 GiB  2.4 GiB   7 KiB   32 MiB   48 GiB  4.82  1.40   15      up
+ 7    hdd  0.04880   1.00000   50 GiB  1.2 GiB  1.1 GiB   8 KiB   31 MiB   49 GiB  2.32  0.68    8      up
+ 2    hdd  0.04880   1.00000   50 GiB  1.9 GiB  1.9 GiB   8 KiB   32 MiB   48 GiB  3.86  1.12   12      up
+ 5    hdd  0.04880   1.00000   50 GiB  1.8 GiB  1.8 GiB   4 KiB   48 MiB   48 GiB  3.63  1.06   12      up
+ 8    hdd  0.04880   1.00000   50 GiB  1.4 GiB  1.4 GiB   5 KiB   49 MiB   49 GiB  2.82  0.82    9      up
+                       TOTAL  450 GiB   15 GiB   15 GiB  60 KiB  370 MiB  435 GiB  3.43
+MIN/MAX VAR: 0.68/1.40  STDDEV: 0.69
+```
+
+读数三层：**osd.2 扛着 12 个 PG、1.9 GiB DATA**——正是杀盘时它名下那 12 个 PG（CRUSH 确定性：同样的权重拓扑算出同样的映射）；**PGS 列合计 10+13+10+10+15+8+12+12+9 = 99 = 33 PG × 3 副本**，对账吻合；**TOTAL 15 GiB 与 `ceph -s` 的 `usage: 15 GiB used` 互证**（5G 数据 × 3 副本口径）。而且这是复活 34 小时后的快照——12 个 PG 稳稳留在 osd.2 上，零搬运不是瞬时侥幸，是稳态。数据在盘上。
 
 **证据二**，10 秒粒度的 Prometheus 回放（05:29:40 ~ 05:33:00），`ceph_pg_degraded` 与 `ceph_pg_backfilling` **全窗口为零**。没有搬运发生。
 
-两个事实放在一起，最符合观测的解释是：**osd.2 原盘上的副本没有被清除**。过程可以拆成三步：
+两个事实放在一起，唯一自洽的解释：**数据从未离开 osd.2 的盘**。时间线是这样的：
 
 1. auto-out 时，backfill 给那 12 个 PG 在其他盘上补了新副本——但 osd.2 盘上的**旧副本一个字节没被删**（pod 只是停了，盘没动）；
 2. 复活后 reweight 回 1.0，CRUSH 用**同样的权重拓扑**重新计算——算出的映射与杀盘前完全一致，那 12 个 PG 的副本位置又轮回到 osd.2；
 3. peering 时发现 osd.2 上的副本还在（只差 out 期间约 20MB 的增量写入，走 recovery 秒级补齐），直接采用。
 
-可以把它理解为：集群在其他位置补足副本时，原盘上的旧副本仍留着；OSD 回来后，CRUSH 映射恢复，Ceph 检查并复用已有数据，因此无需把整份数据再搬回来。
+打个比方：**集群替你把家搬了，你 4 小时后回来，发现老家的门没锁、家具一件没动，产权登记也恢复了——你什么都不用搬**。
 
-因此，故障恢复不一定意味着完整数据回迁：副本仍在且可用时，Ceph 可以通过 peering 和必要的增量 recovery 恢复服务。本次实验中未观察到第二轮 backfill；这不代表所有 OSD 重启都零成本，盘损坏、数据缺失或映射变化都可能触发实际数据恢复。
+"故障恢复 ≠ 数据搬运"——Ceph 的恢复是逻辑回归，副本在、校验通过，就不搬。这个行为对生产的含义：**重启 OSD pod 是个近乎零成本的操作**，只要盘和数据还在，回归的代价是秒级元数据操作，而不是数据面搬迁。
 
 ## reweight 谁改回去的：源码定案
 
 复活后 reweight 从 0 自动回 1.0，这不符合"经典口径"。翻 v19.2.3 源码，在 OSD boot 的处理路径里找到了确切机制（`OSDMonitor.cc` `prepare_boot`）：
+
+![reweight 谁改回去的：源码定案](ceph-osd-600s-sit-1min-move-0bytes-back.assets/211630.png)
 
 ```cpp
 // OSDMonitor.cc L3732-3751（节选，v19.2.3）
@@ -317,6 +382,8 @@ if ((g_conf()->mon_osd_auto_mark_auto_out_in &&
 
 开关本身：
 
+![开关本身](ceph-osd-600s-sit-1min-move-0bytes-back.assets/211805.png)
+
 ```yaml
 # src/common/options/mon.yaml.in L916-926（节选）
 - name: mon_osd_auto_mark_auto_out_in
@@ -334,9 +401,9 @@ if ((g_conf()->mon_osd_auto_mark_auto_out_in &&
 
 ## 数据面视角：用户的十一分钟
 
-控制面的变化最终要回答一个问题：**使用 RBD 卷的应用感知到了什么？**若要了解 Kubernetes 如何通过 CSI 接入 Ceph 等存储系统，可参阅 [CSI 工作原理](../kubernetes/architecture/csi.md)；PV、PVC 与 StorageClass 的关系见 [Kubernetes 存储资源说明](../kubernetes/architecture/storage.md)。
+控制面的风起云涌，最终要落到一个问题上：**用 RBD 卷的应用感知到了什么？**
 
-答案是：什么都没感知到。`rbd-app` 是个跑在 default ns 的裸 pod，挂着 10Gi 的 RBD PVC（`/dev/rbd0` 挂在 `/data`），整个杀盘-静坐-out-搬家-复活全程零重启（pod 的最近一次重启发生在杀盘前 31 分钟），复活后写路径实测正常：
+答案是：什么都没感知到。`rbd-app` 是个跑在 default ns 的裸 pod，挂着 10Gi 的 RBD PVC（由 [Ceph CSI](../kubernetes/architecture/csi.md) 供给，`/dev/rbd0` 挂在 `/data`），整个杀盘-静坐-out-搬家-复活全程零重启（pod 的最近一次重启发生在杀盘前 31 分钟），复活后写路径实测正常：
 
 ```text
 POD=rbd-app
@@ -360,7 +427,7 @@ MNT=/data
     lastState={"terminated":{...,"exitCode":0,"finishedAt":"2026-11-09T01:50:19Z","reason":"Completed","startedAt":"2026-11-09T00:50:19Z"}}
     ```
 
-    startedAt 到 finishedAt **精确相差 3600 秒**，exitCode 0。再看 pod 定义：`command=["sh","-c","sleep 3600"]`——容器主进程就是个一小时的 sleep，睡满退出，restartPolicy: Always 把它拉起来再睡一小时。杀盘无关，纯属保活设计的指纹。顺带它还是个活样本：**容器每小时轮回一次，`/data` 的数据纹丝不动**——RBD 卷的生命周期比容器长，这是 PVC 存在意义的最好注脚。
+    startedAt 到 finishedAt **精确相差 3600 秒**，exitCode 0。再看 pod 定义：`command=["sh","-c","sleep 3600"]`——容器主进程就是个一小时的 sleep，睡满退出，restartPolicy: Always 把它拉起来再睡一小时。杀盘无关，纯属保活设计的指纹。顺带它还是个活样本：**容器每小时轮回一次，`/data` 的数据纹丝不动**——RBD 卷的生命周期比容器长，这是 [PVC 存在意义](../kubernetes/architecture/storage/pv-pvc-storageclass.md) 的最好注脚。
 
 ## 读者自查三件事
 
@@ -380,7 +447,7 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l app=rook-ceph-tools 
 #    应改用 count(ceph_osd_in) < <期望值> 或 absent() 形态
 ```
 
-第三条展开一句：这次实验里 OSD 被 out 后序列直接消失，如果你的 OSD 掉线告警写成 `== 0`，它在你最需要它的时候沉默。**告警规则要为"序列不存在"的形态设计，而不是只为"值变化"设计**。
+第三条展开一句：这次实验里 OSD 被 out 后序列直接消失，如果你的 OSD 掉线告警写成 `== 0`，它在你最需要它的时候沉默。**告警规则要为"序列不存在"的形态设计，而不是只为"值变化"设计**。具体写法可以对照 [Prometheus 的告警规则](../observability/prometheus.md) 一节；路由和噪音治理另见 [Alertmanager](../observability/alertmanager.md)。
 
 ## 附：预注册对账表
 
@@ -402,15 +469,18 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l app=rook-ceph-tools 
 
 预注册的意义不是猜对——是**把"我以为"钉在实验之前**，让实验有机会打脸。这轮打出来的四条（#4 #5 #7 #9）每一条都比猜对值钱：它们各自对应一个下次能直接复用的机制判断。
 
-本次配置还说明一个小集群风险：9 个 OSD 的 `mon_osd_min_in_ratio=0.75`，当 in 的 OSD 数降到 6 个时比例为 6/9，低于阈值，auto-out 会被阻止。故障连续发生时，自动摘除可能提前停下；应结合实际 OSD 数量和配置检查这个保护阈值。
+## 挂账与下一个问题
+
+挂账预告：worker02 三块 OSD 在杀盘前夜的一次重启考古（待查）；Grafana Ceph 面板（2842/5336/5342）导入后的面板篇。
+
+下一步的问题留给读者也留给我自己：**min_in_ratio 0.75 的雪崩闸，在 9 OSD 的集群上意味着什么？** 答案是 out 到第 3 块盘时闸门落下（6/9 = 0.667 < 0.75）——小集群的 auto-out 会在连环故障时提前"装死"。这个数字值得每个 9 盘以下的小集群管理员知道。
 
 ## 推荐阅读
 
-- [Mimir 长期存储实战：Prometheus remote_write 与 MinIO 对象存储](mimir-from-zero.md)：从另一场指标迁移实验理解序列消失、时序数据保留与长期存储。
-- [Prometheus 监控体系：架构、PromQL 与服务发现](../observability/prometheus.md)：了解本文使用的指标采集、PromQL 查询与告警基础。
-- [Kubernetes CSI 工作原理](../kubernetes/architecture/csi.md)：理解 Kubernetes 如何通过 CSI 驱动对接 Ceph 等外部存储。
-- [Kubernetes 存储资源：PV、PVC、StorageClass 与 VolumeSnapshot](../kubernetes/architecture/storage.md)：从应用侧了解 PVC 如何关联持久卷，以及 Pod 与数据生命周期的区别。
-
-本篇属于[测试集群生产化改造系列](index.md)的存储篇。
-
-下一步的问题留给读者也留给我自己：**min_in_ratio 0.75 的雪崩闸，在 9 OSD 的集群上意味着什么？** 答案是 out 到第 3 块盘时闸门落下（6/9 = 0.667 < 0.75）——小集群的 auto-out 会在连环故障时提前"装死"。这个数字值得每个 9 盘以下的小集群管理员知道。
+- [Mimir 从零装机：114 天的 Prometheus 从来没有过硬盘](mimir-from-zero.md)：absent≠0 的第一案，序列随 Pod 删除整组消失的同源故事。
+- [Prometheus 监控体系：架构、PromQL 与服务发现](../observability/prometheus.md)：补齐 ServiceMonitor、抓取链与告警规则的背景知识。
+- [K8s 监控装了 98 天：9 个 Prometheus target 从第一天就是红的](k8s-monitoring-red-from-day-one.md)：target 变红的另一种排查方向——真没接上，而不是抓取还没跑起来。
+- [PV、PVC、StorageClass：K8s 存储三个对象到底谁管谁](../kubernetes/architecture/storage/pv-pvc-storageclass.md)：理解 RBD 卷为何比容器活得久。
+- [Kubernetes CSI 工作原理](../kubernetes/architecture/csi.md)：理解 Ceph CSI 如何把 RBD 卷供给到 Pod。
+- [Grafana 第一次认真打开：盲区期间照样绿的 28 个仪表盘](grafana-first-open-blind-spot.md)：Ceph 面板装进来之前，先看那套仪表盘藏着多少盲区。
+- [Lab 实验室](index.md)：故障演练与生产化改造各战役的索引页。
