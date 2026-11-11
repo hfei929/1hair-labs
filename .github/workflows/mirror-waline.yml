@@ -1,0 +1,16 @@
+name: mirror-waline
+on:
+  workflow_dispatch:
+permissions:
+  packages: write
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 登录 GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: 搬运
+        run: |
+          docker pull easychen/waline:latest
+          docker tag easychen/waline:latest ghcr.io/hfei929/waline:latest
+          docker push ghcr.io/hfei929/waline:latest
