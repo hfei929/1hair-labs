@@ -7,10 +7,10 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - name: 登录 GHCR
+      - name: GHCR login
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: 搬运
+      - name: mirror
         run: |
-          docker pull easychen/waline:latest
-          docker tag easychen/waline:latest ghcr.io/hfei929/waline:latest
+          docker pull lizheming/waline:latest
+          docker tag lizheming/waline:latest ghcr.io/hfei929/waline:latest
           docker push ghcr.io/hfei929/waline:latest
