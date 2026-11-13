@@ -23,7 +23,7 @@ jobs:
         run: |
           printf 'server {\n  listen 80;\n  server_name _;\n  root /usr/share/nginx/html;\n  index index.html;\n  error_page 404 /404.html;\n}\n' > nginx-site.conf
           printf 'FROM nginx:stable-alpine\nCOPY site/ /usr/share/nginx/html/\nCOPY nginx-site.conf /etc/nginx/conf.d/default.conf\n' > Dockerfile
-          docker build -t ghcr.io/hfei929/1hair-site:latest -t ghcr.io/hfei929/1hair-site:$(git rev-parse --short HEAD) .
+          docker build --provenance=false -t ghcr.io/hfei929/1hair-site:latest -t ghcr.io/hfei929/1hair-site:$(git rev-parse --short HEAD) .
       - name: Login GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Push
