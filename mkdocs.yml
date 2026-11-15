@@ -155,7 +155,6 @@ nav:
 #        - 技术服务: service/index.md
 
 # ------------------------------------------------------------------------
-
     - 环境准备:
 
         - 概览: deployment/tutorials.md
@@ -190,6 +189,7 @@ nav:
 # ------------------------------------------------------------------------
 
     - Linux:
+
         - 概览: linux/index.md
 
         - 📚 学习路线: linux/roadmap.md
@@ -339,7 +339,6 @@ nav:
 # ------------------------------------------------------------------------
 
     - 可观测性:
-
         - 概览: observability/index.md
 
         - 📊 Metrics:
@@ -360,11 +359,13 @@ nav:
   
     - 虚拟化:
         - 概览: virtualization/index.md
+
         - 通用概念:
             - Hypervisor 类型对比: virtualization/concepts/hypervisor-types.md
             - CPU 与内存虚拟化原理: virtualization/concepts/cpu-memory-virtualization.md
             - 虚拟网络基础: virtualization/concepts/networking-basics.md
             - 虚拟存储基础: virtualization/concepts/storage-basics.md
+
         - VMware vSphere:
             - vSphere 架构总览: virtualization/vmware/vsphere-architecture.md
             - vCenter 架构详解: virtualization/vmware/vcenter-architecture.md
@@ -372,12 +373,15 @@ nav:
             - HA / DRS / FT 原理: virtualization/vmware/ha-drs-ft.md
             - vDS 与 NSX 网络: virtualization/vmware/networking-deep.md
             - 生命周期管理: virtualization/vmware/lifecycle-management.md
+
         - Proxmox VE:
             - PVE 架构概览: virtualization/pve/pve-overview.md
             - PVE vs VMware 对比: virtualization/pve/pve-vs-vmware.md
+
         - KVM 生态:
             - KVM + libvirt + QEMU: virtualization/kvm/kvm-libvirt.md
             - virt-manager / Cockpit / oVirt: virtualization/kvm/virt-manager-ovirt.md
+
         - 跨平台对比:
             - Hypervisor 选型指南: virtualization/comparison/hypervisor-comparison.md
   
@@ -425,10 +429,17 @@ nav:
 
 # -------------------------------------------------------------------------
 
-    - 解决方案:
+    - 应用交付:
+        - 概览: delivery/index.md
 
+        - 从零点亮 CI：GitHub Actions 构建站点镜像: delivery/ci-lightup.md
+
+# -------------------------------------------------------------------------
+
+    - 解决方案:
         - 概览: solutions/index.md
-        - GPU 算力平台建设方案（脱敏版）: solutions/gpu-k8s-platform-solution.md
+
+        - GPU 算力平台建设方案: solutions/gpu-k8s-platform-solution.md
 #    - 个人服务:
 #        - 服务介绍: service/index.md
 
