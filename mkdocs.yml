@@ -433,7 +433,7 @@ nav:
         - 概览: delivery/index.md
 
         - 从零点亮 CI：GitHub Actions 构建站点镜像: delivery/ci-lightup.md
-
+        - 影子站第一位居民：Waline 开光三幕战: delivery/waline-3acts.md
 # -------------------------------------------------------------------------
 
     - 解决方案:
