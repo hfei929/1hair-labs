@@ -73,7 +73,7 @@ metadata:
   namespace: hairlabs-site
   labels:
     app: user-sim
-    release: monitoring
+    release: prometheus
 spec:
   selector:
     matchLabels:
