@@ -64,8 +64,6 @@ def http_post_comment(seq):
         "mail": "user-sim@1hairlabs.cn",
         "url": WRITE_PAGE,
         "path": WRITE_PAGE,
-        "pid": "",
-        "rid": "",
     }).encode()
     req = urllib.request.Request(
         WRITE_URL, data=body,
