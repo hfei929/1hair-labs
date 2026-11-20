@@ -30,6 +30,8 @@ BURST = os.environ.get("BURST", "0") == "1"
 BURST_SECONDS = float(os.environ.get("BURST_SECONDS", "60"))
 BURST_QPS = float(os.environ.get("BURST_QPS", "1"))
 TIMEOUT = 5
+WRITE_TIMEOUT = float(os.environ.get("USER_SIM_WRITE_TIMEOUT", "15"))
+
 
 requests_total = Counter(
     "usersim_requests_total", "user-sim requests", ["kind", "code"]
@@ -72,7 +74,7 @@ def http_post_comment(seq):
     )
     start = time.monotonic()
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        with urllib.request.urlopen(req, timeout=WRITE_TIMEOUT) as resp:
             code = str(resp.status)
             resp.read()
     except urllib.error.HTTPError as e:
