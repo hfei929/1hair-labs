@@ -1,0 +1,86 @@
+---
+# user-sim 常驻流量模拟器 · hairlabs-site 命名空间
+# 镜像走 Harbor 供给链: Actions 构建 → GHCR → ctr 拉回 → push Harbor → 部署
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-sim
+  namespace: hairlabs-site
+  labels:
+    app: user-sim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-sim
+  template:
+    metadata:
+      labels:
+        app: user-sim
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker03
+      containers:
+      - name: user-sim
+        image: 192.168.114.136/hairlabs/user-sim:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: metrics
+          containerPort: 8000
+        env:
+        - name: USER_SIM_READ_URL
+          value: http://site.hairlabs-site.svc.cluster.local/
+        - name: USER_SIM_WRITE_URL
+          value: http://waline.hairlabs-site.svc.cluster.local:8360/api/comment
+        - name: USER_SIM_WRITE_PAGE
+          value: /delivery/ci-lightup/
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: 8000
+          periodSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 96Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-sim
+  namespace: hairlabs-site
+  labels:
+    app: user-sim
+spec:
+  selector:
+    app: user-sim
+  ports:
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+---
+# 注意: ServiceMonitor 的 release 标签必须与 monitoring 栈一致——
+# 部署前先跑: kubectl -n monitoring get servicemonitor --show-labels | head -5
+# 若 targets 30 秒后不出现, 用下面的命令核对标签并 patch:
+#   kubectl -n hairlabs-site patch servicemonitor user-sim --type merge -p '{"metadata":{"labels":{"release":"<实际值>"}}}'
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: user-sim
+  namespace: hairlabs-site
+  labels:
+    app: user-sim
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: user-sim
+  namespaceSelector:
+    matchNames:
+    - hairlabs-site
+  endpoints:
+  - port: metrics
+    interval: 30s
