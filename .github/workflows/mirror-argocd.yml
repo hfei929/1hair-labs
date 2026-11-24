@@ -1,0 +1,29 @@
+name: mirror-argocd
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Mirror argocd (quay -> ghcr)
+        run: |
+          docker pull quay.io/argoproj/argocd:v3.6.2
+          docker tag quay.io/argoproj/argocd:v3.6.2 ghcr.io/hfei929/argocd:v3.6.2
+          docker push ghcr.io/hfei929/argocd:v3.6.2
+
+      - name: Mirror redis (ecr -> ghcr)
+        run: |
+          docker pull public.ecr.aws/docker/library/redis:8.10.1-alpine
+          docker tag public.ecr.aws/docker/library/redis:8.10.1-alpine ghcr.io/hfei929/redis:8.10.1-alpine
+          docker push ghcr.io/hfei929/redis:8.10.1-alpine
+
+      - name: Mirror dex (ghcr -> ghcr own namespace)
+        run: |
+          docker pull ghcr.io/dexidp/dex:v2.46.0
+          docker tag ghcr.io/dexidp/dex:v2.46.0 ghcr.io/hfei929/dex:v2.46.0
+          docker push ghcr.io/hfei929/dex:v2.46.0
