@@ -3,6 +3,9 @@ name: mirror-argocd
 on:
   workflow_dispatch:
 
+permissions:
+  packages: write
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
