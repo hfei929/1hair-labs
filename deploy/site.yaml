@@ -16,7 +16,7 @@ spec:
         app: site
     spec:
       containers:
-      - image: 192.168.114.136/hairlabs/site:8dd8393b
+      - image: 192.168.114.136/hairlabs/site:e195915
         imagePullPolicy: Always
         lifecycle:
           preStop:
