@@ -436,6 +436,7 @@ nav:
         - 影子站第一位居民：Waline 开光三幕战: delivery/waline-3acts.md
         - 滚动发布第一课：进度条说只传了 14.7KB，Harbor 磁盘躺着 147MB: delivery/rolling-update-first-lesson.md
         - 哨兵报的警，凶手不在存储: delivery/sentinel-alerts-but-culprit-not-in-storage.md
+        - 影子站进 GitOps：漂移挂了 20 分钟没人管，开关一开 1 秒拉回: delivery/gitops-drift-20min.md
 # -------------------------------------------------------------------------
 
     - 解决方案:
